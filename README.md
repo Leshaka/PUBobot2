@@ -1,5 +1,5 @@
-# Pubobot2
-**Pubobot2** is a Discord bot for pickup games organisation.
+# PUBobot2
+**PUBobot2** is a Discord bot for pickup games organisation.
 ## Requirements
 Python 3.8+ and modules: discord.py, aiomysql, emoji, jinja2.
 ## Credits
