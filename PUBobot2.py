@@ -1,0 +1,95 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+
+import time
+import signal
+import asyncio
+import traceback
+from asyncio import sleep as asleep
+
+# Load bot core
+from core import config, console, database, locales, configs
+from core.client import dc
+
+# Load bot
+from bot import main
+
+# Load web server
+if config.cfg.WS_ENABLE:
+	from webui import webserver
+else:
+	webserver = False
+
+log = console.log
+
+# Gracefully exit on ctrl+c
+original_SIGINT_handler = signal.getsignal(signal.SIGINT)
+
+
+def ctrl_c(sig, frame):
+	console.terminate()
+	signal.signal(signal.SIGINT, original_SIGINT_handler)
+
+
+signal.signal(signal.SIGINT, ctrl_c)
+
+
+# Run commands from user console
+async def run_console():
+	try:
+		cmd = console.user_input_queue.get(False)
+	except Exception:
+		return
+
+	log.info(cmd)
+	try:
+		exec(cmd)
+	except Exception as e:
+		log.error("CONSOLE| ERROR: "+str(e))
+
+
+# Background processes loop
+async def think():
+	for task in dc.events['on_init']:
+		await task()
+
+	# Loop runs every 1 second
+	while console.alive:
+		frame_time = time.time()
+		await run_console()
+		for task in dc.events['on_think']:
+			try:
+				await task(frame_time)
+			except Exception as e:
+				log.error('Error running background task from {}: {}\n{}'.format(task.__module__, str(e), traceback.format_exc()))
+		await asleep(1)
+
+	# Exit signal received
+	for task in dc.events['on_exit']:
+		try:
+			await task()
+		except Exception as e:
+			log.error('Error running exit task from {}: {}\n{}'.format(task.__module__, str(e), traceback.format_exc()))
+
+	log.info("Waiting for connection to close...")
+	await dc.logout()
+
+	log.info("Closing db.")
+	await database.db.close()
+	if webserver:
+		log.info("Closing web server.")
+		webserver.srv.close()
+		await webserver.srv.wait_closed()
+	log.info("Closing discord.")
+	await dc.logout()
+	log.info("Closing log.")
+	log.close()
+	print("Exit now.")
+	loop.stop()
+
+# Login to discord
+loop = asyncio.get_event_loop()
+loop.create_task(think())
+loop.create_task(dc.start(config.cfg.DC_BOT_TOKEN))
+
+loop.run_forever()
