@@ -8,89 +8,64 @@ from core.utils import format_emoji
 from core.console import log
 
 
-class ConfigSpawner:
-	""" This class contains CfgFactory objects and spawns CfgCollection objects """
+class CfgFactory:
 
-	def __init__(self, pkeys, prefix=''):
-		self.prefix = prefix
-		self.pkeys = pkeys
+	def __init__(self, name, pkeys, variables=[], tables=[], display=None, icon='star.png'):
 
-		self.spawned_pkeys = []
-		self.factories = dict()
+		self.pkeys = [dict(cname=pkey, ctype=db.types.int, notnull=True) for pkey in pkeys]
+		self.name = name
+		self.display = display or name
+		self.icon = icon
+		self.table = name
+		self.variables = {v.name: v for v in variables}
+		self.tables = {t.name: t for t in tables}
+		self.configs = dict()
+		self._row_blank = {v.name: v.default for v in variables}
 
-	def add_factory(self, name, variables=[], **kwargs):
-		name = self.prefix + name
-		if name in self.factories.keys():
-			raise(KeyError('Config factory with this name already exists'))
-
-		cfg_factory = CfgFactory(name, variables=variables, **kwargs)
 		db.ensure_table(dict(
-			tname=cfg_factory.table,
+			tname=self.table,
 			columns=[
 				*self.pkeys,
 				*(dict(cname=v.name, ctype=v.ctype, default=v.default) for v in variables)
 			],
 			primary_keys=[pk['cname'] for pk in self.pkeys]
 		))
-		for var_table in cfg_factory.tables.values():
-			var_table.table = 'vt_' + name + '_' + var_table.name
+
+		for var_table in self.tables.values():
+			var_table.table = self.name + '_' + var_table.name
 			db.ensure_table(dict(
 				tname=var_table.table,
 				columns=[
-					dict(cname='guild_id', ctype=db.types.str, notnull=True),
+					*self.pkeys,
 					*(dict(cname=v.name, ctype=v.ctype, default=v.default) for v in var_table.variables.values())
 				]
 			))
-		self.factories[name] = cfg_factory
 
-	async def new(self, pkeys, guild):
-		if pkeys in self.spawned_pkeys:
-			raise(ValueError('Already spawned config collection with given pkeys'))
-
-		cfg_collection = SimpleNamespace()
-		cfg_collection._guild = guild
-		for cfgFactory in self.factories.values():
-			cfg = Config(guild, cfgFactory)
-			await cfg._load()
-			cfg_collection.__setattr__(cfgFactory.name, cfg)
-			if cfgFactory.on_new:
-				cfgFactory.on_new(cfg_collection)
-
-		self.spawned_pkeys.append(pkeys)
-		return cfg_collection
-
-
-class CfgFactory:
-
-	def __init__(self, name, variables=[], tables=[], display=None, icon='star.png', on_new=None):
-		self.name = name
-		self.display = display or name
-		self.icon = icon
-		self.table = 'configs_' + name
-		self.variables = {v.name: v for v in variables}
-		self.tables = {t.name: t for t in tables}
-		self.configs = dict()
-		self._row_blank = {v.name: v.default for v in variables}
-		self.on_new = on_new
+	async def spawn(self, guild, pkeys):
+		c = Config(self, guild, pkeys)
+		await c.load()
+		return c
 
 
 class Config:
 
-	def __init__(self, guild, cfg_factory):
+	def __init__(self, cfg_factory, guild, pkeys):
 		self._guild = guild
+		self.pkeys = pkeys
 		self._factory = cfg_factory
 		self._values = dict(**self._factory._row_blank)
 		self._tables = SimpleNamespace()
 
-	async def _load(self):
-		row = await db.select_one(['*'], self._factory.table, {'guild_id': self._guild.id})
+	async def load(self):
+		row = await db.select_one(['*'], self._factory.table, self.pkeys)
 		if not row:
 			# Insert blank row if existing not found
-			row = {'guild_id': self._guild.id, **self._values}
+			row = {**self.pkeys, **self._values}
 			await db.insert(self._factory.table, row)
 
 		# generate useful objects from variables values and set it as attributes
-		row.pop('guild_id')
+		for pkey in self.pkeys.keys():
+			row.pop(pkey)
 		for var_name in self._factory.variables.keys():
 			try:
 				setattr(self, var_name, await self._factory.variables[var_name].wrap(row[var_name], self._guild))
@@ -99,7 +74,7 @@ class Config:
 				setattr(self, var_name, await self._factory.variables[var_name].wrap(None, self._guild))
 
 		for var_table in self._factory.tables.values():
-			rows = await db.select(['*'], var_table.table, {'guild_id': self._guild.id})
+			rows = await db.select(['*'], var_table.table, self.pkeys)
 			l = []
 			for row in rows:
 				try:
@@ -109,7 +84,7 @@ class Config:
 			setattr(self._tables, var_table.name, l)
 
 	async def _update_db(self, d):
-		await db.update(self._factory.table, d, {'guild_id': self._guild.id})
+		await db.update(self._factory.table, d, self.pkeys)
 
 	async def update(self, d):
 		print(d)
@@ -121,7 +96,7 @@ class Config:
 		# validate strings and convert to database-friendly objects
 		for var_name in d.keys():
 			if var_name not in self._factory.variables.keys():
-				raise(KeyError("Variable '{}' not found.".format(var_name)))
+				raise (KeyError("Variable '{}' not found.".format(var_name)))
 			v_validated[var_name] = await self._factory.variables[var_name].validate(d[var_name], self._guild)
 		for tname in tables.keys():
 			if tname not in self._factory.tables.keys():
@@ -143,12 +118,12 @@ class Config:
 			setattr(self._tables, tname, await table.wrap(t_validated[tname], self._guild))
 
 	async def _update_table_db(self, table, l):
-		await db.delete(table.table, where={'guild_id': self._guild.id})
-		await db.insert_many(table.table, (dict(guild_id=self._guild.id, **d) for d in l))
+		await db.delete(table.table, where=self.pkeys)
+		await db.insert_many(table.table, ({**self.pkeys, **d} for d in l))
 
 	async def set(self, var_name, string):
 		value = await self._factory.variables[var_name].validate(string, self._guild)
-		await db.update(self._factory.table, {var_name: value}, {'guild_id': self._guild.id})
+		await db.update(self._factory.table, {var_name: value}, self.pkeys)
 		self._values[var_name] = value
 		setattr(self, var_name, await self._factory.variables[var_name].wrap(value, self._guild))
 		if self._factory.variables[var_name].on_change:
@@ -241,7 +216,7 @@ class BoolVar(Variable):
 			return 0
 		elif value is None:
 			return None
-		raise(ValueError('{} value must be set to 0 or 1 or None'.format(self.name)))
+		raise (ValueError('{} value must be set to 0 or 1 or None'.format(self.name)))
 
 	def readable(self, obj):
 		if obj is not None:
@@ -360,8 +335,8 @@ class TextChanVar(Variable):
 		else:
 			try:
 				channel_id = next((channel for channel in guild.channels if
-					channel.name == value.lstrip('#') or str(channel.id) == value
-				)).id
+								   channel.name == value.lstrip('#') or str(channel.id) == value
+								   )).id
 			except StopIteration:
 				raise ValueError("Channel '{}' not found on the guild.".format(value))
 
@@ -386,7 +361,7 @@ class VariableTable:
 
 	def __init__(self, name, variables=[], display=None, blank=None, default=[], description=None, on_change=None):
 		self.name = name
-		self.table = 'variable_'+name
+		self.table = 'variable_' + name
 		self.variables = {v.name: v for v in variables}
 		self.display = display or name
 		self.blank = blank if blank else {i: None for i in self.variables.keys()}
@@ -401,19 +376,22 @@ class VariableTable:
 		values = []
 		for d in l:
 			if d.keys() != self.variables.keys():
-				raise(ValueError('Incorrect table columns.'))
-			validated = {var_name: await self.variables[var_name].validate(value, guild) for var_name, value in d.items()}
+				raise (ValueError('Incorrect table columns.'))
+			validated = {var_name: await self.variables[var_name].validate(value, guild) for var_name, value in
+						 d.items()}
 			values.append(validated)
 		return values
 
 	async def wrap(self, l, guild):
 		wrapped = []
 		for d in l:
-			wrapped.append({var_name: await self.variables[var_name].wrap(value, guild) for var_name, value in d.items()})
+			wrapped.append(
+				{var_name: await self.variables[var_name].wrap(value, guild) for var_name, value in d.items()})
 		return wrapped
 
 	async def wrap_row(self, d, guild):
-		return {var_name: await self.variables[var_name].wrap(value, guild) for var_name, value in d.items() if var_name != 'guild_id'}
+		return {var_name: await self.variables[var_name].wrap(value, guild) for
+				var_name, value in d.items() if var_name not in self.pkeys.keys()}
 
 	def readable(self, l):
 		return [{var_name: self.variables[var_name].readable(value) for var_name, value in d.items()} for d in l]
