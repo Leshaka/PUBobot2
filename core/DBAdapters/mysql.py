@@ -3,6 +3,8 @@ import aiomysql
 from pymysql import err as mysqlErr
 from .common import *
 
+from core.console import log
+
 
 class Types:
 	int = "BIGINT"
@@ -183,7 +185,7 @@ class Adapter:
 			table=table,
 			where=conditions,
 			order=" ORDER BY "+order_by+(" ASC" if order_asc else " DESC") if order_by else "",
-			limit=(" LIMIT " + limit) if limit else ""
+			limit=(" LIMIT " + str(limit)) if limit else ""
 		)
 
 		if one:

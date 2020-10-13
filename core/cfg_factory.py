@@ -10,25 +10,27 @@ from core.console import log
 
 class CfgFactory:
 
-	def __init__(self, name, pkeys, variables=[], tables=[], display=None, icon='star.png'):
-
-		self.pkeys = [dict(cname=pkey, ctype=db.types.int, notnull=True) for pkey in pkeys]
+	def __init__(self, name, p_key, f_key=None, variables=[], tables=[], display=None, icon='star.png'):
+		self.p_key = p_key
+		self.f_key = f_key
+		self.keys = [dict(cname=p_key, ctype=db.types.int, notnull=True)]
+		if f_key:
+			self.keys.append(dict(cname=f_key, ctype=db.types.int))
 		self.name = name
 		self.display = display or name
 		self.icon = icon
 		self.table = name
 		self.variables = {v.name: v for v in variables}
 		self.tables = {t.name: t for t in tables}
-		self.configs = dict()
-		self._row_blank = {v.name: v.default for v in variables}
+		self.row_blank = {v.name: v.default for v in self.variables.values()}
 
 		db.ensure_table(dict(
 			tname=self.table,
 			columns=[
-				*self.pkeys,
+				*self.keys,
 				*(dict(cname=v.name, ctype=v.ctype, default=v.default) for v in variables)
 			],
-			primary_keys=[pk['cname'] for pk in self.pkeys]
+			primary_keys=[self.p_key]
 		))
 
 		for var_table in self.tables.values():
@@ -36,98 +38,109 @@ class CfgFactory:
 			db.ensure_table(dict(
 				tname=var_table.table,
 				columns=[
-					*self.pkeys,
+					*self.keys,
 					*(dict(cname=v.name, ctype=v.ctype, default=v.default) for v in var_table.variables.values())
 				]
 			))
 
-	async def spawn(self, guild, pkeys):
-		c = Config(self, guild, pkeys)
-		await c.load()
-		return c
+	async def spawn(self, guild, p_key=None, f_key=None):
+		""" Load existing Config from db by given p_key if exists or spawn a new one """
+
+		row = await db.select_one(['*'], self.table, {self.p_key: p_key})
+		if row:
+			return await Config.load(self, row, guild)
+		else:
+			row = {v.name: v.default for v in self.variables.values()}
+			row[self.p_key] = p_key if p_key else await self.get_max(self.p_key)+1
+			if f_key:
+				row[self.f_key] = f_key
+
+			await db.insert(self.table, row)
+			return await Config.load(self, row, guild)
+
+	async def select(self, guild, keys):
+		""" Returns all Config objects from db by given keys """
+
+		rows = await db.select(['*'], self.table, keys)
+		return [await Config.load(self, row, guild) for row in rows]
+
+	async def p_keys(self):
+		""" Return all existing p_keys in the database """
+
+		return [row[self.p_key] for row in await db.select([self.p_key], self.table)]
+
+	async def get_max(self, key):
+		""" Return max value for given column """
+
+		data = await db.select_one([key], self.table, order_by=key, limit=1)
+		return data.get(key) if data else 0
 
 
 class Config:
 
-	def __init__(self, cfg_factory, guild, pkeys):
-		self._guild = guild
-		self.pkeys = pkeys
-		self._factory = cfg_factory
-		self._values = dict(**self._factory._row_blank)
-		self._tables = SimpleNamespace()
+	@classmethod
+	async def load(cls, cfg_factory, row, guild):
+		self = Config(cfg_factory, row, guild)
 
-	async def load(self):
-		row = await db.select_one(['*'], self._factory.table, self.pkeys)
-		if not row:
-			# Insert blank row if existing not found
-			row = {**self.pkeys, **self._values}
-			await db.insert(self._factory.table, row)
-
-		# generate useful objects from variables values and set it as attributes
-		for pkey in self.pkeys.keys():
-			row.pop(pkey)
-		for var_name in self._factory.variables.keys():
+		# Wrap database data into useful objects and update self attributes
+		for var in self._factory.variables.values():
 			try:
-				setattr(self, var_name, await self._factory.variables[var_name].wrap(row[var_name], self._guild))
+				obj = await var.wrap(row[var.name], self._guild)
 			except Exception as e:
-				log.error("Failed to wrap variable '{}': {}".format(var_name, str(e)))
-				setattr(self, var_name, await self._factory.variables[var_name].wrap(None, self._guild))
+				log.error("Failed to wrap variable '{}': {}".format(var.name, str(e)))
+				obj = await var.wrap(var.default, self._guild)
+			setattr(self, var.name, obj)
 
-		for var_table in self._factory.tables.values():
-			rows = await db.select(['*'], var_table.table, self.pkeys)
-			l = []
-			for row in rows:
+		for table in self._factory.tables.values():
+			objects = []
+			for row in await db.select(['*'], table.table, {self._factory.p_key: self.p_key}):
 				try:
-					l.append(await var_table.wrap_row(row, self._guild))
+					objects.append(await table.wrap_row(row, self._guild))
 				except Exception as e:
-					log.error("Failed to wrap a table row from '{}': {}".format(var_table.name, str(e)))
-			setattr(self._tables, var_table.name, l)
+					log.error("Failed to wrap a table row '{}' from '{}': {}".format(row, table.name, str(e)))
+			setattr(self.tables, table.name, objects)
 
-	async def _update_db(self, d):
-		await db.update(self._factory.table, d, self.pkeys)
+		return self
 
-	async def update(self, d):
-		print(d)
-		tables = d.pop('_tables') if '_tables' in d.keys() else {}
-		print(tables)
-		v_validated = dict()
-		t_validated = dict()
+	def __init__(self, cfg_factory, row, guild):
+		self._guild = guild
+		self._factory = cfg_factory
+		self.p_key = row.pop(cfg_factory.p_key)
+		self.f_key = row.pop(cfg_factory.f_key) if cfg_factory.f_key else None
+		self.tables = SimpleNamespace()
 
-		# validate strings and convert to database-friendly objects
-		for var_name in d.keys():
-			if var_name not in self._factory.variables.keys():
-				raise (KeyError("Variable '{}' not found.".format(var_name)))
-			v_validated[var_name] = await self._factory.variables[var_name].validate(d[var_name], self._guild)
-		for tname in tables.keys():
-			if tname not in self._factory.tables.keys():
-				raise (KeyError("Table '{}' not found.".format(tname)))
-			t_validated[tname] = await self._factory.tables[tname].validate(tables[tname], self._guild)
+	async def update(self, data):
+		tables = data.pop('tables') if 'tables' in data.keys() else {}
 
-		# Update db and wrap to variables
-		await self._update_db(v_validated)
-		self._values.update(v_validated)
-		# update useful objects
-		for var_name in v_validated.keys():
-			setattr(self, var_name, await self._factory.variables[var_name].wrap(v_validated[var_name], self._guild))
-			if self._factory.variables[var_name].on_change:
-				self._factory.variables[var_name].on_change(self._guild.cfg)
+		print(data)
+		# Validate data
+		for key, value in data.items():
+			if key not in self._factory.variables.keys():
+				raise KeyError("Variable '{}' not found.".format(key))
+			data[key] = await self._factory.variables[key].validate(value, self._guild)
 
-		for tname in t_validated.keys():
-			table = self._factory.tables[tname]
-			await self._update_table_db(table, t_validated[tname])
-			setattr(self._tables, tname, await table.wrap(t_validated[tname], self._guild))
+		for key, value in tables.items():
+			if key not in self._factory.tables.keys():
+				raise KeyError("Table '{}' not found.".format(key))
+			tables[key] = await self._factory.tables[key].validate(value)
 
-	async def _update_table_db(self, table, l):
-		await db.delete(table.table, where=self.pkeys)
-		await db.insert_many(table.table, ({**self.pkeys, **d} for d in l))
+		# Update useful objects and push to database
+		for key, value in data.items():
+			setattr(self, key, await self._factory.variables[key].wrap(value, self._guild))
+			if self._factory.variables[key].on_change:
+				self._factory.variables[key].on_change(self)
+		await db.update(self._factory.table, data, {self._factory.p_key: self.p_key})
 
-	async def set(self, var_name, string):
-		value = await self._factory.variables[var_name].validate(string, self._guild)
-		await db.update(self._factory.table, {var_name: value}, self.pkeys)
-		self._values[var_name] = value
-		setattr(self, var_name, await self._factory.variables[var_name].wrap(value, self._guild))
-		if self._factory.variables[var_name].on_change:
-			self._factory.variables[var_name].on_change(self._guild.cfg)
+		for key, value in tables.items():
+			setattr(self.tables, key, await self._factory.tables[key].wrap(value, self._guild))
+			await db.delete(self._factory.tables[key].table, where={self._factory.p_key: self.p_key})
+			await db.update(self._factory.tables[key].table, value, {self._factory.p_key: self.p_key})
+
+	def to_json(self):
+		data = {key: value.readable(getattr(self, key)) for key, value in self._factory.variables.items()}
+		for key, value in self._factory.tables.items():
+			data[key] = value.readable(getattr(self.tables, key))
+		return data
 
 
 class Variable:
@@ -295,8 +308,8 @@ class MemberVar(Variable):
 			value = value.lower()
 			try:
 				user_id = next((member for member in guild.members if
-					(member.nick or member.name).lower() == value or str(member.id) == value
-				))
+								(member.nick or member.name).lower() == value or str(member.id) == value
+								))
 			except StopIteration:
 				raise ValueError("User '{}' not found on the guild.".format(value))
 
@@ -335,8 +348,8 @@ class TextChanVar(Variable):
 		else:
 			try:
 				channel_id = next((channel for channel in guild.channels if
-								   channel.name == value.lstrip('#') or str(channel.id) == value
-								   )).id
+					channel.name == value.lstrip('#') or str(channel.id) == value
+				)).id
 			except StopIteration:
 				raise ValueError("Channel '{}' not found on the guild.".format(value))
 
@@ -369,24 +382,24 @@ class VariableTable:
 		self.description = description
 		self.on_change = on_change
 
-	async def validate(self, l, guild):
-		if type(l) != list:
+	async def validate(self, data, guild):
+		if type(data) != list:
 			raise (ValueError('Value must be a list.'))
 
-		values = []
-		for d in l:
-			if d.keys() != self.variables.keys():
+		validated = []
+		for row in data:
+			if row.keys() != self.variables.keys():
 				raise (ValueError('Incorrect table columns.'))
-			validated = {var_name: await self.variables[var_name].validate(value, guild) for var_name, value in
-						 d.items()}
-			values.append(validated)
-		return values
+			validated.append(
+				{var_name: await self.variables[var_name].validate(value, guild) for var_name, value in row.items()}
+			)
+		return validated
 
-	async def wrap(self, l, guild):
+	async def wrap(self, data, guild):
 		wrapped = []
-		for d in l:
+		for row in data:
 			wrapped.append(
-				{var_name: await self.variables[var_name].wrap(value, guild) for var_name, value in d.items()})
+				{var_name: await self.variables[var_name].wrap(value, guild) for var_name, value in row.items()})
 		return wrapped
 
 	async def wrap_row(self, d, guild):

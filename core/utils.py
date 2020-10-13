@@ -37,6 +37,10 @@ def error_embed(description, title='Error'):
 	return Embed(title=title, description=description, color=0xca0000)
 
 
+def ok_embed(description, title='Success'):
+	return Embed(title=title, description=description, color=0x32cd32)
+
+
 def format_channel(string, guild):
 	channel = get(guild.text_channels, name=string)
 	return '<#{}>'.format(channel.id) if channel else None

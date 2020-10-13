@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from core.console import log
-from core.cfg_factory import CfgFactory, Variables
+from core.cfg_factory import CfgFactory, Variables, VariableTable
 
 
 class PickupQueue:
@@ -19,6 +19,11 @@ class PickupQueue:
 				display="Queue size"
 			),
 			Variables.BoolVar(
+				"is_default",
+				display="Default",
+				default=1
+			),
+			Variables.BoolVar(
 				"ranked",
 				display="Ranked",
 				default=0,
@@ -29,13 +34,21 @@ class PickupQueue:
 				display="Promotion role",
 				description="Set a role to highlight on !promote and !sub commands."
 			)
+		],
+		tables=[
+			VariableTable(
+				"aliases", display="Aliases",
+				variables=[
+					Variables.StrVar("alias", notnull=True)
+				]
+			)
 		]
 	)
 
 	@staticmethod
 	def validate_name(name):
 		if not len(name) or any((c in name for c in "+-: \t\n")):
-			raise ValueError(f"Invalid queue name '{name}'. Queue name should be one word without +-: characters.")
+			raise ValueError(f"Invalid queue name '{name}'. A queue name should be one word without +-: characters.")
 		return name
 
 	@classmethod
@@ -57,16 +70,14 @@ class PickupQueue:
 	def status(self):  # (length/max)
 		return f"{len(self.queue)}/{self.cfg.size}"
 
+	@property
 	def who(self):
-		return "[{} ({}/{})] {}".format(
-			self.name,
-			len(self.queue),
-			self.cfg.size,
-			"/".join("`{}`".format(m.nick or m.name) for m in self.queue)
-		)
+		return "/".join([f"`{m.nick or m.name}`" for m in self.queue])
 
-	def add(self, member):
-		self.queue.add(member)
+	async def add_member(self, member):
+		if member not in self.queue:
+			self.queue.append(member)
 
-	def remove(self, member):
-		self.queue.remove(member)
+	async def remove_member(self, member):
+		if member in self.queue:
+			self.queue.remove(member)

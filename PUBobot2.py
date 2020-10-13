@@ -8,11 +8,11 @@ import traceback
 from asyncio import sleep as asleep
 
 # Load bot core
-from core import config, console, database, locales, configs
+from core import config, console, database, locales, cfg_factory
 from core.client import dc
 
 # Load bot
-from bot import main
+import bot
 
 # Load web server
 if config.cfg.WS_ENABLE:
@@ -53,7 +53,7 @@ async def think():
 	for task in dc.events['on_init']:
 		await task()
 
-	# Loop runs every 1 second
+	# Loop runs roughly every 1 second
 	while console.alive:
 		frame_time = time.time()
 		await run_console()
@@ -92,4 +92,5 @@ loop = asyncio.get_event_loop()
 loop.create_task(think())
 loop.create_task(dc.start(config.cfg.DC_BOT_TOKEN))
 
+log.info("Connecting to discord...")
 loop.run_forever()

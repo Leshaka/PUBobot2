@@ -4,3 +4,6 @@ msgstr ""
 
 msgid "_lang"
 msgstr "ru"
+
+msgid "no players"
+msgstr "нет игроков"

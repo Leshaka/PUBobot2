@@ -99,9 +99,11 @@ class QueueChannel:
 		self._ = locales[self.cfg.lang]
 		self.queues = []
 		self.channel = text_channel
+		self.topic = f"> {self._('no players')}"
 		self.commands = dict(
 			add_pickup=self._add_pickup,
 			queues=self._show_queues,
+			pickups=self._show_queues,
 			add=self._add_member,
 			j=self._add_member,
 			remove=self._remove_member,
@@ -132,6 +134,18 @@ class QueueChannel:
 		q_obj = await kind.create(self, name, size)
 		self.queues.append(q_obj)
 		return q_obj
+
+	async def update_topic(self):
+		populated = [q for q in self.queues if len(q.queue)]
+		if not len(populated):
+			new_topic = f"> {self._('no players')}"
+		elif len(populated) < 5:
+			new_topic = "\n".join([f"> **{q.name}** ({q.status}) | {q.who}" for q in populated])
+		else:
+			new_topic = "> [" + " | ".join([f"**{q.name}** ({q.status})" for q in populated]) + "]"
+		if new_topic != self.topic:
+			self.topic = new_topic
+			await self.channel.send(self.topic)
 
 	async def process_msg(self, message):
 		if not len(message.content) > 1:
@@ -173,17 +187,53 @@ class QueueChannel:
 
 	async def _show_queues(self, message, args=None):
 		if len(self.queues):
-			await self.channel.send("[" + " | ".join(
+			await self.channel.send("> [" + " | ".join(
 				[f"**{q.name}** ({q.status})" for q in self.queues]
 			) + "]")
 		else:
-			await self.channel.send("[ **no queues configured** ]")
+			await self.channel.send("> [ **no queues configured** ]")
 
 	async def _add_member(self, message, args=None):
-		pass
+		targets = args.lower().split(" ") if args else []
+
+		# select the only one queue on the channel
+		if not len(targets) and len(self.queues) == 1:
+			t_queues = self.queues
+
+		# select queues requested by user
+		elif len(targets):
+			t_queues = (q for q in self.queues if any((t in (q.name, *q.cfg.tables.aliases) for t in targets)))
+
+		# select active queues or default queues if no active queues
+		else:
+			t_queues = [q for q in self.queues if len(q.queue)]
+			if not len(t_queues):
+				t_queues = (q for q in self.queues if q.cfg.is_default)
+
+		for q in t_queues:
+			await q.add_member(message.author)
+		await self.update_topic()
 
 	async def _remove_member(self, message, args=None):
-		pass
+		targets = args.lower().split(" ") if args else []
+
+		t_queues = (q for q in self.queues if len(q.queue))
+		if len(targets):
+			t_queues = (q for q in t_queues if any((t in (q.name, *q.cfg.tables.aliases) for t in targets)))
+
+		for q in t_queues:
+			await q.remove_member(message.author)
+		await self.update_topic()
 
 	async def _who(self, message, args=None):
-		pass
+		targets = args.lower().split(" ") if args else []
+
+		if len(targets):
+			t_queues = [q for q in self.queues if any((t in (q.name, *q.cfg.tables.aliases) for t in targets))]
+		else:
+			t_queues = [q for q in self.queues if len(q.queue)]
+
+		if not len(t_queues):
+			await self.channel.send(f"> {self._('no players')}")
+		else:
+			await self.channel.send("\n".join([f"> **{q.name}** ({q.status}) | {q.who}" for q in t_queues]))
