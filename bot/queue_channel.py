@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import re
+import json
 
 from core.config import cfg
 from core.console import log
@@ -108,7 +109,13 @@ class QueueChannel:
 			j=self._add_member,
 			remove=self._remove_member,
 			l=self._remove_member,
-			who=self._who
+			who=self._who,
+			set=self._set,
+			set_queue=self._set_queue,
+			cfg=self._cfg,
+			cfg_queue=self._cfg_queue,
+			set_cfg=self._set_cfg,
+			set_cfg_queue=self._set_cfg_queue
 		)
 
 	def update_lang(self):
@@ -161,7 +168,7 @@ class QueueChannel:
 		elif cmd == "++":
 			await self._add_member(message, "")
 		elif cmd == "--":
-			await self._add_member(message, "")
+			await self._remove_member(message, "")
 
 		# normal commands starting with prefix
 		if self.cfg.prefix != cmd[0]:
@@ -202,7 +209,9 @@ class QueueChannel:
 
 		# select queues requested by user
 		elif len(targets):
-			t_queues = (q for q in self.queues if any((t in (q.name, *q.cfg.tables.aliases) for t in targets)))
+			t_queues = (q for q in self.queues if any(
+				(t == q.name or t in (a["alias"] for a in q.cfg.tables.aliases) for t in targets)
+			))
 
 		# select active queues or default queues if no active queues
 		else:
@@ -219,8 +228,9 @@ class QueueChannel:
 
 		t_queues = (q for q in self.queues if len(q.queue))
 		if len(targets):
-			t_queues = (q for q in t_queues if any((t in (q.name, *q.cfg.tables.aliases) for t in targets)))
-
+			t_queues = (q for q in self.queues if any(
+				(t == q.name or t in (a["alias"] for a in q.cfg.tables.aliases) for t in targets)
+			))
 		for q in t_queues:
 			await q.remove_member(message.author)
 		await self.update_topic()
@@ -229,7 +239,9 @@ class QueueChannel:
 		targets = args.lower().split(" ") if args else []
 
 		if len(targets):
-			t_queues = [q for q in self.queues if any((t in (q.name, *q.cfg.tables.aliases) for t in targets))]
+			t_queues = (q for q in self.queues if any(
+				(t == q.name or t in (a["alias"] for a in q.cfg.tables.aliases) for t in targets)
+			))
 		else:
 			t_queues = [q for q in self.queues if len(q.queue)]
 
@@ -237,3 +249,78 @@ class QueueChannel:
 			await self.channel.send(f"> {self._('no players')}")
 		else:
 			await self.channel.send("\n".join([f"> **{q.name}** ({q.status}) | {q.who}" for q in t_queues]))
+
+	async def _set(self, message, args=""):
+		args = args.lower().split(" ", maxsplit=2)
+		if len(args) != 2:
+			await self.channel.send(
+				embed=error_embed(f"Usage: {self.cfg.prefix}set __variable__ __value__"))
+			return
+		var_name = args[0].lower()
+		if var_name not in self.cfg_factory.variables.keys():
+			await self.channel.send(embed=error_embed(f"No such variable '{var_name}'."))
+			return
+		try:
+			await self.cfg.update({var_name: args[1]})
+		except Exception as e:
+			await self.channel.send(embed=error_embed(str(e)))
+		else:
+			await self.channel.send(embed=ok_embed(f"Variable __{var_name}__ configured."))
+
+	async def _set_queue(self, message, args=""):
+		args = args.lower().split(" ", maxsplit=3)
+		if len(args) != 3:
+			await self.channel.send(
+				embed=error_embed(f"Usage: {self.cfg.prefix}set_queue __queue__ __variable__ __value__"))
+			return
+		var_name = args[0].lower()
+		if var_name not in self.cfg_factory.variables.keys():
+			await self.channel.send(embed=error_embed(f"No such variable '{var_name}'."))
+			return
+		try:
+			await self.cfg.update({var_name: args[1]})
+		except Exception as e:
+			await self.channel.send(embed=error_embed(str(e)))
+		else:
+			await self.channel.send(embed=ok_embed(f"Variable __{var_name}__ configured."))
+
+	async def _cfg(self, message, args=None):
+		await message.author.send(f"```json\n{json.dumps(self.cfg.to_json())}```")
+
+	async def _cfg_queue(self, message, args=None):
+		if not args:
+			await self.channel.send(embed=error_embed(f"Usage: {self.cfg.prefix}cfg_queue __queue__"))
+			return
+		args = args.lower()
+		for q in self.queues:
+			if q.name.lower() == args:
+				await message.author.send(f"```json\n{json.dumps(q.cfg.to_json())}```")
+				return
+		await self.channel.send(embed=error_embed(f"No such queue '{args}'."))
+
+	async def _set_cfg(self, message, args=None):
+		if not args:
+			await self.channel.send(embed=error_embed(f"Usage: {self.cfg.prefix}set_cfg __json__"))
+			return
+		try:
+			await self.cfg.update(json.loads(args))
+		except Exception as e:
+			await self.channel.send(embed=error_embed(str(e)))
+		else:
+			await self.channel.send(embed=ok_embed(f"Channel configuration updated."))
+
+	async def _set_cfg_queue(self, message, args=""):
+		args = args.split(" ", maxsplit=1)
+		if len(args) != 2:
+			await self.channel.send(embed=error_embed(f"Usage: {self.cfg.prefix}set_cfg_queue __queue__ __json__"))
+			return
+		for q in self.queues:
+			if q.name.lower() == args[0].lower():
+				try:
+					await q.cfg.update(json.loads(args[1]))
+				except Exception as e:
+					await self.channel.send(embed=error_embed(str(e)))
+				else:
+					await self.channel.send(embed=ok_embed(f"__{q.name}__ queue configuration updated."))
+				return
+		await self.channel.send(embed=error_embed(f"No such queue '{args}'."))

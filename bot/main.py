@@ -75,4 +75,4 @@ async def disable_channel(message):
 
 
 def update_qc_lang(qc_cfg):
-	queue_channels[qc_cfg.f_key].update_lang()
+	queue_channels[qc_cfg.p_key].update_lang()

@@ -93,7 +93,7 @@ class Config:
 
 		for table in self._factory.tables.values():
 			objects = []
-			for row in await db.select(['*'], table.table, {self._factory.p_key: self.p_key}):
+			for row in await db.select(table.variables.keys(), table.table, {self._factory.p_key: self.p_key}):
 				try:
 					objects.append(await table.wrap_row(row, self._guild))
 				except Exception as e:
@@ -122,7 +122,7 @@ class Config:
 		for key, value in tables.items():
 			if key not in self._factory.tables.keys():
 				raise KeyError("Table '{}' not found.".format(key))
-			tables[key] = await self._factory.tables[key].validate(value)
+			tables[key] = await self._factory.tables[key].validate(value, self._guild)
 
 		# Update useful objects and push to database
 		for key, value in data.items():
@@ -134,12 +134,15 @@ class Config:
 		for key, value in tables.items():
 			setattr(self.tables, key, await self._factory.tables[key].wrap(value, self._guild))
 			await db.delete(self._factory.tables[key].table, where={self._factory.p_key: self.p_key})
-			await db.update(self._factory.tables[key].table, value, {self._factory.p_key: self.p_key})
+			for row in value:
+				print(row)
+				await db.insert(self._factory.tables[key].table, {self._factory.p_key: self.p_key, **row})
 
 	def to_json(self):
 		data = {key: value.readable(getattr(self, key)) for key, value in self._factory.variables.items()}
+		data["tables"] = dict()
 		for key, value in self._factory.tables.items():
-			data[key] = value.readable(getattr(self.tables, key))
+			data["tables"][key] = value.readable(getattr(self.tables, key))
 		return data
 
 
@@ -222,13 +225,13 @@ class BoolVar(Variable):
 
 	async def validate(self, value, guild):
 		# 0 == False and 1 == True in python
+		if value is None:
+			return None
 		value = value.lower()
 		if value in ['1', 'on', 'true']:
 			return 1
 		elif value in ['0', 'off', 'false']:
 			return 0
-		elif value is None:
-			return None
 		raise (ValueError('{} value must be set to 0 or 1 or None'.format(self.name)))
 
 	def readable(self, obj):
@@ -389,7 +392,7 @@ class VariableTable:
 		validated = []
 		for row in data:
 			if row.keys() != self.variables.keys():
-				raise (ValueError('Incorrect table columns.'))
+				raise (ValueError(f"Incorrect columns for table {self.name}."))
 			validated.append(
 				{var_name: await self.variables[var_name].validate(value, guild) for var_name, value in row.items()}
 			)
@@ -403,8 +406,7 @@ class VariableTable:
 		return wrapped
 
 	async def wrap_row(self, d, guild):
-		return {var_name: await self.variables[var_name].wrap(value, guild) for
-				var_name, value in d.items() if var_name not in self.pkeys.keys()}
+		return {var_name: await self.variables[var_name].wrap(value, guild) for var_name, value in d.items()}
 
 	def readable(self, l):
 		return [{var_name: self.variables[var_name].readable(value) for var_name, value in d.items()} for d in l]
