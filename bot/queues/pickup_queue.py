@@ -2,6 +2,8 @@
 from core.console import log
 from core.cfg_factory import CfgFactory, Variables, VariableTable
 
+import bot
+
 
 class PickupQueue:
 
@@ -33,6 +35,11 @@ class PickupQueue:
 				"promotion_role",
 				display="Promotion role",
 				description="Set a role to highlight on !promote and !sub commands."
+			),
+			Variables.RoleVar(
+				"captains_role",
+				display="Captains role",
+				description="Users with this role may have preference in captains choosing process."
 			)
 		],
 		tables=[
@@ -77,7 +84,25 @@ class PickupQueue:
 	async def add_member(self, member):
 		if member not in self.queue:
 			self.queue.append(member)
+			if len(self.queue) == self.cfg.size:
+				await self.start()
+				return True
+		return False
 
 	async def remove_member(self, member):
 		if member in self.queue:
 			self.queue.remove(member)
+
+	async def start(self):
+		bot.Match(self, self.qc, list(self.queue))
+		await self.qc.remove_members(list(self.queue))
+
+	async def revert(self, not_ready, ready):
+		old_players = list(self.queue)
+		self.queue = list(ready)
+		while len(self.queue) < self.cfg.size and len(old_players):
+			self.queue.append(old_players.pop(0))
+		if len(self.queue) == self.cfg.size:
+			await self.start()
+			self.queue = list(old_players)
+		await self.qc.update_topic(force_announce=True)
