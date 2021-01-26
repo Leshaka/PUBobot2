@@ -92,6 +92,8 @@ class PickupQueue:
 	async def remove_member(self, member):
 		if member in self.queue:
 			self.queue.remove(member)
+		else:
+			raise ValueError("Specified Member is not added to the queue.")
 
 	async def start(self):
 		bot.Match(self, self.qc, list(self.queue), check_in_timeout=None, pick_teams="random teams", ranked=True)

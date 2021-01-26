@@ -19,6 +19,7 @@ waiting_reactions = dict()  # {message.id: function}
 async def on_think(frame_time):
 	for match in active_matches:
 		await match.think(frame_time)
+	await bot.expire.think(frame_time)
 
 
 @dc.event
@@ -99,3 +100,8 @@ def update_qc_lang(qc_cfg):
 
 def update_rating_system(qc_cfg):
 	queue_channels[qc_cfg.p_key].update_rating_system()
+
+
+def remove_members(*user_ids, reason=None):
+	for qc in queue_channels.values():
+		qc.remove_members()

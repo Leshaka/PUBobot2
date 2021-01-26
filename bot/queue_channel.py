@@ -1,13 +1,14 @@
 # -*- coding: utf-8 -*-
 import re
 import json
+import time
 from discord import Embed, Colour
 
 from core.config import cfg
 from core.console import log
 from core.cfg_factory import CfgFactory, Variables, VariableTable
 from core.locales import locales
-from core.utils import error_embed, ok_embed, find
+from core.utils import error_embed, ok_embed, find, join_and, seconds_to_str, parse_duration
 
 import bot
 from bot.stats.rating import FlatRating, Glicko2Rating, TrueSkillRating
@@ -157,7 +158,8 @@ class QueueChannel:
 			lb=self._lb,
 			leaderboard=self._lb,
 			rl=self._rl,
-			rd=self._rd
+			rd=self._rd,
+			expire=self._expire
 		)
 
 	def update_lang(self):
@@ -204,11 +206,33 @@ class QueueChannel:
 			self.topic = new_topic
 			await self.channel.send(self.topic)
 
-	async def remove_members(self, members, queues=None):
-		queues = queues or self.queues
-		for q in queues:
+	async def remove_members(self, *members, reason=None):
+		affected = set()
+		for q in self.queues:
 			for m in members:
-				await q.remove_member(m)
+				try:
+					await q.remove_member(m)
+					affected.add(m)
+				except ValueError:
+					pass
+
+		if len(affected):
+			await self.update_topic()
+			if reason:
+				if reason == "expire":
+					reason = self.gt("expire time ran off")
+					mention = join_and(['**'+(m.nick or m.name)+'**' for m in affected])
+
+				if len(affected) == 1:
+					await self.channel.send(self.gt("{member} were removed from all queues ({reason}).").format(
+						member=mention,
+						reason=reason
+					))
+				else:
+					await self.channel.send(self.gt("{members} were removed from all queues ({reason}).").format(
+						members=mention,
+						reason=reason
+					))
 
 	async def error(self, content, title=None):
 		title = title or self.gt("Error")
@@ -318,7 +342,10 @@ class QueueChannel:
 				(t == q.name or t in (a["alias"] for a in q.cfg.tables.aliases) for t in targets)
 			))
 		for q in t_queues:
-			await q.remove_member(message.author)
+			try:
+				await q.remove_member(message.author)
+			except ValueError:  # member is not added to the queue
+				pass
 		await self.update_topic()
 
 	async def _who(self, message, args=None):
@@ -500,3 +527,24 @@ class QueueChannel:
 			await self.error(self.gt("You are not in an active match."))
 		else:
 			await match.report(member=message.author, draw=True)
+
+	async def _expire(self, message, args=None):
+		if not args:
+			if task := bot.expire.get(self, message.author):
+				await self.channel.send(self.gt("You have {duration} expire time left.").format(
+					duration=seconds_to_str(task.at-int(time.time()))
+				))
+			else:
+				await self.channel.send(self.gt("You don't have an expire timer set right now."))
+
+		else:
+			try:
+				secs = parse_duration("".join(args))
+			except ValueError:
+				await self.error(self.gt("Invalid duration format. Syntax: 3h2m1s."))
+				return
+
+			bot.expire.set(self, message.author, secs)
+			await self.channel.send(self.gt("Set your expire time to {duration}.").format(
+				duration=seconds_to_str(secs)
+			))

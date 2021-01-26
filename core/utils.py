@@ -29,6 +29,11 @@ def hl_user(user_id):
 	return '<@' + str(user_id) + '>'
 
 
+def join_and(names):
+	""" Generates 'item1, item2, item3 & item4' string from a list """
+	return ', '.join(names[:-1]) + f' & {names[-1]}>' if len(names) > 1 else names[0]
+
+
 def hl_role(role_id):
 	return '<&' + str(role_id) + '>'
 
@@ -90,7 +95,7 @@ def parse_duration(string):
 	elif string[-1] == 'Y':
 		duration = duration * 60 * 60 * 24 * 30
 	else:
-		raise Exception()
+		raise ValueError()
 	return int(duration)
 
 
