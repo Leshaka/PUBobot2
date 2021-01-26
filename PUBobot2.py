@@ -5,7 +5,10 @@ import time
 import signal
 import asyncio
 import traceback
+import queue
+import discord
 from asyncio import sleep as asleep
+from asyncio import iscoroutine
 
 # Load bot core
 from core import config, console, database, locales, cfg_factory
@@ -38,12 +41,16 @@ signal.signal(signal.SIGINT, ctrl_c)
 async def run_console():
 	try:
 		cmd = console.user_input_queue.get(False)
-	except Exception:
+	except queue.Empty:
 		return
 
 	log.info(cmd)
 	try:
-		exec(cmd)
+		x = eval(cmd)
+		if iscoroutine(x):
+			log.info(await x)
+		else:
+			log.info(str(x))
 	except Exception as e:
 		log.error("CONSOLE| ERROR: "+str(e))
 
@@ -88,6 +95,7 @@ async def think():
 	loop.stop()
 
 # Login to discord
+intents = discord.Intents.default()
 loop = asyncio.get_event_loop()
 loop.create_task(think())
 loop.create_task(dc.start(config.cfg.DC_BOT_TOKEN))

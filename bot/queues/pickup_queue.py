@@ -94,7 +94,7 @@ class PickupQueue:
 			self.queue.remove(member)
 
 	async def start(self):
-		bot.Match(self, self.qc, list(self.queue))
+		bot.Match(self, self.qc, list(self.queue), check_in_timeout=None, pick_teams="random teams", ranked=True)
 		await self.qc.remove_members(list(self.queue))
 
 	async def revert(self, not_ready, ready):

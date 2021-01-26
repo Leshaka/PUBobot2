@@ -94,5 +94,10 @@ def parse_duration(string):
 	return int(duration)
 
 
+def iter_to_dict(it, key):
+	""" Converts an iterable of dictionaries to a dict """
+	return {i[key]: i for i in it}
+
+
 def seconds_to_str(seconds):
 	return str(timedelta(seconds=seconds))

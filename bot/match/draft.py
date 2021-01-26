@@ -36,7 +36,7 @@ class Draft:
 				team=" + ".join(
 					[f"`{self.m.rank_str(p)}{p.nick or p.name}`" for p in team]
 				) if len(team) else f"`{team.name}`",
-				rating=f" 〈__{sum([self.m.ranks[p.id] for p in team])}__〉" if self.m.ranked else ""
+				rating=f" 〈__{sum([self.m.ratings[p.id] for p in team])}__〉" if self.m.ranked else ""
 			))
 		content = f"\n>          :fire: **{self.m.gt('VERSUS')}** :fire:\n".join(teams_s)
 		content += "\n\n " + f"__{self.m.gt('Unpicked')}__:\n"

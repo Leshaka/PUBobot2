@@ -12,6 +12,13 @@ import bot
 queue_channels = dict()  # {channel.id: QueueChannel()}
 active_pickups = []
 active_matches = []
+waiting_reactions = dict()  # {message.id: function}
+
+
+@dc.event
+async def on_think(frame_time):
+	for match in active_matches:
+		await match.think(frame_time)
 
 
 @dc.event
@@ -29,6 +36,18 @@ async def on_message(message):
 	qc = queue_channels.get(message.channel.id)
 	if qc:
 		await qc.process_msg(message)
+
+
+@dc.event
+async def on_reaction_add(reaction, user):
+	if user.id != dc.user.id and reaction.message.id in waiting_reactions.keys():
+		await waiting_reactions[reaction.message.id](reaction, user)
+
+
+@dc.event
+async def on_reaction_remove(reaction, user):  # FIXME: this event does not get triggered for some reason
+	if user.id != dc.user.id and reaction.message.channel.id in waiting_reactions.keys():
+		await waiting_reactions[reaction.message.id](reaction, user, remove=True)
 
 
 @dc.event
@@ -68,7 +87,7 @@ async def disable_channel(message):
 		return
 	qc = queue_channels.get(message.channel.id)
 	if qc:
-		queue_channels.remove(qc)
+		queue_channels.pop(message.channel.id)
 		await message.channel.send(embed=ok_embed("The bot has been disabled."))
 	else:
 		await message.channel.send(embed=error_embed("The bot is not enabled on this channel."))
@@ -76,3 +95,7 @@ async def disable_channel(message):
 
 def update_qc_lang(qc_cfg):
 	queue_channels[qc_cfg.p_key].update_lang()
+
+
+def update_rating_system(qc_cfg):
+	queue_channels[qc_cfg.p_key].update_rating_system()

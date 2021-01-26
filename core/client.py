@@ -48,4 +48,9 @@ class DiscordClient(discord.Client):
 		return wrapper
 
 
-dc = DiscordClient()
+intents = discord.Intents.default()
+intents.typing = False
+intents.presences = True
+intents.members = False
+intents.bans = False
+dc = DiscordClient(intents=intents)

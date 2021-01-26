@@ -22,13 +22,9 @@ class CheckIn:
 
 	async def start(self):
 		text = f"!spawn message {self.m.id}"
-		bot.waiting_messages.append([self.m.qc.channel.id, text, self.spawn_message])
-		await self.m.send(text)
-
-	async def spawn_message(self, message):
-		self.message = message
+		self.message = await self.m.send(text)
 		for emoji in [self.READY_EMOJI, '🔸', self.NOT_READY_EMOJI]:
-			await message.add_reaction(emoji)
+			await self.message.add_reaction(emoji)
 		bot.waiting_reactions[self.message.id] = self.process_reaction
 		await self.refresh()
 
@@ -83,7 +79,7 @@ class CheckIn:
 			self.m.gt("Reverting {queue} to the gathering stage...").format(queue=f"**{self.m.queue.name}**")
 		)))
 
-		bot.active_matches.remove(self)
+		bot.active_matches.remove(self.m)
 		await self.m.queue.revert([member], [m for m in self.m.players if m != member])
 
 	async def abort_timeout(self):
@@ -96,5 +92,4 @@ class CheckIn:
 		)))
 
 		await self.m.queue.revert(not_ready, self.ready_players)
-		print(bot.active_matches)
-		bot.active_matches.remove(self)
+		bot.active_matches.remove(self.m)
