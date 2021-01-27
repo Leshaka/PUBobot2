@@ -11,8 +11,8 @@ msgstr "Ошибка"
 msgid "no players"
 msgstr "нет игроков"
 
-msgid "{match_id}{queue} is started!"
-msgstr "{match_id}{queue} начался!"
+msgid "__**{queue}** is started!__"
+msgstr "__**{queue}** начался!__"
 
 msgid "Reverting {queue} to the gathering stage..."
 msgstr "Возвращаем {queue} на стадию сбора..."

@@ -71,12 +71,14 @@ class Match:
 		self.max_players = max_players
 		self.pick_teams = pick_teams
 		self.ranked = ranked
+		self.server = "127.0.0.1"
 
 		# Set working objects
 		self.id = 0  # TODO
 		self.maps = random.sample(maps, map_count) if len(maps) > map_count else list(maps)
 		self.players = list(players)
-		self.ratings = {p['user_id']: p['rating'] for p in self.qc.rating.get_ratings(self.players)}
+		# self.ratings = {p['user_id']: p['rating'] for p in await self.qc.rating.get_ratings(self.players)}
+		self.ratings = {p.id: 1400 for p in self.players}
 
 		team_names = team_names or ['Alpha', 'Beta']
 		team_emojis = team_emojis or random.sample(self.TEAM_EMOJIS, 2)
@@ -168,77 +170,52 @@ class Match:
 	async def _final_message_embed(self):
 		embed = Embed(
 			colour=Colour(0x27b75e),
-			description=self.start_msg,
-			title=self.qc.gt("{match_id}{queue} is started!").format(match_id="", queue=self.queue.name)
+			title=self.qc.gt("__**{queue}** is started!__").format(queue=self.queue.name.capitalize())
 		)
-		if self.ranked:
-			for team in self.teams[:2]:
-				embed.add_field(
-					name=f"{team.emoji} {team.name} 〈{sum([self.ratings[p.id] for p in team])}〉",
-					value="\n\n" + "\n".join([f"`{self.rank_str(p)}`<@{p.id}>" for p in team]) + "\n--",
-					inline=True
-				)
-		else:
-			for team in self.teams[:2]:
-				embed.add_field(
-					name=f"{team.emoji} {team.name}",
-					value="\n".join([f"<@{p.id}>" for p in team]) + "\n--",
-					inline=True
-				)
-		if len(self.maps):
-			embed.add_field(name=self.qc.gt("Maps")+":", value=", ".join(self.maps), inline=False)
 
+		if len(self.teams[0]) == 1 and len(self.teams[1]) == 1:  # 1v1
+			p1, p2 = self.teams[0][0], self.teams[1][0]
+			players = " \u200b {player1}{rating1}\n \u200b {player2}{rating2}\n\u200b".format(
+				rating1=f" \u200b `〈{self.ratings[p1.id]}〉`" if self.ranked else "",
+				player1=f"<@{p1.id}>",
+				rating2=f" \u200b `〈{self.ratings[p1.id]}〉`" if self.ranked else "",
+				player2=f"<@{p2.id}>",
+			)
+			embed.add_field(name="Players", value=players, inline=False)
+		else:  # team vs team
+			teams_names = [
+				f"{t.emoji} \u200b **{t.name}**" +
+				(f" \u200b `〈{sum((self.ratings[p.id] for p in t))}〉`" if self.ranked else "")
+				for t in self.teams[:2]
+			]
+			team_players = [
+				" \u200b " +
+				" \u200b ".join([
+					(f"`{self.rank_str(p)}`" if self.ranked else "") + f"<@{p.id}>"
+					for p in t
+				])
+				for t in self.teams[:2]
+			]
+			team_players[1] += "\n\u200b"  # Extra empty line
+			embed.add_field(name=teams_names[0], value=team_players[0], inline=False)
+			embed.add_field(name=teams_names[1], value=team_players[1], inline=False)
+
+		if len(self.maps):
+			embed.add_field(
+				name=self.qc.gt("Map" if len(self.maps) == 1 else "Maps"),
+				value="\n".join((f"**{i}**" for i in self.maps)),
+				inline=True
+			)
+		if self.server:
+			embed.add_field(name=self.qc.gt("Server"), value=f"`{self.server}`", inline=True)
+		if self.start_msg:
+			embed.add_field(name="—", value=self.start_msg, inline=False)
 		embed.set_footer(
 			text="Match id: 157947",
 			icon_url=f"https://cdn.discordapp.com/avatars/{dc.user.id}/{dc.user.avatar}.png?size=64"
 		)
+
 		await self.qc.channel.send(embed=embed)
-
-	async def _final_message_text(self):
-		title = self.qc.gt("{match_id}{queue} is started!").format(
-			match_id=f"__(*{self.id}*) ",
-			queue=f"**{self.queue.name}**"
-		) + "__"
-
-		# just players list
-		if self.teams == [[], []]:
-			teams = self.highlight(self.players)
-
-		# p1 vs p2
-		elif len(self.teams[0]) == 1 and len(self.teams[1]) == 1:
-			p1, p2 = self.teams[0][0], self.teams[1][0]
-			teams = "> {rank1}<@{p1}> :fire:**{versus}**:fire: {rank2}<@{p2}>".format(
-				rank1=f"`{self.rank_str(p1)}`" if self.ranked else "",
-				rank2=f"`{self.rank_str(p2)}`" if self.ranked else "",
-				p1=p1.id,
-				p2=p2.id,
-				versus=self.qc.gt("VERSUS")
-			)
-
-		# team1 vs team2
-		else:
-			teams = ["> {emoji}❲{team}❳{rating}".format(
-				emoji=team.emoji,
-				team=" ".join("`{rank}`<@{id}>".format(rank=self.rank_str(p) or "", id=p.id) for p in team),
-				rating=f" 〈{sum([self.ratings[p.id] for p in team])}〉" if self.ranked else ""
-			) for team in self.teams[:2]]
-
-			teams = f"{teams[0]}\n         :fire: **{self.qc.gt('VERSUS')}** :fire:\n{teams[1]}"
-
-		if len(self.captains) and self.pick_teams == "no teams" and len(self.players) > 2:
-			captains = f"\n{self.qc.gt('Captains')}: <@{self.captains[0].id}> & <@{self.captains[1]}>"
-		else:
-			captains = ""
-
-		if len(self.maps):
-			maps = "\n{s}: {maps}.".format(
-				s=self.qc.gt("Maps"),
-				maps=", ".join([f"**{m}**" for m in self.maps])
-			)
-		else:
-			maps = ""
-
-		await self.qc.channel.send(f"{title}\n{teams}\n\n{self.start_msg}{captains}{maps}")
 
 	async def report(self, member=None, team_name=None, draw=False, force=False):
 		# TODO: Only captain must be able to do this
@@ -309,10 +286,7 @@ class Match:
 
 	async def final_message(self):
 		#  Embed message with teams
-		if self.start_msg_style == "embed" and all((len(team) > 1 for team in self.teams[:2])):
-			await self._final_message_embed()
-		else:
-			await self._final_message_text()
+		await self._final_message_embed()
 
 	async def finish_match(self):
 		bot.active_matches.remove(self)
