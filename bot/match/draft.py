@@ -23,36 +23,10 @@ class Draft:
 			await self.m.next_state()
 			return
 
-		await self.m.send(
-			"__" + self.m.gt("{queue} is now on the draft stage!").format(queue=f"**{self.m.queue.name}**") + "__"
-		)
 		await self.print()
 
 	async def print(self):
-		teams_s = []
-		for team in self.m.teams[:2]:
-			teams_s.append("> {emoji} ❲{team}❳{rating}".format(
-				emoji=team.emoji,
-				team=" + ".join(
-					[f"`{self.m.rank_str(p)}{p.nick or p.name}`" for p in team]
-				) if len(team) else f"`{team.name}`",
-				rating=f" 〈__{sum([self.m.ratings[p.id] for p in team])}__〉" if self.m.ranked else ""
-			))
-		content = f"\n>          :fire: **{self.m.gt('VERSUS')}** :fire:\n".join(teams_s)
-		content += "\n\n " + f"__{self.m.gt('Unpicked')}__:\n"
-		content += "\n".join([f"  - `{self.m.rank_str(m)}{m.nick or m.name}`" for m in self.m.teams[2]])
-
-		if len(self.m.teams[0]) and len(self.m.teams[1]):
-			pick_step = len(self.m.teams[0]) + len(self.m.teams[1]) - 2
-			picker_team = self.m.teams[self.pick_order[pick_step]] if pick_step < len(self.pick_order)-1 else None
-			if picker_team:
-				content += "\n\n> " + self.m.gt("{member}'s turn to pick!").format(member=f"<@{picker_team[0].id}>")
-		else:
-			content += "\n\n> " + self.m.gt(
-				"Type {cmd} to become a captain and start picking teams."
-			).format(cmd=f"`{self.m.qc.cfg.prefix}capfor {'/'.join((team.name.lower() for team in self.m.teams))}`")
-
-		await self.m.send(content)
+		await self.m.send(embed=self.m.embeds.draft())
 
 	async def refresh(self):
 		if len(self.m.teams[2]) or self.m.state != self.m.DRAFT:

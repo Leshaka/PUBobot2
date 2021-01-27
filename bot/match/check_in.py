@@ -31,14 +31,7 @@ class CheckIn:
 	async def refresh(self):
 		not_ready = list(filter(lambda m: m not in self.ready_players, self.m.players))
 		if len(not_ready):
-			await self.message.edit(content=self.m.gt("\n".join([
-				self.m.gt("__**{queue}** is now on the check-in stage!__"),
-				self.m.gt("Waiting on: {players}."),
-				self.m.gt("Please react with {ready_emoji} to **check-in** or {not_ready_emoji} to **abort**!")
-			])).format(
-				queue=self.m.queue.name, players=self.m.highlight(not_ready),
-				ready_emoji=self.READY_EMOJI, not_ready_emoji=self.NOT_READY_EMOJI
-			))
+			await self.message.edit(content=None, embed=self.m.embeds.check_in(not_ready))
 		else:
 			bot.waiting_reactions.pop(self.message.id)
 			self.ready_players = []

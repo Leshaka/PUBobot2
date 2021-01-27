@@ -2,14 +2,13 @@
 from time import time
 from itertools import combinations
 import random
-from discord import Embed, Colour
 
 import bot
-from core.client import dc
 from core.utils import find, iter_to_dict
 
 from .check_in import CheckIn
 from .draft import Draft
+from .embeds import Embeds
 
 
 class Match:
@@ -71,7 +70,7 @@ class Match:
 		self.max_players = max_players
 		self.pick_teams = pick_teams
 		self.ranked = ranked
-		self.server = "127.0.0.1"
+		self.server = None
 
 		# Set working objects
 		self.id = 0  # TODO
@@ -99,6 +98,7 @@ class Match:
 		self.init_teams(pick_teams)
 		self.check_in = CheckIn(self, check_in_timeout)
 		self.draft = Draft(self, pick_order, captains_role_id)
+		self.embeds = Embeds(self)
 		if self.ranked:
 			print("YAY KEKW")
 			self.states.append(self.WAITING_REPORT)
@@ -166,56 +166,6 @@ class Match:
 
 	async def start_waiting_report(self):
 		await self.final_message()
-
-	async def _final_message_embed(self):
-		embed = Embed(
-			colour=Colour(0x27b75e),
-			title=self.qc.gt("__**{queue}** is started!__").format(queue=self.queue.name.capitalize())
-		)
-
-		if len(self.teams[0]) == 1 and len(self.teams[1]) == 1:  # 1v1
-			p1, p2 = self.teams[0][0], self.teams[1][0]
-			players = " \u200b {player1}{rating1}\n \u200b {player2}{rating2}\n\u200b".format(
-				rating1=f" \u200b `〈{self.ratings[p1.id]}〉`" if self.ranked else "",
-				player1=f"<@{p1.id}>",
-				rating2=f" \u200b `〈{self.ratings[p1.id]}〉`" if self.ranked else "",
-				player2=f"<@{p2.id}>",
-			)
-			embed.add_field(name="Players", value=players, inline=False)
-		else:  # team vs team
-			teams_names = [
-				f"{t.emoji} \u200b **{t.name}**" +
-				(f" \u200b `〈{sum((self.ratings[p.id] for p in t))}〉`" if self.ranked else "")
-				for t in self.teams[:2]
-			]
-			team_players = [
-				" \u200b " +
-				" \u200b ".join([
-					(f"`{self.rank_str(p)}`" if self.ranked else "") + f"<@{p.id}>"
-					for p in t
-				])
-				for t in self.teams[:2]
-			]
-			team_players[1] += "\n\u200b"  # Extra empty line
-			embed.add_field(name=teams_names[0], value=team_players[0], inline=False)
-			embed.add_field(name=teams_names[1], value=team_players[1], inline=False)
-
-		if len(self.maps):
-			embed.add_field(
-				name=self.qc.gt("Map" if len(self.maps) == 1 else "Maps"),
-				value="\n".join((f"**{i}**" for i in self.maps)),
-				inline=True
-			)
-		if self.server:
-			embed.add_field(name=self.qc.gt("Server"), value=f"`{self.server}`", inline=True)
-		if self.start_msg:
-			embed.add_field(name="—", value=self.start_msg, inline=False)
-		embed.set_footer(
-			text="Match id: 157947",
-			icon_url=f"https://cdn.discordapp.com/avatars/{dc.user.id}/{dc.user.avatar}.png?size=64"
-		)
-
-		await self.qc.channel.send(embed=embed)
 
 	async def report(self, member=None, team_name=None, draw=False, force=False):
 		# TODO: Only captain must be able to do this
@@ -286,7 +236,7 @@ class Match:
 
 	async def final_message(self):
 		#  Embed message with teams
-		await self._final_message_embed()
+		await self.qc.channel.send(embed=self.embeds.final_message())
 
 	async def finish_match(self):
 		bot.active_matches.remove(self)

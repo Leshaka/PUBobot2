@@ -26,8 +26,8 @@ msgstr "__**{queue}** на стадии потверждения участни�
 msgid "Please react with {ready_emoji} to **check-in** or {not_ready_emoji} to **abort**!"
 msgstr "Нажмите {ready_emoji} чтобы **подтвердить** или {not_ready_emoji} чтобы **отменить** участие!"
 
-msgid "Waiting on: {players}."
-msgstr "Ожидаем: {players}."
+msgid "Waiting on:"
+msgstr "Ожидаем:"
 
 msgid "{members} was not ready in time."
 msgstr "Не подтвердили участие: {members}."
@@ -41,8 +41,8 @@ msgstr "Матч не на стадии подтверждения участн�
 msgid "You are not in an active match."
 msgstr "Вы не в матче."
 
-msgid "{queue} is now on the draft stage!"
-msgstr "{queue} на стадии драфта!"
+msgid "__**{queue}** is now on the draft stage!__"
+msgstr "__**{queue}** на стадии драфта!__"
 
 msgid "VERSUS"
 msgstr "ПРОТИВ"
