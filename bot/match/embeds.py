@@ -99,7 +99,7 @@ class Embeds:
 			players = " \u200b {player1}{rating1}\n \u200b {player2}{rating2}".format(
 				rating1=f" \u200b `〈{self.m.ratings[p1.id]}〉`" if self.m.cfg['ranked'] else "",
 				player1=f"<@{p1.id}>",
-				rating2=f" \u200b `〈{self.m.ratings[p1.id]}〉`" if self.m.cfg['ranked'] else "",
+				rating2=f" \u200b `〈{self.m.ratings[p2.id]}〉`" if self.m.cfg['ranked'] else "",
 				player2=f"<@{p2.id}>",
 			)
 			embed.add_field(name="Players", value=players, inline=False)

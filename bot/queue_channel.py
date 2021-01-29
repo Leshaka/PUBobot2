@@ -89,6 +89,16 @@ class QueueChannel:
 				display="Rating scale",
 				description="Set rating scale.",
 				default=32
+			),
+			Variables.BoolVar(
+				"remove_afk",
+				display="Auto remove on AFK status",
+				default=1
+			),
+			Variables.BoolVar(
+				"remove_offline",
+				display="Auto remove on offline status",
+				default=1
 			)
 		],
 		tables=[
@@ -160,7 +170,9 @@ class QueueChannel:
 			leaderboard=self._lb,
 			rl=self._rl,
 			rd=self._rd,
-			expire=self._expire
+			expire=self._expire,
+			ao=self._allow_offline,
+			allow_offline=self._allow_offline
 		)
 
 	def update_lang(self):
@@ -207,6 +219,12 @@ class QueueChannel:
 			self.topic = new_topic
 			await self.channel.send(self.topic)
 
+	async def auto_remove(self, member):
+		if str(member.status) == "idle" and self.cfg.remove_afk:
+			await self.remove_members(member, reason="afk")
+		elif str(member.status) == "offline" and self.cfg.remove_offline:
+			await self.remove_members(member, reason="offline")
+
 	async def remove_members(self, *members, reason=None):
 		affected = set()
 		for q in self.queues:
@@ -220,9 +238,13 @@ class QueueChannel:
 		if len(affected):
 			await self.update_topic()
 			if reason:
+				mention = join_and(['**' + (m.nick or m.name) + '**' for m in affected])
 				if reason == "expire":
 					reason = self.gt("expire time ran off")
-					mention = join_and(['**'+(m.nick or m.name)+'**' for m in affected])
+				elif reason == "offline":
+					reason = self.gt("user offline")
+				elif reason == "afk":
+					reason = self.gt("user AFK")
 
 				if len(affected) == 1:
 					await self.channel.send(self.gt("{member} were removed from all queues ({reason}).").format(
@@ -549,3 +571,11 @@ class QueueChannel:
 			await self.channel.send(self.gt("Set your expire time to {duration}.").format(
 				duration=seconds_to_str(secs)
 			))
+
+	async def _allow_offline(self, message, args=None):
+		if message.author.id in bot.allow_offline:
+			bot.allow_offline.remove(message.author.id)
+			await self.channel.send(embed=ok_embed(self.gt("Your allow offline immune is gone.")))
+		else:
+			bot.allow_offline.append(message.author.id)
+			await self.channel.send(embed=ok_embed(self.gt("You now have the allow offline immune.")))
