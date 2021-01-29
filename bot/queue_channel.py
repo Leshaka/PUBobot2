@@ -119,6 +119,7 @@ class QueueChannel:
 
 	def __init__(self, text_channel, qc_cfg):
 		self.cfg = qc_cfg
+		self.id = text_channel.id
 		self.gt = locales[self.cfg.lang]
 		self.rating = self.rating_names[self.cfg.rating_system](
 			channel_id=text_channel.id,
@@ -277,7 +278,7 @@ class QueueChannel:
 		elif cmd == "--":
 			await self._remove_member(message, "")
 
-		# normal commands starting with prefix
+		# normal commands s<tarting with prefix
 		if self.cfg.prefix != cmd[0]:
 			return
 

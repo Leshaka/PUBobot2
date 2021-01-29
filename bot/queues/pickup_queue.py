@@ -64,9 +64,24 @@ class PickupQueue:
 		await cfg.update({"name": name, "size": size})
 		return cls(qc, cfg)
 
+	def serialize(self):
+		return dict(
+			queue_id=self.id,
+			channel_id=self.qc.channel.id,
+			players=[i.id for i in self.queue]
+		)
+
+	async def from_json(self, data):
+		players = [self.qc.channel.guild.get_member(user_id) for user_id in data['players']]
+		if None in players:
+			await self.qc.error(f"Unable to load queue **{self.cfg.name}**, error fetching guild members.")
+			return
+		self.queue = players
+
 	def __init__(self, qc, cfg):
 		self.qc = qc
 		self.cfg = cfg
+		self.id = self.cfg.p_key
 		self.queue = []
 
 	@property
@@ -80,6 +95,10 @@ class PickupQueue:
 	@property
 	def who(self):
 		return "/".join([f"`{m.nick or m.name}`" for m in self.queue])
+
+	@property
+	def length(self):
+		return len(self.queue)
 
 	async def add_member(self, member):
 		if member not in self.queue:
@@ -96,8 +115,8 @@ class PickupQueue:
 			raise ValueError("Specified Member is not added to the queue.")
 
 	async def start(self):
-		bot.Match(self, self.qc, list(self.queue), check_in_timeout=None, pick_teams="draft", ranked=True)
-		await self.qc.remove_members(list(self.queue))
+		await bot.Match.new(self, self.qc, list(self.queue), check_in_timeout=300, pick_teams="draft", ranked=True)
+		await self.qc.remove_members(*list(self.queue))
 
 	async def revert(self, not_ready, ready):
 		old_players = list(self.queue)

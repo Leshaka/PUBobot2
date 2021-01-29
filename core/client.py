@@ -51,6 +51,6 @@ class DiscordClient(discord.Client):
 intents = discord.Intents.default()
 intents.typing = False
 intents.presences = True
-intents.members = False
+intents.members = True
 intents.bans = False
 dc = DiscordClient(intents=intents)

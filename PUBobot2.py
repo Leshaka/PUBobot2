@@ -30,6 +30,7 @@ original_SIGINT_handler = signal.getsignal(signal.SIGINT)
 
 
 def ctrl_c(sig, frame):
+	bot.save_state()
 	console.terminate()
 	signal.signal(signal.SIGINT, original_SIGINT_handler)
 

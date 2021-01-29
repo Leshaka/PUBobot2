@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
 import traceback
+import json
 from discord import ChannelType
 
 from core.client import dc
 from core.console import log
 from core.config import cfg
-from core.utils import error_embed, ok_embed
+from core.utils import error_embed, ok_embed, get
 
 import bot
 
@@ -62,6 +63,8 @@ async def on_ready():
 			log.info(f"\tInit channel {channel.guild.name}>#{channel.name} successful.")
 		else:
 			log.info(f"\tCould not reach a text channel with id {channel_id}.")
+
+	await load_state()
 	log.info("Done.")
 
 
@@ -105,3 +108,48 @@ def update_rating_system(qc_cfg):
 def remove_members(*user_ids, reason=None):
 	for qc in queue_channels.values():
 		qc.remove_members()
+
+
+def save_state():
+	log.info("Saving state...")
+	queues = []
+	for qc in queue_channels.values():
+		for q in qc.queues:
+			if q.length > 0:
+				queues.append(q.serialize())
+
+	matches = []
+	for match in active_matches:
+		matches.append(match.serialize())
+
+	f = open("saved_state.json", 'w')
+	f.write(json.dumps(dict(queues=queues, matches=matches)))
+	f.close()
+
+
+async def load_state():
+	try:
+		with open("saved_state.json", "r") as f:
+			data = json.loads(f.read())
+	except IOError:
+		return
+
+	log.info("Loading state...")
+
+	for qd in data['queues']:
+		if qc := queue_channels.get(qd['channel_id']):
+			if q := get(qc.queues, id=qd['queue_id']):
+				await q.from_json(qd)
+			else:
+				log.error(f"Queue with id {qd['queue_id']} not found.")
+		else:
+			log.error(f"Queue channel with id {qd['channel_id']} not found.")
+
+	for md in data['matches']:
+		if qc := queue_channels.get(md['channel_id']):
+			if q := get(qc.queues, id=md['queue_id']):
+				await bot.Match.from_json(q, qc, md)
+			else:
+				log.error(f"Queue with id {md['queue_id']} not found.")
+		else:
+			log.error(f"Queue channel with id {md['channel_id']} not found.")

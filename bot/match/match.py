@@ -4,7 +4,8 @@ from itertools import combinations
 import random
 
 import bot
-from core.utils import find, iter_to_dict
+from core.utils import find, get, iter_to_dict
+from core.client import dc
 
 from .check_in import CheckIn
 from .draft import Draft
@@ -23,7 +24,16 @@ class Match:
 		":scorpion:", ":crab:", ":eagle:", ":shark:", ":bat:", ":rhino:", ":dragon_face:", ":deer:"
 	]
 
+	default_cfg = dict(
+		teams=None, team_names=['Alpha', 'Beta'], team_emojis=None, ranked=False,
+		max_players=None, pick_captains="no captains", captains_role_id=None, pick_teams="draft",
+		pick_order=None, maps=[], map_count=0, check_in_timeout=0,
+		match_lifetime=0, start_msg=None, server=None
+	)
+
 	class Team(list):
+		""" Team is basically a set of member objects, but we need it ordered so list is used """
+
 		def __init__(self, name=None, emoji=None, players=None, idx=-1):
 			super().__init__(players or [])
 			self.name = name
@@ -43,19 +53,63 @@ class Match:
 			if p in self:
 				self.remove(p)
 
-	@staticmethod
-	def highlight(members):
-		if len(members) == 1:
-			return f"<@{members[0].id}>"
-		else:
-			return ", ".join((f"<@{m.id}>" for m in members[:-1])) + f" & <@{members[-1].id}>"
+	@classmethod
+	async def new(cls, queue, qc, players, **kwargs):
+		# Create the Match object
+		ratings = {p['user_id']: p['rating'] for p in await qc.rating.get_ratings((p.id for p in players))}
+		match = cls(0, queue, qc, players, ratings, **kwargs)
+		# Prepare the Match object
+		match.init_maps(match.cfg['maps'], match.cfg['map_count'])
+		match.init_captains(match.cfg['pick_captains'], match.cfg['captains_role_id'])
+		match.init_teams(match.cfg['pick_teams'])
+		if match.cfg['ranked']:
+			match.states.append(match.WAITING_REPORT)
+		bot.active_matches.append(match)
 
-	def __init__(
-		self, queue, qc, players, teams=None, team_names=None, team_emojis=None,
-		ranked=False, max_players=None, pick_captains="no captains", captains_role_id=None, pick_teams="draft",
-		pick_order=None, maps=[], map_count=0, check_in_timeout=0, match_lifetime=0, state_data=None,
-		start_msg="Please create an in-game lobby.", start_msg_style="embed"
-	):
+	def serialize(self):
+		return dict(
+			match_id=self.id,
+			queue_id=self.queue.id,
+			channel_id=self.qc.channel.id,
+			cfg=self.cfg,
+			players=[p.id for p in self.players],
+			teams=[[p.id for p in team] for team in self.teams],
+			maps=self.maps,
+			state=self.state,
+			states=self.states,
+			ready_players=[p.id for p in self.check_in.ready_players]
+		)
+
+	@classmethod
+	async def from_json(cls, queue, qc, data):
+		# Prepare discord objects
+		data['players'] = [qc.channel.guild.get_member(user_id) for user_id in data['players']]
+		if None in data['players']:
+			await qc.error(f"Unable to load match {data['match_id']}, error fetching guild members.")
+			return
+
+		# Fill data with discord objects
+		for i in range(len(data['teams'])):
+			data['teams'][i] = [get(data['players'], id=user_id) for user_id in data['teams'][i]]
+		data['ready_players'] = [get(data['players'], id=user_id) for user_id in data['ready_players']]
+
+		# Create the Match object
+		ratings = {p['user_id']: p['rating'] for p in await qc.rating.get_ratings((p.id for p in data['players']))}
+		match = cls(data['match_id'], queue, qc, data['players'], ratings, **data['cfg'])
+
+		# Set state data
+		for i in range(len(match.teams)):
+			match.teams[i].set(data['teams'][i])
+		match.check_in.ready_players = data['ready_players']
+		match.maps = data['maps']
+		match.state = data['state']
+		match.states = data['states']
+		if match.state == match.CHECK_IN:
+			await match.check_in.start()  # Spawn a new check_in message
+
+		bot.active_matches.append(match)
+
+	def __init__(self, match_id, queue, qc, players, ratings, **cfg):
 
 		# Set parent objects and shorthands
 		self.queue = queue
@@ -65,22 +119,17 @@ class Match:
 		self.gt = qc.gt
 
 		# Set configuration variables
-		self.start_msg = start_msg
-		self.start_msg_style = start_msg_style
-		self.max_players = max_players
-		self.pick_teams = pick_teams
-		self.ranked = ranked
-		self.server = None
+		self.cfg = self.default_cfg.copy()
+		self.cfg.update(cfg)
 
 		# Set working objects
-		self.id = 0  # TODO
-		self.maps = random.sample(maps, map_count) if len(maps) > map_count else list(maps)
+		self.id = match_id
 		self.players = list(players)
-		# self.ratings = {p['user_id']: p['rating'] for p in await self.qc.rating.get_ratings(self.players)}
-		self.ratings = {p.id: 1400 for p in self.players}
+		self.ratings = ratings
+		print(self.ratings)
 
-		team_names = team_names or ['Alpha', 'Beta']
-		team_emojis = team_emojis or random.sample(self.TEAM_EMOJIS, 2)
+		team_names = self.cfg['team_names']
+		team_emojis = self.cfg['team_emojis'] or random.sample(self.TEAM_EMOJIS, 2)
 		self.teams = [
 			self.Team(name=team_names[0], emoji=team_emojis[0], idx=0),
 			self.Team(name=team_names[1], emoji=team_emojis[1], idx=1),
@@ -89,21 +138,18 @@ class Match:
 
 		self.captains = []
 		self.states = []
-		self.lifetime = match_lifetime
+		self.maps = []
+		self.lifetime = self.cfg['match_lifetime']
 		self.start_time = int(time())
 		self.state = self.INIT
 
 		# Init self sections
-		self.init_captains(pick_captains, captains_role_id)
-		self.init_teams(pick_teams)
-		self.check_in = CheckIn(self, check_in_timeout)
-		self.draft = Draft(self, pick_order, captains_role_id)
+		self.check_in = CheckIn(self, self.cfg['check_in_timeout'])
+		self.draft = Draft(self, self.cfg['pick_order'], self.cfg['captains_role_id'])
 		self.embeds = Embeds(self)
-		if self.ranked:
-			print("YAY KEKW")
-			self.states.append(self.WAITING_REPORT)
 
-		bot.active_matches.append(self)
+	def init_maps(self, maps, map_count):
+		self.maps = random.sample(maps, map_count)
 
 	def init_captains(self, pick_captains, captains_role_id):
 		if pick_captains == "by role and rating":

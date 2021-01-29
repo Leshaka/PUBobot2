@@ -7,8 +7,12 @@ class Embeds:
 
 	def __init__(self, match):
 		self.m = match
-		# self.icon_url = f"https://cdn.discordapp.com/avatars/{dc.user.id}/{dc.user.avatar}.png?size=64"
-		self.icon_url = "https://cdn.discordapp.com/avatars/240843400457355264/a51a5bf3b34d94922fd60751ba1d60ab.png?size=64"
+		# self.
+		self.footer = dict(
+			text=f"Match id: {self.m.id}",
+			# icon_url = f"https://cdn.discordapp.com/avatars/{dc.user.id}/{dc.user.avatar}.png?size=64"
+			icon_url="https://cdn.discordapp.com/avatars/240843400457355264/a51a5bf3b34d94922fd60751ba1d60ab.png?size=64"
+		)
 
 	def check_in(self, not_ready):
 		embed = Embed(
@@ -30,9 +34,7 @@ class Embeds:
 			) + "\n\u200b",
 			inline=False
 		)
-		embed.set_footer(
-			text="Match id: 157947",
-			icon_url=self.icon_url)
+		embed.set_footer(**self.footer)
 
 		return embed
 
@@ -46,12 +48,12 @@ class Embeds:
 
 		teams_names = [
 			f"{t.emoji} \u200b **{t.name}**" +
-			(f" \u200b `〈{sum((self.m.ratings[p.id] for p in t))}〉`" if self.m.ranked else "")
+			(f" \u200b `〈{sum((self.m.ratings[p.id] for p in t))}〉`" if self.m.cfg['ranked'] else "")
 			for t in self.m.teams[:2]
 		]
 		team_players = [
 			" \u200b ".join([
-				(f"`{self.m.rank_str(p)}" if self.m.ranked else "`") + f"{p.nick or p.name}`"
+				(f"`{self.m.rank_str(p)}" if self.m.cfg['ranked'] else "`") + f"{p.nick or p.name}`"
 				for p in t
 			]) if len(t) else "empty"
 			for t in self.m.teams[:2]
@@ -63,7 +65,7 @@ class Embeds:
 			name=self.m.gt("Unpicked:"),
 			value="\n".join((
 				" \u200b `{rank}{name}`".format(
-					rank=self.m.rank_str(p) if self.m.ranked else "",
+					rank=self.m.rank_str(p) if self.m.cfg['ranked'] else "",
 					name=p.nick or p.name
 				)
 			) for p in self.m.teams[2]),
@@ -78,11 +80,11 @@ class Embeds:
 				msg += "\n" + self.m.gt("{member}'s turn to pick!").format(member=f"<@{picker_team[0].id}>")
 		else:
 			msg = self.m.gt("Type {cmd} to become a captain and start picking teams.").format(
-				cmd=f"`{self.m.qc.cfg.prefix}capfor {'/'.join((team.name.lower() for team in self.m.teams))}`"
+				cmd=f"`{self.m.qc.cfg.prefix}capfor {'/'.join((team.name.lower() for team in self.m.teams[:2]))}`"
 			)
 
 		embed.add_field(name="—", value=msg + "\n\u200b", inline=False)
-		embed.set_footer(text="Match id: 157947", icon_url=self.icon_url)
+		embed.set_footer(**self.footer)
 
 		return embed
 
@@ -95,16 +97,16 @@ class Embeds:
 		if len(self.m.teams[0]) == 1 and len(self.m.teams[1]) == 1:  # 1v1
 			p1, p2 = self.m.teams[0][0], self.m.teams[1][0]
 			players = " \u200b {player1}{rating1}\n \u200b {player2}{rating2}".format(
-				rating1=f" \u200b `〈{self.m.ratings[p1.id]}〉`" if self.m.ranked else "",
+				rating1=f" \u200b `〈{self.m.ratings[p1.id]}〉`" if self.m.cfg['ranked'] else "",
 				player1=f"<@{p1.id}>",
-				rating2=f" \u200b `〈{self.m.ratings[p1.id]}〉`" if self.m.ranked else "",
+				rating2=f" \u200b `〈{self.m.ratings[p1.id]}〉`" if self.m.cfg['ranked'] else "",
 				player2=f"<@{p2.id}>",
 			)
 			embed.add_field(name="Players", value=players, inline=False)
 		else:  # team vs team
 			teams_names = [
 				f"{t.emoji} \u200b **{t.name}**" +
-				(f" \u200b `〈{sum((self.m.ratings[p.id] for p in t))}〉`" if self.m.ranked else "")
+				(f" \u200b `〈{sum((self.m.ratings[p.id] for p in t))}〉`" if self.m.cfg['ranked'] else "")
 				for t in self.m.teams[:2]
 			]
 			team_players = [
@@ -125,10 +127,10 @@ class Embeds:
 				value="\n".join((f"**{i}**" for i in self.m.maps)),
 				inline=True
 			)
-		if self.m.server:
+		if self.m.cfg['server']:
 			embed.add_field(name=self.qc.gt("Server"), value=f"`{self.server}`", inline=True)
-		if self.m.start_msg:
-			embed.add_field(name="—", value=self.m.start_msg + "\n\u200b", inline=False)
-		embed.set_footer(text="Match id: 157947", icon_url=self.icon_url)
+		if self.m.cfg['start_msg']:
+			embed.add_field(name="—", value=self.m.cfg['start_msg'] + "\n\u200b", inline=False)
+		embed.set_footer(**self.footer)
 
 		return embed

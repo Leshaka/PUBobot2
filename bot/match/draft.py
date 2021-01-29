@@ -15,7 +15,7 @@ class Draft:
 		self.captains_role_id = captains_role_id
 		self.sub_queue = []
 
-		if self.m.pick_teams == "draft":
+		if self.m.cfg['pick_teams'] == "draft":
 			self.m.states.append(self.m.DRAFT)
 
 	async def start(self):
