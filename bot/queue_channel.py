@@ -9,9 +9,12 @@ from core.console import log
 from core.cfg_factory import CfgFactory, Variables, VariableTable
 from core.locales import locales
 from core.utils import error_embed, ok_embed, find, join_and, seconds_to_str, parse_duration
+from core.database import db
 
 import bot
 from bot.stats.rating import FlatRating, Glicko2Rating, TrueSkillRating
+
+MAX_EXPIRE_TIME = 12*60*60
 
 
 class QueueChannel:
@@ -171,6 +174,7 @@ class QueueChannel:
 			rl=self._rl,
 			rd=self._rd,
 			expire=self._expire,
+			default_expire=self._default_expire,
 			ao=self._allow_offline,
 			allow_offline=self._allow_offline,
 			matches=self._matches
@@ -258,9 +262,17 @@ class QueueChannel:
 						reason=reason
 					))
 
-	async def error(self, content, title=None):
+	async def error(self, content, title=None, reply_to=None):
 		title = title or self.gt("Error")
+		if reply_to:
+			content = f"<@{reply_to.id}>, " + content
 		await self.channel.send(embed=error_embed(content, title=title))
+
+	async def success(self, content, title=None, reply_to=None):
+		title = title or self.gt("Success")
+		if reply_to:
+			content = f"<@{reply_to.id}>, " + content
+		await self.channel.send(embed=ok_embed(content, title=title))
 
 	def get_match(self, member):
 		for match in bot.active_matches:
@@ -321,7 +333,7 @@ class QueueChannel:
 		except ValueError as e:
 			await self.error(str(e))
 		else:
-			await self.channel.send(embed=ok_embed(f"[**{pq.name}** ({pq.status})]"))
+			await self.success(f"[**{pq.name}** ({pq.status})]")
 
 	async def _show_queues(self, message, args=None):
 		if len(self.queues):
@@ -401,7 +413,7 @@ class QueueChannel:
 		except Exception as e:
 			await self.error(str(e))
 		else:
-			await self.channel.send(embed=ok_embed(f"Variable __{var_name}__ configured."))
+			await self.success(f"Variable __{var_name}__ configured.")
 
 	async def _set_queue(self, message, args=""):
 		args = args.lower().split(" ", maxsplit=3)
@@ -417,7 +429,7 @@ class QueueChannel:
 		except Exception as e:
 			await self.error(str(e))
 		else:
-			await self.channel.send(embed=ok_embed(f"Variable __{var_name}__ configured."))
+			await self.success(f"Variable __{var_name}__ configured.")
 
 	async def _cfg(self, message, args=None):
 		await message.author.send(f"```json\n{json.dumps(self.cfg.to_json())}```")
@@ -442,7 +454,7 @@ class QueueChannel:
 		except Exception as e:
 			await self.error(str(e))
 		else:
-			await self.channel.send(embed=ok_embed(f"Channel configuration updated."))
+			await self.success(f"Channel configuration updated.")
 
 	async def _set_cfg_queue(self, message, args=""):
 		args = args.split(" ", maxsplit=1)
@@ -456,7 +468,7 @@ class QueueChannel:
 				except Exception as e:
 					await self.error(str(e))
 				else:
-					await self.channel.send(embed=ok_embed(f"__{q.name}__ queue configuration updated."))
+					await self.success(f"__{q.name}__ queue configuration updated.")
 				return
 		await self.error(f"No such queue '{args}'.")
 
@@ -568,10 +580,57 @@ class QueueChannel:
 				await self.error(self.gt("Invalid duration format. Syntax: 3h2m1s."))
 				return
 
+			if secs > MAX_EXPIRE_TIME:
+				await self.error(self.gt("Expire time must be less than {time}.".format(
+					time=seconds_to_str(MAX_EXPIRE_TIME)
+				)))
+				return
+
 			bot.expire.set(self, message.author, secs)
-			await self.channel.send(self.gt("Set your expire time to {duration}.").format(
+			await self.success(self.gt("Set your expire time to {duration}.").format(
 				duration=seconds_to_str(secs)
 			))
+
+	async def _default_expire(self, message, args=None):
+		if not args:
+			data = await db.select_one(['expire'], 'players', where={'user_id': message.author.id})
+			expire = None if not data else data['expire']
+			modify = False
+		else:
+			modify = True
+			print(args)
+			args = args.lower()
+			if args == 'afk':
+				expire = 0
+			elif args == 'none':
+				expire = None
+			else:
+				try:
+					expire = parse_duration("".join(args))
+				except ValueError:
+					await self.error(self.gt("Invalid expire time argument."))
+					return
+				if expire > MAX_EXPIRE_TIME:
+					await self.error(self.gt("Expire time must be less than {time}.".format(
+						time=seconds_to_str(MAX_EXPIRE_TIME)
+					)))
+					return
+
+		if expire == 0:
+			text = self.gt("You will be removed from queues on AFK status by default.")
+		elif expire is None:
+			text = self.gt("Your expire time value will fallback to guild's settings.")
+		else:
+			text = self.gt("Your default expire time is {time}.".format(time=seconds_to_str(expire)))
+
+		if not modify:
+			await self.channel.send(text)
+		else:
+			try:
+				await db.insert('players', {'user_id': message.author.id, 'expire': expire})
+			except db.errors.IntegrityError:
+				await db.update('players', {'expire': expire}, keys={'user_id': message.author.id})
+			await self.success(text)
 
 	async def _allow_offline(self, message, args=None):
 		if message.author.id in bot.allow_offline:

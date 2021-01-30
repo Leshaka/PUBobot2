@@ -75,7 +75,8 @@ db.ensure_table(dict(
 
 
 async def last_match_id():
-	m = await db.select_one(('match_id',), 'qc_matches', order_asc=True, limit=1)
+	m = await db.select_one(('match_id',), 'qc_matches', order_by='match_id', limit=1)
+	print(m)
 	return m['match_id'] if m else 0
 
 

@@ -36,3 +36,11 @@ class ProgrammingError(DatabaseError):
 	"""Exception raised for programming errors, e.g. table not found
 	or already exists, syntax error in the SQL statement, wrong number
 	of parameters specified, etc."""
+
+
+class Errors:
+	DatabaseError = DatabaseError
+	DataError = DataError
+	OperationalError = OperationalError
+	IntegrityError = IntegrityError
+	ProgrammingError = ProgrammingError

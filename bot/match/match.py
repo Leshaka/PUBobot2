@@ -285,12 +285,12 @@ class Match:
 		await self.qc.channel.send(embed=self.embeds.final_message())
 
 	async def finish_match(self):
+		bot.active_matches.remove(self)
+
 		if self.cfg['ranked']:
 			await bot.stats.register_match_ranked(self)
 		else:
 			await bot.stats.register_match_unranked(self)
-
-		bot.active_matches.remove(self)
 
 	def print(self):
 		return f"> *({self.id})* **{self.queue.name}** | `{join_and([p.nick or p.name for p in self.players])}`"

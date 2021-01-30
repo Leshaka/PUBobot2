@@ -121,11 +121,11 @@ class TrueSkillRating(BaseRating):
 		)
 
 	def rate(self, winners, losers, draw=False):
-		g1 = [self.ts.create_rating(mu=p['rating'], sigma=p['deviation']) for p in winners.keys()]
-		g2 = [self.ts.create_rating(mu=p['rating'], sigma=p['deviation']) for p in losers.keys()]
+		g1 = [self.ts.create_rating(mu=p['rating'], sigma=p['deviation']) for p in winners]
+		g2 = [self.ts.create_rating(mu=p['rating'], sigma=p['deviation']) for p in losers]
 
 		ranks = [0, 0] if draw else [0, 1]
-		g1, g2 = self.ts.rate((g1, g2), ranks=ranks)
+		g1, g2 = (list(i) for i in self.ts.rate((g1, g2), ranks=ranks))
 
 		results = []
 		for p in winners:

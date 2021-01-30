@@ -28,6 +28,7 @@ fkey_blank = dict(cname=None, refTable=None, refColumn=None, on_delete=None, on_
 
 class Adapter:
 	types = Types
+	errors = Errors
 
 	def __init__(self, db_address, loop):
 		self.dbAddress = db_address
