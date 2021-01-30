@@ -7,6 +7,7 @@ from core.console import log
 
 
 class Types:
+	bool = "TINYINT(1)"
 	int = "BIGINT"
 	float = "FLOAT"
 	str = "VARCHAR(191)"
@@ -97,7 +98,7 @@ class Adapter:
 			notnull=" NOT NULL" if kwargs['notnull'] else "",
 			unique=" UNIQUE" if kwargs['unique'] else "",
 			autoincrement=" AUTO_INCREMENT" if kwargs['autoincrement'] else "",
-			default=" DEFAULT '{}'".format(kwargs['default']) if kwargs['default'] else ""
+			default=" DEFAULT '{}'".format(kwargs['default']) if kwargs['default'] is not None else ""
 		)
 
 	@staticmethod

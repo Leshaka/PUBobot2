@@ -172,7 +172,8 @@ class QueueChannel:
 			rd=self._rd,
 			expire=self._expire,
 			ao=self._allow_offline,
-			allow_offline=self._allow_offline
+			allow_offline=self._allow_offline,
+			matches=self._matches
 		)
 
 	def update_lang(self):
@@ -534,7 +535,7 @@ class QueueChannel:
 		await self.channel.send(f"{rating['rating']} {rating['deviation']}")
 
 	async def _lb(self, message, args=None):
-		ratings = await self.rating.get_ratings()
+		ratings = await self.rating.get_players()
 		await self.channel.send("\n".join(
 			(f"{i['user_id']} {i['rating']} {i['deviation']}" for i in ratings)
 		))
@@ -543,13 +544,13 @@ class QueueChannel:
 		if (match := self.get_match(message.author)) is None:
 			await self.error(self.gt("You are not in an active match."))
 		else:
-			await match.report(member=message.author)
+			await match.report_loss(message.author, draw=False)
 
 	async def _rd(self, message, args=None):
 		if (match := self.get_match(message.author)) is None:
 			await self.error(self.gt("You are not in an active match."))
 		else:
-			await match.report(member=message.author, draw=True)
+			await match.report_loss(message.author, draw=True)
 
 	async def _expire(self, message, args=None):
 		if not args:
@@ -579,3 +580,15 @@ class QueueChannel:
 		else:
 			bot.allow_offline.append(message.author.id)
 			await self.channel.send(embed=ok_embed(self.gt("You now have the allow offline immune.")))
+
+	async def _matches(self, message, args=[0]):
+		try:
+			page = int(args[0])
+		except ValueError:
+			page = 0
+
+		matches = [m for m in bot.active_matches if m.qc.channel.id == self.channel.id]
+		if len(matches):
+			await self.channel.send("\n".join((m.print() for m in matches)))
+		else:
+			await self.channel.send(self.gt("> no active matches"))

@@ -4,7 +4,7 @@ from itertools import combinations
 import random
 
 import bot
-from core.utils import find, get, iter_to_dict
+from core.utils import find, get, iter_to_dict, join_and
 from core.client import dc
 
 from .check_in import CheckIn
@@ -56,8 +56,9 @@ class Match:
 	@classmethod
 	async def new(cls, queue, qc, players, **kwargs):
 		# Create the Match object
-		ratings = {p['user_id']: p['rating'] for p in await qc.rating.get_ratings((p.id for p in players))}
-		match = cls(0, queue, qc, players, ratings, **kwargs)
+		ratings = {p['user_id']: p['rating'] for p in await qc.rating.get_players((p.id for p in players))}
+		bot.last_match_id += 1
+		match = cls(bot.last_match_id, queue, qc, players, ratings, **kwargs)
 		# Prepare the Match object
 		match.init_maps(match.cfg['maps'], match.cfg['map_count'])
 		match.init_captains(match.cfg['pick_captains'], match.cfg['captains_role_id'])
@@ -94,8 +95,9 @@ class Match:
 		data['ready_players'] = [get(data['players'], id=user_id) for user_id in data['ready_players']]
 
 		# Create the Match object
-		ratings = {p['user_id']: p['rating'] for p in await qc.rating.get_ratings((p.id for p in data['players']))}
-		match = cls(data['match_id'], queue, qc, data['players'], ratings, **data['cfg'])
+		ratings = {p['user_id']: p['rating'] for p in await qc.rating.get_players((p.id for p in data['players']))}
+		bot.last_match_id += 1
+		match = cls(bot.last_match_id, queue, qc, data['players'], ratings, **data['cfg'])
 
 		# Set state data
 		for i in range(len(match.teams)):
@@ -126,6 +128,7 @@ class Match:
 		self.id = match_id
 		self.players = list(players)
 		self.ratings = ratings
+		self.winner = None
 		print(self.ratings)
 
 		team_names = self.cfg['team_names']
@@ -213,54 +216,51 @@ class Match:
 	async def start_waiting_report(self):
 		await self.final_message()
 
-	async def report(self, member=None, team_name=None, draw=False, force=False):
-		# TODO: Only captain must be able to do this
+	async def report_loss(self, member, draw):
 		if self.state != self.WAITING_REPORT:
 			await self.error(self.gt("The match must be on the waiting report stage."))
 			return
 
-		if member:
-			team = find(lambda t: member in t, self.teams[:2])
-		elif team_name:
-			team = find(lambda t: t.name.lower() == team_name, self.teams[:2])
-		else:
-			team = self.teams[0]
-
+		team = find(lambda team: member in team[:1], self.teams[:2])
 		if team is None:
-			await self.error(self.gt("Team not found."))
+			await self.error(self.gt("You must be a team captain to report loss."))
 			return
+		enemy_team = self.teams[1-team.idx]
 
-		e_team = self.teams[abs(team.idx-1)]
-
-		if not force and (draw and not e_team.want_draw):
+		if draw and not enemy_team.want_draw:
 			team.want_draw = True
 			await self.qc.channel.send(
 				self.gt("{team} team captain is calling a draw, waiting for {enemy} to type `{prefix}rd`.")
 			)
 			return
 
-		before = [
-			await self.qc.rating.get_ratings((p.id for p in e_team)),
-			await self.qc.rating.get_ratings((p.id for p in team))
-		]
-		results = self.qc.rating.rate(
-			winners=before[0],
-			losers=before[1],
-			draw=draw)
+		self.winner = None if draw is None else enemy_team.idx
+		await self.finish_match()
 
-		print(results)
-		await self.qc.rating.set_ratings(results)
+	async def report_win(self, team_name):  # version for admins/mods
+		if self.state != self.WAITING_REPORT:
+			await self.error(self.gt("The match must be on the waiting report stage."))
+			return
 
-		before = iter_to_dict((*before[0], *before[1]), key='user_id')
-		after = iter_to_dict(results, key='user_id')
-		await self.print_rating_results(e_team, team, before, after)
+		if team_name.lower() == "draw":
+			self.winner = None
+		elif (team := find(lambda t: t.name.lower() == team_name, self.teams[:2])) is not None:
+			self.winner(team.idx)
+		else:
+			await self.error(self.gt("Specified team name not found."))
+			return
 
 		await self.finish_match()
 
-	async def print_rating_results(self, winners, losers, before, after):
+	async def print_rating_results(self, before, after):
 		msg = "```markdown\n"
 		msg += f"{self.queue.name.capitalize()}({self.id}) results\n"
 		msg += "-------------\n"
+
+		if self.winner is not None:
+			winners, losers = self.teams[self.winner], self.teams[abs(self.winner-1)]
+		else:
+			winners, losers = self.teams[:2]
 
 		if len(winners) == 1 and len(losers) == 1:
 			p = winners[0]
@@ -285,4 +285,12 @@ class Match:
 		await self.qc.channel.send(embed=self.embeds.final_message())
 
 	async def finish_match(self):
+		if self.cfg['ranked']:
+			await bot.stats.register_match_ranked(self)
+		else:
+			await bot.stats.register_match_unranked(self)
+
 		bot.active_matches.remove(self)
+
+	def print(self):
+		return f"> *({self.id})* **{self.queue.name}** | `{join_and([p.nick or p.name for p in self.players])}`"

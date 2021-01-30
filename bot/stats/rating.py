@@ -5,21 +5,10 @@ import trueskill
 from core.database import db
 from core.utils import find
 
-db.ensure_table(dict(
-	tname="qc_ratings",
-	columns=[
-		dict(cname="channel_id", ctype=db.types.int),
-		dict(cname="user_id", ctype=db.types.int),
-		dict(cname="rating", ctype=db.types.int),
-		dict(cname="deviation", ctype=db.types.int),
-	],
-	primary_keys=["channel_id", "user_id"]
-))
-
 
 class BaseRating:
 
-	table = "qc_ratings"
+	table = "qc_players"
 
 	def __init__(self, channel_id, init_rp=1500, init_deviation=300, scale=32):
 		self.channel_id = channel_id
@@ -27,15 +16,18 @@ class BaseRating:
 		self.init_deviation = init_deviation
 		self.scale = scale
 
-	async def get_ratings(self, user_ids=None, limit=None):
+	async def get_players(self, user_ids=None, limit=None):
 		data = await db.select(
-			['user_id', 'rating', 'deviation', 'channel_id'], self.table,
+			['user_id', 'rating', 'deviation', 'channel_id', 'wins', 'losses', 'draws'], self.table,
 			where={'channel_id': self.channel_id}, order_by="rating", limit=limit
 		)
 		if user_ids:
 			return [
 				find(lambda p: p['user_id'] == user_id, data) or
-				dict(channel_id=self.channel_id, user_id=user_id, rating=self.init_rp, deviation=self.init_deviation)
+				dict(
+					channel_id=self.channel_id, user_id=user_id, rating=self.init_rp, deviation=self.init_deviation,
+					wins=0, losses=0, draws=0
+				)
 				for user_id in user_ids
 			]
 		else:

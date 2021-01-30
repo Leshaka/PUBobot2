@@ -115,7 +115,7 @@ class PickupQueue:
 			raise ValueError("Specified Member is not added to the queue.")
 
 	async def start(self):
-		await bot.Match.new(self, self.qc, list(self.queue), check_in_timeout=300, pick_teams="draft", ranked=True)
+		await bot.Match.new(self, self.qc, list(self.queue), check_in_timeout=None, pick_teams="matchmaking", ranked=True)
 		await self.qc.remove_members(*list(self.queue))
 
 	async def revert(self, not_ready, ready):

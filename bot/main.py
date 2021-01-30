@@ -13,6 +13,7 @@ active_pickups = []
 active_matches = []
 waiting_reactions = dict()  # {message.id: function}
 allow_offline = []  # [user_id]
+last_match_id = None
 
 
 async def enable_channel(message):

@@ -31,7 +31,7 @@ def hl_user(user_id):
 
 def join_and(names):
 	""" Generates 'item1, item2, item3 & item4' string from a list """
-	return ', '.join(names[:-1]) + f' & {names[-1]}>' if len(names) > 1 else names[0]
+	return ', '.join(names[:-1]) + f' & {names[-1]}' if len(names) > 1 else names[0]
 
 
 def hl_role(role_id):

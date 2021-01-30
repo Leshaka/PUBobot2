@@ -43,6 +43,7 @@ async def on_reaction_remove(reaction, user):  # FIXME: this event does not get 
 
 @dc.event
 async def on_ready():
+	bot.last_match_id = await bot.stats.last_match_id()
 	log.info(f"Logged in discord as '{dc.user.name}#{dc.user.discriminator}'.")
 	log.info("Loading queue channels...")
 	for channel_id in await bot.QueueChannel.cfg_factory.p_keys():
