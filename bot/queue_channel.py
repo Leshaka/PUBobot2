@@ -102,6 +102,13 @@ class QueueChannel:
 				"remove_offline",
 				display="Auto remove on offline status",
 				default=1
+			),
+			Variables.DurationVar(
+				"expire_time",
+				display="Auto remove on timer after last !add command",
+				verify=lambda x: 0 < x < MAX_EXPIRE_TIME,
+				verify_message=f"Expire time must be more than 0 and less than {seconds_to_str(MAX_EXPIRE_TIME)}",
+				default=None
 			)
 		],
 		tables=[
@@ -362,10 +369,16 @@ class QueueChannel:
 			if not len(t_queues):
 				t_queues = (q for q in self.queues if q.cfg.is_default)
 
+		is_started = False
 		for q in t_queues:
-			is_started = await q.add_member(message.author)
-			if is_started:
+			if is_started := await q.add_member(message.author):
 				break
+		if not is_started:
+			if personal_expire := await db.select_one(['expire'], 'players', where={'user_id': message.author.id}):
+				if personal_expire['expire'] not in [0, None]:
+					bot.expire.set(self, message.author, personal_expire['expire'])
+			elif self.cfg.expire_time:
+				bot.expire.set(self, message.author, personal_expire['expire'])
 
 		await self.update_topic()
 

@@ -2,9 +2,10 @@
 from types import SimpleNamespace
 import re
 import emoji
+from datetime import datetime
 
 from core.database import db
-from core.utils import format_emoji
+from core.utils import format_emoji, parse_duration, seconds_to_str
 from core.console import log
 
 
@@ -113,30 +114,39 @@ class Config:
 		tables = data.pop('tables') if 'tables' in data.keys() else {}
 
 		print(data)
+		objects = dict()
+		table_objects = dict()
 		# Validate data
 		for key, value in data.items():
 			if key not in self._factory.variables.keys():
 				raise KeyError("Variable '{}' not found.".format(key))
-			data[key] = await self._factory.variables[key].validate(value, self._guild)
+			vo = self._factory.variables[key]
+			data[key] = await vo.validate(value, self._guild)
+			objects[key] = await vo.wrap(data[key], self._guild)
+			vo.verify(objects[key])
 
 		for key, value in tables.items():
 			if key not in self._factory.tables.keys():
 				raise KeyError("Table '{}' not found.".format(key))
-			tables[key] = await self._factory.tables[key].validate(value, self._guild)
+			vo = self._factory.variables[key]
+			tables[key] = await vo.validate(value, self._guild)
+			table_objects[key] = await vo.wrap(value, self._guild)
+			vo.verify(table_objects[key])
 
 		# Update useful objects and push to database
 		for key, value in data.items():
-			setattr(self, key, await self._factory.variables[key].wrap(value, self._guild))
-			if self._factory.variables[key].on_change:
-				self._factory.variables[key].on_change(self)
+			vo = self._factory.variables[key]
+			setattr(self, key, objects[key])
+			if vo.on_change:
+				vo.on_change(self)
 		await db.update(self._factory.table, data, {self._factory.p_key: self.p_key})
 
 		for key, value in tables.items():
-			setattr(self.tables, key, await self._factory.tables[key].wrap(value, self._guild))
-			await db.delete(self._factory.tables[key].table, where={self._factory.p_key: self.p_key})
+			vo = self._factory.tables[key]
+			setattr(self.tables, key, await vo.wrap(value, self._guild))
+			await db.delete(vo.table, where={self._factory.p_key: self.p_key})
 			for row in value:
-				print(row)
-				await db.insert(self._factory.tables[key].table, {self._factory.p_key: self.p_key, **row})
+				await db.insert(vo.table, {self._factory.p_key: self.p_key, **row})
 
 	def to_json(self):
 		data = {key: value.readable(getattr(self, key)) for key, value in self._factory.variables.items()}
@@ -149,13 +159,18 @@ class Config:
 class Variable:
 	""" Variable base class """
 
-	def __init__(self, name, default=None, display=None, description=None, notnull=False, on_change=None):
+	def __init__(
+			self, name, default=None, display=None, description=None,
+			notnull=False, on_change=None, verify=None, verify_message=None
+	):
 		self.name = name
 		self.default = default
 		self.display = display or name
 		self.description = description
 		self.notnull = notnull
 		self.on_change = on_change
+		self.verify_f = verify or (lambda x: True)
+		self.verify_message = verify_message
 
 	async def validate(self, string, guild):
 		""" Validate and return database-friendly object from received string """
@@ -168,6 +183,11 @@ class Variable:
 	def readable(self, obj):
 		""" returns string from a useful object"""
 		return str(obj) if obj is not None else None
+
+	def verify(self, obj):
+		""" optional verification of generated object """
+		if not self.verify_f(obj):
+			raise(VerifyError(message=self.verify_message))
 
 
 class StrVar(Variable):
@@ -373,6 +393,31 @@ class TextChanVar(Variable):
 			return None
 
 
+class DurationVar(Variable):
+	def __init__(self, name, **kwargs):
+		super().__init__(name, **kwargs)
+		self.ctype = db.types.int
+
+	async def validate(self, value, guild):
+		if value is None:
+			return None
+
+		if re.match(r"^\d\d:\d\d:\d\d$", value):
+			x = sum(x * int(t) for x, t in zip([3600, 60, 1], value.split(":")))
+			print(x)
+			return x
+		try:
+			return parse_duration(value)
+		except ValueError:
+			raise ValueError("Invalid duration format.")
+
+	async def wrap(self, value, guild):
+		return value
+
+	def readable(self, obj):
+		return seconds_to_str(obj)
+
+
 class VariableTable:
 
 	def __init__(self, name, variables=[], display=None, blank=None, default=[], description=None, on_change=None):
@@ -414,6 +459,10 @@ class VariableTable:
 	def readable_row(self, d):
 		return {var_name: self.variables[var_name].readable(value) for var_name, value in d.items()}
 
+	def verify(self, d):
+		for key, value in d.items():
+			self.variables[key].verify(value)
+
 
 class Variables:
 	StrVar = StrVar
@@ -424,3 +473,9 @@ class Variables:
 	IntVar = IntVar
 	RoleVar = RoleVar
 	TextChanVar = TextChanVar
+	DurationVar = DurationVar
+
+
+class VerifyError(BaseException):
+	def __init__(self, message=None):
+		self.message=message
