@@ -15,6 +15,7 @@ import bot
 from bot.stats.rating import FlatRating, Glicko2Rating, TrueSkillRating
 
 MAX_EXPIRE_TIME = 12*60*60
+MAX_PROMOTION_DELAY = 12*60*60
 
 
 class QueueChannel:
@@ -43,6 +44,8 @@ class QueueChannel:
 				"prefix",
 				display="Command prefix",
 				description="Set the prefix before all bot`s commands",
+				verify=lambda x: len(x) == 1,
+				verify_message="Command prefix must be exactly one symbol.",
 				default="!",
 				notnull=True
 			),
@@ -60,17 +63,13 @@ class QueueChannel:
 				display="Promotion role",
 				description="Set a role to highlight on !promote and !sub commands.",
 			),
-			Variables.IntVar(
-				"promotion_delay",
-				display="Promotion delay",
-				description="Set a cooldown time between !promote and !sub commands can be used."
-			),
 			Variables.OptionVar(
 				"rating_system",
 				display="Rating system",
 				description="Set player's rating calculation method.",
 				options=rating_names.keys(),
 				default="glicko2",
+				notnull=True,
 				on_change=bot.update_rating_system
 			),
 			Variables.IntVar(
@@ -78,6 +77,9 @@ class QueueChannel:
 				display="Initial rating",
 				description="Set player's initial rating.",
 				default=1500,
+				verify=lambda x: 0 <= x <= 10000,
+				verify_message="Initial rating must be between 0 and 10000",
+				notnull=True,
 				on_change=bot.update_rating_system
 			),
 			Variables.IntVar(
@@ -85,12 +87,18 @@ class QueueChannel:
 				display="Rating deviation",
 				description="Set initial rating deviation.",
 				default=300,
+				verify=lambda x: 0 <= x <= 3000,
+				verify_message="Rating deviation must be between 0 and 3000",
+				notnull=True,
 				on_change=bot.update_rating_system
 			),
 			Variables.IntVar(
 				"rating_scale",
 				display="Rating scale",
 				description="Set rating scale.",
+				verify=lambda x: 4 <= x <= 256,
+				verify_message="Rating scale must be between 4 and 256",
+				notnull=True,
 				default=32
 			),
 			Variables.BoolVar(
@@ -106,9 +114,25 @@ class QueueChannel:
 			Variables.DurationVar(
 				"expire_time",
 				display="Auto remove on timer after last !add command",
-				verify=lambda x: 0 < x < MAX_EXPIRE_TIME,
-				verify_message=f"Expire time must be more than 0 and less than {seconds_to_str(MAX_EXPIRE_TIME)}",
-				default=None
+				verify=lambda x: 0 < x <= MAX_EXPIRE_TIME,
+				verify_message=f"Expire time must be less than {seconds_to_str(MAX_EXPIRE_TIME)}"
+			),
+			Variables.RoleVar(
+				"blacklist_role",
+				display="Blacklist role",
+				description="Players with this role wont be able to add to queues.",
+			),
+			Variables.RoleVar(
+				"whitelist_role",
+				display="Whitelist role",
+				description="If set, only players with this role will be able to add to queues."
+			),
+			Variables.DurationVar(
+				"promotion_delay",
+				display="Promotion delay",
+				description="Set time delay between players can promote queues.",
+				verify=lambda x: 0 <= MAX_PROMOTION_DELAY,
+				verify_message=f"Promotion delay time must be less than {seconds_to_str(MAX_EXPIRE_TIME)}"
 			)
 		],
 		tables=[
@@ -176,8 +200,8 @@ class QueueChannel:
 			subme=self._sub_me,
 			subfor=self._sub_for,
 			rank=self._rank,
-			lb=self._lb,
-			leaderboard=self._lb,
+			lb=self._leaderboard,
+			leaderboard=self._leaderboard,
 			rl=self._rl,
 			rd=self._rd,
 			expire=self._expire,
@@ -232,10 +256,11 @@ class QueueChannel:
 			await self.channel.send(self.topic)
 
 	async def auto_remove(self, member):
-		if str(member.status) == "idle" and self.cfg.remove_afk:
-			await self.remove_members(member, reason="afk")
-		elif str(member.status) == "offline" and self.cfg.remove_offline:
-			await self.remove_members(member, reason="offline")
+		if bot.expire.get(self, member) is None:
+			if str(member.status) == "idle" and self.cfg.remove_afk:
+				await self.remove_members(member, reason="afk")
+			elif str(member.status) == "offline" and self.cfg.remove_offline:
+				await self.remove_members(member, reason="offline")
 
 	async def remove_members(self, *members, reason=None):
 		affected = set()
@@ -351,6 +376,13 @@ class QueueChannel:
 			await self.channel.send("> [ **no queues configured** ]")
 
 	async def _add_member(self, message, args=None):
+		if self.cfg.blacklist_role and self.cfg.blacklist_role in message.author.roles:
+			await self.error(self.gt("You are not allowed to add to queues."), reply_to=message.author)
+			return
+		if self.cfg.whitelist_role and self.cfg.whitelist_role not in message.author.roles:
+			await self.error(self.gt("You are not allowed to add to queues."), reply_to=message.author)
+			return
+
 		targets = args.lower().split(" ") if args else []
 
 		# select the only one queue on the channel
@@ -374,11 +406,12 @@ class QueueChannel:
 			if is_started := await q.add_member(message.author):
 				break
 		if not is_started:
-			if personal_expire := await db.select_one(['expire'], 'players', where={'user_id': message.author.id}):
-				if personal_expire['expire'] not in [0, None]:
-					bot.expire.set(self, message.author, personal_expire['expire'])
-			elif self.cfg.expire_time:
-				bot.expire.set(self, message.author, personal_expire['expire'])
+			personal_expire = await db.select_one(['expire'], 'players', where={'user_id': message.author.id})
+			personal_expire = personal_expire.get('expire') if personal_expire else None
+			if personal_expire not in [0, None]:
+				bot.expire.set(self, message.author, personal_expire)
+			elif self.cfg.expire_time and personal_expire is None:
+				bot.expire.set(self, message.author, self.cfg.expire_time)
 
 		await self.update_topic()
 
@@ -559,12 +592,6 @@ class QueueChannel:
 		rating = await self.rating.get_rating(member.id)
 		await self.channel.send(f"{rating['rating']} {rating['deviation']}")
 
-	async def _lb(self, message, args=None):
-		ratings = await self.rating.get_players()
-		await self.channel.send("\n".join(
-			(f"{i['user_id']} {i['rating']} {i['deviation']}" for i in ratings)
-		))
-
 	async def _rl(self, message, args=None):
 		if (match := self.get_match(message.author)) is None:
 			await self.error(self.gt("You are not in an active match."))
@@ -611,7 +638,6 @@ class QueueChannel:
 			modify = False
 		else:
 			modify = True
-			print(args)
 			args = args.lower()
 			if args == 'afk':
 				expire = 0
@@ -653,9 +679,9 @@ class QueueChannel:
 			bot.allow_offline.append(message.author.id)
 			await self.channel.send(embed=ok_embed(self.gt("You now have the allow offline immune.")))
 
-	async def _matches(self, message, args=[0]):
+	async def _matches(self, message, args=0):
 		try:
-			page = int(args[0])
+			page = int(args)
 		except ValueError:
 			page = 0
 
@@ -664,3 +690,34 @@ class QueueChannel:
 			await self.channel.send("\n".join((m.print() for m in matches)))
 		else:
 			await self.channel.send(self.gt("> no active matches"))
+
+	async def _leaderboard(self, message, args=0):
+		try:
+			page = int(args)
+		except ValueError:
+			await self.error(f"Usage: {self.cfg.prefix}lb [page]")
+			return
+
+		data = await self.rating.get_players()
+
+		if len(data):
+			lines = ["{0:^3}|{1:^11}|{2:^25.25}|{3:^9}| {4}".format(
+				(page*10)+(n+1),
+				str(data[n]['rating']) + self.rating_rank(data[n]['rating'])['rank'],
+				data[n]['nick'],
+				int(data[n]['wins']+data[n]['losses']+data[n]['draws']),
+				"{0}/{1}/{2} ({3}%)".format(
+					data[n]['wins'],
+					data[n]['losses'],
+					data[n]['draws'],
+					int(data[n]['wins']*100/((data[n]['wins']+data[n]['losses']) or 1))
+				)
+			) for n in range(page*10, min((page+1)*10, len(data)))]
+
+			text = "```markdown\n № | Rating〈Ξ〉 |         Nickname        | Matches |  W/L/D\n{0}\n{1}```".format(
+				"-"*60,
+				"\n".join(lines)
+			)
+			await self.channel.send(text)
+		else:
+			await self.error("Leaderboard is empty")

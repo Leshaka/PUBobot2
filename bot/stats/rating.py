@@ -18,7 +18,7 @@ class BaseRating:
 
 	async def get_players(self, user_ids=None, limit=None):
 		data = await db.select(
-			['user_id', 'rating', 'deviation', 'channel_id', 'wins', 'losses', 'draws'], self.table,
+			['user_id', 'nick', 'rating', 'deviation', 'channel_id', 'wins', 'losses', 'draws'], self.table,
 			where={'channel_id': self.channel_id}, order_by="rating", limit=limit
 		)
 		if user_ids:
