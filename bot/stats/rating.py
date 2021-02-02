@@ -33,9 +33,9 @@ class BaseRating:
 		else:
 			return data
 
-	async def get_rating(self, user_id):
+	async def get_player(self, user_id):
 		data = await db.select_one(
-			["rating", "deviation"], self.table,
+			['user_id', 'nick', 'rating', 'deviation', 'channel_id', 'wins', 'losses', 'draws'], self.table,
 			where={"channel_id": self.channel_id, "user_id": user_id}
 		)
 		return data or dict(rating=self.init_rp, deviation=self.init_deviation)

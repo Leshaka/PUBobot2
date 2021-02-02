@@ -589,8 +589,38 @@ class QueueChannel:
 		else:
 			member = message.author
 
-		rating = await self.rating.get_rating(member.id)
-		await self.channel.send(f"{rating['rating']} {rating['deviation']}")
+		data = await self.rating.get_players()
+		if p := find(lambda i: i['user_id'] == member.id, data):
+			embed = Embed(title=p['nick'], colour=Colour(0x7289DA))
+			embed.add_field(name="№", value=f"**{data.index(p)+1}**", inline=True)
+			embed.add_field(name="Matches", value=f"**{(p['wins']+p['losses']+p['draws'])}**", inline=True)
+			embed.add_field(name="Rank", value=f"**{self.rating_rank(p['rating'])['rank']}**", inline=True)
+			embed.add_field(name="Rating", value=f"**{p['rating']}**±{p['deviation']}")
+			embed.add_field(name="W/L/D", value=f"**{p['wins']}**/**{p['losses']}**/**{p['draws']}**", inline=True)
+			embed.add_field(name="Winrate", value="**{}%**\n\u200b".format(
+				int(p['wins']*100 / (p['wins']+p['losses'] or 1))
+			), inline=True)
+			if member.avatar_url:
+				embed.set_thumbnail(url=member.avatar_url)
+
+			changes = await db.select(
+				('at', 'rating_change', 'match_id', 'reason'),
+				'qc_rating_history', where=dict(user_id=member.id, channel_id=self.channel.id),
+				order_by='match_id', limit=3
+			)
+			embed.add_field(
+				name=self.gt("Last changes:"),
+				value="\n".join(("\u200b \u200b **{change}** \u200b | {ago} ago | {reason}{match_id}".format(
+					ago=seconds_to_str(int(time.time()-c['at'])),
+					reason=c['reason'],
+					match_id=f"(__{c['match_id']}__)" if c['match_id'] else "",
+					change=("+" if c['rating_change'] >= 0 else "") + str(c['rating_change'])
+				) for c in changes))
+			)
+			await self.channel.send(embed=embed)
+
+		else:
+			await self.error(self.gt("No rating data found."))
 
 	async def _rl(self, message, args=None):
 		if (match := self.get_match(message.author)) is None:
