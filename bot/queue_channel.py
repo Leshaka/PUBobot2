@@ -142,6 +142,16 @@ class QueueChannel:
 					Variables.StrVar("rank", default="〈E〉"),
 					Variables.IntVar("rating", default=1200),
 					Variables.RoleVar("role")
+				],
+				default=[
+					dict(rank="〈G〉", rating=0, role=None),
+					dict(rank="〈F〉", rating=1000, role=None),
+					dict(rank="〈E〉", rating=1200, role=None),
+					dict(rank="〈D〉", rating=1400, role=None),
+					dict(rank="〈C〉", rating=1600, role=None),
+					dict(rank="〈B〉", rating=1800, role=None),
+					dict(rank="〈A〉", rating=1900, role=None),
+					dict(rank="〈★〉", rating=2000, role=None)
 				]
 			)
 		]
@@ -325,9 +335,13 @@ class QueueChannel:
 			)
 
 	def rating_rank(self, rating):
-		if not len(self.cfg.tables.ranks):
+		below = sorted(
+			(rank for rank in self.cfg.tables.ranks if rank['rating'] < rating),
+			key=lambda r: r['rating'], reverse=True
+		)
+		if not len(below):
 			return {'rank': '〈?〉', 'rating': 0, 'role': None}
-		return max(rank for rank in self.cfg.tables.ranks if rank['rating'] < rating)
+		return below[0]
 
 	async def process_msg(self, message):
 		if not len(message.content) > 1:
@@ -478,7 +492,7 @@ class QueueChannel:
 			await self.success(f"Variable __{var_name}__ configured.")
 
 	async def _cfg(self, message, args=None):
-		await message.author.send(f"```json\n{json.dumps(self.cfg.to_json())}```")
+		await message.author.send(f"```json\n{json.dumps(self.cfg.to_json(), ensure_ascii=False, indent=2)}```")
 
 	async def _cfg_queue(self, message, args=None):
 		if not args:
@@ -499,6 +513,7 @@ class QueueChannel:
 			await self.cfg.update(json.loads(args))
 		except Exception as e:
 			await self.error(str(e))
+			raise(e)
 		else:
 			await self.success(f"Channel configuration updated.")
 

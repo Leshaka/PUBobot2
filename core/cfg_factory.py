@@ -57,6 +57,11 @@ class CfgFactory:
 				row[self.f_key] = f_key
 
 			await db.insert(self.table, row)
+
+			for var_table in self.tables.values():
+				if var_table.default:
+					await db.insert_many(var_table.table, [{self.p_key: p_key, **row} for row in var_table.default])
+
 			return await Config.load(self, row, guild)
 
 	async def select(self, guild, keys):
@@ -128,18 +133,19 @@ class Config:
 		for key, value in tables.items():
 			if key not in self._factory.tables.keys():
 				raise KeyError("Table '{}' not found.".format(key))
-			vo = self._factory.variables[key]
+			vo = self._factory.tables[key]
 			tables[key] = await vo.validate(value, self._guild)
 			table_objects[key] = await vo.wrap(value, self._guild)
 			vo.verify(table_objects[key])
 
 		# Update useful objects and push to database
-		for key, value in data.items():
-			vo = self._factory.variables[key]
-			setattr(self, key, objects[key])
-			if vo.on_change:
-				vo.on_change(self)
-		await db.update(self._factory.table, data, {self._factory.p_key: self.p_key})
+		if len(data):
+			for key, value in data.items():
+				vo = self._factory.variables[key]
+				setattr(self, key, objects[key])
+				if vo.on_change:
+					vo.on_change(self)
+			await db.update(self._factory.table, data, {self._factory.p_key: self.p_key})
 
 		for key, value in tables.items():
 			vo = self._factory.tables[key]
@@ -186,7 +192,7 @@ class Variable:
 
 	def verify(self, obj):
 		""" optional verification of generated object """
-		if not self.verify_f(obj):
+		if obj and not self.verify_f(obj):
 			raise(VerifyError(message=self.verify_message))
 
 
@@ -415,7 +421,10 @@ class DurationVar(Variable):
 		return value
 
 	def readable(self, obj):
-		return seconds_to_str(obj)
+		if obj:
+			return seconds_to_str(obj)
+		else:
+			return None
 
 
 class VariableTable:
@@ -459,9 +468,12 @@ class VariableTable:
 	def readable_row(self, d):
 		return {var_name: self.variables[var_name].readable(value) for var_name, value in d.items()}
 
-	def verify(self, d):
-		for key, value in d.items():
-			self.variables[key].verify(value)
+	def verify(self, l):
+		return(
+			all((
+				all((self.variables[key].verify(value) for key, value in d.items())) for d in l
+			))
+		)
 
 
 class Variables:
