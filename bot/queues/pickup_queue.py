@@ -100,6 +100,14 @@ class PickupQueue:
 	def length(self):
 		return len(self.queue)
 
+	@property
+	def promote(self):
+		return self.qc.gt("{role}Please add to **{name}** pickup, `{num}` players left!".format(
+			role=self.cfg.promotion_role.mention + " " if self.cfg.promotion_role else "",
+			name=self.name,
+			num=self.cfg.size-self.length
+		))
+
 	async def add_member(self, member):
 		if member not in self.queue:
 			self.queue.append(member)
@@ -127,10 +135,3 @@ class PickupQueue:
 			await self.start()
 			self.queue = list(old_players)
 		await self.qc.update_topic(force_announce=True)
-
-	def promote(self):
-		return self.qc.gt("{role}Please add to **{name}** pickup, `{num}` players left!".format(
-			role=self.cfg.promotion_role.mention + " " if self.cfg.promotion_role else "",
-			name=self.name,
-			num=self.cfg.size-self.length
-		))

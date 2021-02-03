@@ -64,3 +64,9 @@ async def on_member_update(before, after):
 		if after.id not in bot.allow_offline:
 			for qc in filter(lambda i: i.channel.guild.id == after.guild.id, bot.queue_channels.values()):
 				await qc.auto_remove(after)
+
+
+@dc.event
+async def on_member_remove(member):
+	for qc in filter(lambda i: i.channel.guild.id == member.guild.id, bot.queue_channels.values()):
+		await qc.remove_members(member, reason="left guild")

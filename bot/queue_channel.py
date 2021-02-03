@@ -294,6 +294,8 @@ class QueueChannel:
 					reason = self.gt("user offline")
 				elif reason == "afk":
 					reason = self.gt("user AFK")
+				elif reason == "left guild":
+					reason = self.gt("user left the guild")
 
 				if len(affected) == 1:
 					await self.channel.send(self.gt("{member} were removed from all queues ({reason}).").format(
@@ -792,5 +794,5 @@ class QueueChannel:
 			)))
 			return
 
-		await self.channel.send(queue.promote())
+		await self.channel.send(queue.promote)
 		self.last_promote = now
