@@ -184,6 +184,7 @@ class QueueChannel:
 		self.queues = []
 		self.channel = text_channel
 		self.topic = f"> {self.gt('no players')}"
+		self.last_promote = 0
 		self.commands = dict(
 			add_pickup=self._add_pickup,
 			queues=self._show_queues,
@@ -218,7 +219,8 @@ class QueueChannel:
 			default_expire=self._default_expire,
 			ao=self._allow_offline,
 			allow_offline=self._allow_offline,
-			matches=self._matches
+			matches=self._matches,
+			promote=self._promote
 		)
 
 	def update_lang(self):
@@ -480,12 +482,16 @@ class QueueChannel:
 		if len(args) != 3:
 			await self.error(f"Usage: {self.cfg.prefix}set_queue __queue__ __variable__ __value__")
 			return
-		var_name = args[0].lower()
-		if var_name not in self.cfg_factory.variables.keys():
+		if (queue := find(lambda q: q.name.lower() == args[0].lower(), self.queues)) is None:
+			await self.error("Specified queue not found.")
+			return
+		print(queue)
+		if (var_name := args[1].lower()) not in queue.cfg_factory.variables.keys():
 			await self.error(f"No such variable '{var_name}'.")
 			return
+
 		try:
-			await self.cfg.update({var_name: args[1]})
+			await queue.cfg.update({var_name: args[2]})
 		except Exception as e:
 			await self.error(str(e))
 		else:
@@ -766,3 +772,25 @@ class QueueChannel:
 			await self.channel.send(text)
 		else:
 			await self.error("Leaderboard is empty")
+
+	async def _promote(self, message, args=None):
+		if not args:
+			if (queue := next(iter(
+					sorted((q for q in self.queues if q.length), key=lambda q: q.length, reverse=True)
+			), None)) is None:
+				await self.error("Nothing to promote.")
+				return
+		else:
+			if (queue := find(lambda q: q.name.lower() == args.lower(), self.queues)) is None:
+				await self.error("Specified queue not found.")
+				return
+
+		now = int(time.time())
+		if self.cfg.promotion_delay and self.cfg.promotion_delay+self.last_promote > now:
+			await self.error(self.gt("You promote to fast, `{delay}` until next promote.".format(
+				delay=seconds_to_str((self.cfg.promotion_delay+self.last_promote)-now)
+			)))
+			return
+
+		await self.channel.send(queue.promote())
+		self.last_promote = now

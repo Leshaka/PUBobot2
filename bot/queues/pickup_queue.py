@@ -127,3 +127,10 @@ class PickupQueue:
 			await self.start()
 			self.queue = list(old_players)
 		await self.qc.update_topic(force_announce=True)
+
+	def promote(self):
+		return self.qc.gt("{role}Please add to **{name}** pickup, `{num}` players left!".format(
+			role=self.cfg.promotion_role.mention + " " if self.cfg.promotion_role else "",
+			name=self.name,
+			num=self.cfg.size-self.length
+		))
