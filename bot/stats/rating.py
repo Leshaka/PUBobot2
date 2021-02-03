@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import glicko2
 import trueskill
+import time
 
 from core.database import db
 from core.utils import find
@@ -40,8 +41,37 @@ class BaseRating:
 		)
 		return data or dict(rating=self.init_rp, deviation=self.init_deviation)
 
-	async def set_ratings(self, results):
-		await db.insert_many(self.table, results, on_dublicate="replace")
+	async def set_rating(self, member, rating, deviation=None):
+		old = await db.select_one(
+			('rating', 'deviation'), self.table,
+			where=dict(channel_id=self.channel_id, user_id=member.id)
+		)
+
+		if not old:
+			await db.insert(
+				self.table,
+				dict(
+					channel_id=self.channel_id, nick=member.nick or member.name, user_id=member.id,
+					rating=rating, deviation=deviation or self.init_deviation
+				)
+			)
+			old = dict(rating=self.init_rp, deviation=self.init_deviation)
+		else:
+			await db.update(
+					self.table,
+					dict(rating=rating, deviation=deviation or self.init_deviation),
+					keys=dict(channel_id=self.channel_id, user_id=member.id)
+				)
+
+		await db.insert(
+			"qc_rating_history",
+			dict(
+				channel_id=self.channel_id, user_id=member.id, at=int(time.time()), rating_before=old['rating'],
+				deviation_before=old['deviation'], rating_change=rating-old['rating'],
+				deviation_change=deviation-old['deviation'] if deviation else 0,
+				match_id=None, reason='manual seeding'
+			)
+		)
 
 
 class FlatRating(BaseRating):

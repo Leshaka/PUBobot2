@@ -33,6 +33,7 @@ db.ensure_table(dict(
 db.ensure_table(dict(
 	tname="qc_rating_history",
 	columns=[
+		dict(cname="id", ctype=db.types.int, autoincrement=True),
 		dict(cname="channel_id", ctype=db.types.int),
 		dict(cname="user_id", ctype=db.types.int),
 		dict(cname="at", ctype=db.types.int),
@@ -43,7 +44,7 @@ db.ensure_table(dict(
 		dict(cname="match_id", ctype=db.types.int),
 		dict(cname="reason", ctype=db.types.str)
 	],
-	primary_keys=["user_id", "match_id"]
+	primary_keys=["id"]
 ))
 
 db.ensure_table(dict(

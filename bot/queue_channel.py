@@ -220,7 +220,9 @@ class QueueChannel:
 			ao=self._allow_offline,
 			allow_offline=self._allow_offline,
 			matches=self._matches,
-			promote=self._promote
+			promote=self._promote,
+			rating_set=self._rating_set,
+			seed=self._rating_set
 		)
 
 	def update_lang(self):
@@ -631,15 +633,16 @@ class QueueChannel:
 				'qc_rating_history', where=dict(user_id=member.id, channel_id=self.channel.id),
 				order_by='match_id', limit=3
 			)
-			embed.add_field(
-				name=self.gt("Last changes:"),
-				value="\n".join(("\u200b \u200b **{change}** \u200b | {ago} ago | {reason}{match_id}".format(
-					ago=seconds_to_str(int(time.time()-c['at'])),
-					reason=c['reason'],
-					match_id=f"(__{c['match_id']}__)" if c['match_id'] else "",
-					change=("+" if c['rating_change'] >= 0 else "") + str(c['rating_change'])
-				) for c in changes))
-			)
+			if len(changes):
+				embed.add_field(
+					name=self.gt("Last changes:"),
+					value="\n".join(("\u200b \u200b **{change}** \u200b | {ago} ago | {reason}{match_id}".format(
+						ago=seconds_to_str(int(time.time()-c['at'])),
+						reason=c['reason'],
+						match_id=f"(__{c['match_id']}__)" if c['match_id'] else "",
+						change=("+" if c['rating_change'] >= 0 else "") + str(c['rating_change'])
+					) for c in changes))
+				)
 			await self.channel.send(embed=embed)
 
 		else:
@@ -796,3 +799,17 @@ class QueueChannel:
 
 		await self.channel.send(queue.promote)
 		self.last_promote = now
+
+	async def _rating_set(self, message, args=None):
+		args = args.split(" ")
+		try:
+			if (member := self.get_member(args.pop(0))) is None:
+				raise ValueError()
+			rating = int(args.pop(0))
+			deviation = int(args.pop(0)) if len(args) else None
+		except (ValueError, IndexError):
+			await self.error(f"Usage: {self.cfg.prefix}rating_set __@user__ __rating__ [__deviation__]")
+			return
+
+		await self.rating.set_rating(member, rating, deviation)
+		await self.success("Done.")
