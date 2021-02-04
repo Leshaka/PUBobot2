@@ -73,6 +73,34 @@ class BaseRating:
 			)
 		)
 
+	async def hide_player(self, user_id, hide=True):
+		await db.update(self.table, dict(is_hidden=hide), keys=dict(channel_id=self.channel_id, user_id=user_id))
+
+	async def reset(self):
+		data = await db.select(('user_id', 'rating', 'deviation'), self.table, where=dict(channel_id=self.channel_id))
+		history = []
+		now = int(time.time())
+
+		for p in data:
+			if p['rating'] != self.init_rp or p['deviation'] != self.init_deviation:
+				history.append(dict(
+					user_id=p['user_id'],
+					channel_id=self.channel_id,
+					at=now,
+					rating_before=p['rating'],
+					rating_change=self.init_rp-p['rating'],
+					deviation_before=p['deviation'],
+					deviation_change=self.init_deviation-p['deviation'],
+					match_id=None,
+					reason="ratings reset"
+				))
+
+		await db.update(
+			self.table, dict(rating=self.init_rp, deviation=self.init_deviation), keys=dict(channel_id=self.channel_id)
+		)
+		if len(history):
+			await db.insert_many('qc_rating_history', history)
+
 
 class FlatRating(BaseRating):
 

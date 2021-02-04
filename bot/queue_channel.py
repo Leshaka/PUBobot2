@@ -222,7 +222,10 @@ class QueueChannel:
 			matches=self._matches,
 			promote=self._promote,
 			rating_set=self._rating_set,
-			seed=self._rating_set
+			seed=self._rating_set,
+			rating_hide=self._rating_hide,
+			rating_unhide=self._rating_unhide,
+			rating_reset=self._rating_reset
 		)
 
 	def update_lang(self):
@@ -616,7 +619,7 @@ class QueueChannel:
 
 		data = await self.rating.get_players()
 		if p := find(lambda i: i['user_id'] == member.id, data):
-			embed = Embed(title=p['nick'], colour=Colour(0x7289DA))
+			embed = Embed(title=f"__{p['nick']}__", colour=Colour(0x7289DA))
 			embed.add_field(name="№", value=f"**{data.index(p)+1}**", inline=True)
 			embed.add_field(name="Matches", value=f"**{(p['wins']+p['losses']+p['draws'])}**", inline=True)
 			embed.add_field(name="Rank", value=f"**{self.rating_rank(p['rating'])['rank']}**", inline=True)
@@ -641,7 +644,7 @@ class QueueChannel:
 						reason=c['reason'],
 						match_id=f"(__{c['match_id']}__)" if c['match_id'] else "",
 						change=("+" if c['rating_change'] >= 0 else "") + str(c['rating_change'])
-					) for c in changes))
+					) for c in changes[::-1]))
 				)
 			await self.channel.send(embed=embed)
 
@@ -754,7 +757,10 @@ class QueueChannel:
 			await self.error(f"Usage: {self.cfg.prefix}lb [page]")
 			return
 
-		data = await self.rating.get_players()
+		data = await db.select(
+			['nick', 'rating', 'deviation', 'wins', 'losses', 'draws'], 'qc_players',
+			where={'channel_id': self.channel.id, 'is_hidden': 0}, order_by="rating"
+		)
 
 		if len(data):
 			lines = ["{0:^3}|{1:^11}|{2:^25.25}|{3:^9}| {4}".format(
@@ -812,4 +818,20 @@ class QueueChannel:
 			return
 
 		await self.rating.set_rating(member, rating, deviation)
+		await self.success("Done.")
+
+	async def _rating_hide(self, message, args=None):
+		if (member := self.get_member(args)) is None:
+			await self.error(f"Usage: {self.cfg.prefix}rating_hide __@user__")
+		await self.rating.hide_player(member.id)
+		await self.success("Done.")
+
+	async def _rating_unhide(self, message, args=None):
+		if (member := self.get_member(args)) is None:
+			await self.error(f"Usage: {self.cfg.prefix}rating_unhide __@user__")
+		await self.rating.hide_player(member.id, hide=False)
+		await self.success("Done.")
+
+	async def _rating_reset(self, message, args=None):
+		await self.rating.reset()
 		await self.success("Done.")
