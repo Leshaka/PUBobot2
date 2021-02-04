@@ -294,3 +294,11 @@ class Match:
 
 	def print(self):
 		return f"> *({self.id})* **{self.queue.name}** | `{join_and([p.nick or p.name for p in self.players])}`"
+
+	async def cancel(self):
+		if self.check_in.message and self.check_in.message.id in bot.waiting_reactions.keys():
+			bot.waiting_reactions.pop(self.check_in.message.id)
+		await self.qc.channel.send(
+			self.gt("{players} your match has been canceled.").format(players=join_and([p.mention for p in self.players]))
+		)
+		bot.active_matches.remove(self)

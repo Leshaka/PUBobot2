@@ -8,7 +8,7 @@ from core.config import cfg
 from core.console import log
 from core.cfg_factory import CfgFactory, Variables, VariableTable
 from core.locales import locales
-from core.utils import error_embed, ok_embed, find, join_and, seconds_to_str, parse_duration
+from core.utils import error_embed, ok_embed, find, get, join_and, seconds_to_str, parse_duration
 from core.database import db
 
 import bot
@@ -225,7 +225,8 @@ class QueueChannel:
 			seed=self._rating_set,
 			rating_hide=self._rating_hide,
 			rating_unhide=self._rating_unhide,
-			rating_reset=self._rating_reset
+			rating_reset=self._rating_reset,
+			cancel_match=self._cancel_match
 		)
 
 	def update_lang(self):
@@ -835,3 +836,12 @@ class QueueChannel:
 	async def _rating_reset(self, message, args=None):
 		await self.rating.reset()
 		await self.success("Done.")
+
+	async def _cancel_match(self, message, args=""):
+		if not args.isdigit():
+			await self.error(f"Usage: {self.cfg.prefix}cancel_match __match_id__")
+
+		if not (match := get(bot.active_matches,id=int(args))):
+			await self.error(f"Specified match not found.")
+
+		await match.cancel()
