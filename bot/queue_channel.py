@@ -2,7 +2,7 @@
 import re
 import json
 import time
-from discord import Embed, Colour
+from discord import Embed, Colour, Forbidden
 
 from core.config import cfg
 from core.console import log
@@ -353,6 +353,21 @@ class QueueChannel:
 		if not len(below):
 			return {'rank': '〈?〉', 'rating': 0, 'role': None}
 		return below[0]
+
+	async def update_rating_roles(self, *members):
+		data = await self.rating.get_players(user_ids=(i.id for i in members))
+		roles = {i['user_id']: self.rating_rank(i['rating'])['role'] for i in data}
+		all_roles = [i['role'] for i in self.cfg.tables.ranks if i is not None]
+
+		for member in members:
+			to_delete = [role for role in all_roles if role != roles[member.id] and role in member.roles]
+			try:
+				if len(to_delete):
+					await member.remove_roles(*to_delete, reason="Rank update.")
+				if roles[member.id] is not None and roles[member.id] not in member.roles:
+					await member.add_roles(roles[member.id], reason="Rank update.")
+			except Forbidden:
+				pass
 
 	async def process_msg(self, message):
 		if not len(message.content) > 1:
@@ -820,6 +835,7 @@ class QueueChannel:
 			return
 
 		await self.rating.set_rating(member, rating, deviation)
+		await self.update_rating_roles(member)
 		await self.success("Done.")
 
 	async def _rating_hide(self, message, args=None):

@@ -135,7 +135,7 @@ class Config:
 				raise KeyError("Table '{}' not found.".format(key))
 			vo = self._factory.tables[key]
 			tables[key] = await vo.validate(value, self._guild)
-			table_objects[key] = await vo.wrap(value, self._guild)
+			table_objects[key] = await vo.wrap(tables[key], self._guild)
 			vo.verify(table_objects[key])
 
 		# Update useful objects and push to database
