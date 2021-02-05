@@ -423,6 +423,10 @@ class QueueChannel:
 			await self.error(self.gt("You are not allowed to add to queues."), reply_to=message.author)
 			return
 
+		if any((message.author in m.players for m in bot.active_matches)):
+			await self.error(self.gt("You are already in an active match."))
+			return
+
 		targets = args.lower().split(" ") if args else []
 
 		# select the only one queue on the channel
