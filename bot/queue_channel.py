@@ -226,7 +226,8 @@ class QueueChannel:
 			rating_hide=self._rating_hide,
 			rating_unhide=self._rating_unhide,
 			rating_reset=self._rating_reset,
-			cancel_match=self._cancel_match
+			cancel_match=self._cancel_match,
+			undo_match=self._undo_match
 		)
 
 	def update_lang(self):
@@ -635,7 +636,7 @@ class QueueChannel:
 			changes = await db.select(
 				('at', 'rating_change', 'match_id', 'reason'),
 				'qc_rating_history', where=dict(user_id=member.id, channel_id=self.channel.id),
-				order_by='match_id', limit=3
+				order_by='id', limit=3
 			)
 			if len(changes):
 				embed.add_field(
@@ -645,7 +646,7 @@ class QueueChannel:
 						reason=c['reason'],
 						match_id=f"(__{c['match_id']}__)" if c['match_id'] else "",
 						change=("+" if c['rating_change'] >= 0 else "") + str(c['rating_change'])
-					) for c in changes[::-1]))
+					) for c in changes))
 				)
 			await self.channel.send(embed=embed)
 
@@ -841,7 +842,18 @@ class QueueChannel:
 		if not args.isdigit():
 			await self.error(f"Usage: {self.cfg.prefix}cancel_match __match_id__")
 
-		if not (match := get(bot.active_matches,id=int(args))):
+		if not (match := get(bot.active_matches, id=int(args))):
 			await self.error(f"Specified match not found.")
 
 		await match.cancel()
+
+	async def _undo_match(self, message, args=""):
+		if not args.isdigit():
+			await self.error(f"Usage: {self.cfg.prefix}undo_match __match_id__")
+			return
+
+		result = await bot.stats.undo_match(int(args), self)
+		if result:
+			await self.success("Done")
+		else:
+			await self.error("Specified match not found.")
