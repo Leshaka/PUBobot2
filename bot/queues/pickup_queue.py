@@ -137,6 +137,8 @@ class PickupQueue:
 			await self.qc.error(f"Unable to load queue **{self.cfg.name}**, error fetching guild members.")
 			return
 		self.queue = players
+		if self.length:
+			bot.active_queues.append(self)
 
 	def __init__(self, qc, cfg):
 		self.qc = qc
@@ -168,17 +170,29 @@ class PickupQueue:
 			num=self.cfg.size-self.length
 		))
 
+	async def reset(self):
+		self.queue = []
+		if self in bot.active_queues:
+			bot.active_queues.remove(self)
+
 	async def add_member(self, member):
 		if member not in self.queue:
 			self.queue.append(member)
+
+			if self not in bot.active_queues:
+				bot.active_queues.append(self)
+
 			if len(self.queue) == self.cfg.size:
 				await self.start()
 				return True
+
 		return False
 
 	async def remove_member(self, member):
 		if member in self.queue:
 			self.queue.remove(member)
+			if not self.length:
+				bot.active_queues.remove(self)
 		else:
 			raise ValueError("Specified Member is not added to the queue.")
 
@@ -192,7 +206,7 @@ class PickupQueue:
 				channel=self.qc.channel.mention
 			)
 		)
-		await self.qc.remove_members()
+		await bot.remove_players(*players, reason="pickup started")
 
 	async def revert(self, not_ready, ready):
 		old_players = list(self.queue)
@@ -203,3 +217,6 @@ class PickupQueue:
 			await self.start()
 			self.queue = list(old_players)
 		await self.qc.update_topic(force_announce=True)
+
+		if self not in bot.active_queues and self.length:
+			bot.active_queues.append(self)

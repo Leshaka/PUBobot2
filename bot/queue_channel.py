@@ -228,7 +228,8 @@ class QueueChannel:
 			rating_unhide=self._rating_unhide,
 			rating_reset=self._rating_reset,
 			cancel_match=self._cancel_match,
-			undo_match=self._undo_match
+			undo_match=self._undo_match,
+			switch_dms=self._switch_dms
 		)
 
 	def update_lang(self):
@@ -284,7 +285,7 @@ class QueueChannel:
 
 	async def remove_members(self, *members, reason=None):
 		affected = set()
-		for q in self.queues:
+		for q in (q for q in self.queues if q.length):
 			for m in members:
 				try:
 					await q.remove_member(m)
@@ -304,6 +305,8 @@ class QueueChannel:
 					reason = self.gt("user AFK")
 				elif reason == "left guild":
 					reason = self.gt("user left the guild")
+				elif reason == "pickup started":
+					reason = self.gt("pickup started on another channel")
 
 				if len(affected) == 1:
 					await self.channel.send(self.gt("{member} were removed from all queues ({reason}).").format(
@@ -375,6 +378,8 @@ class QueueChannel:
 			await asyncio.sleep(1)
 
 	async def queue_started(self, members, message=None):
+		await self.remove_members(*members)
+
 		for m in members:
 			bot.expire.cancel(self, m)
 		if message:
@@ -382,7 +387,7 @@ class QueueChannel:
 
 	async def _dm_members(self, members, *args, **kwargs):
 		for m in members:
-			if not await db.select_one(("user_id", ), "players", where={'user_id': m.id, 'allow_dm': 0}) and not m.bot:
+			if not m.bot and not await db.select_one(("user_id", ), "players", where={'user_id': m.id, 'allow_dm': 0}):
 				try:
 					await m.send(*args, **kwargs)
 				except Forbidden:
@@ -641,6 +646,8 @@ class QueueChannel:
 			await match.draft.sub_me(message.author)
 
 	async def _sub_for(self, message, args=None):
+		if self.get_match(message.author) is not None:
+			await self.error(self.gt("You are already in an active match"))
 		if not args:
 			await self.error(f"Usage: {self.cfg.prefix}sub_for __player__")
 		elif (member := self.get_member(args)) is None:
@@ -897,3 +904,17 @@ class QueueChannel:
 			await self.success("Done")
 		else:
 			await self.error("Specified match not found.")
+
+	async def _switch_dms(self, message, args=""):
+		data = await db.select_one(('allow_dm', ), 'players', where={'user_id': message.author.id})
+		if data:
+			allow_dm = 1 if data['allow_dm'] == 0 else 0
+			await db.update('players', {'allow_dm': allow_dm}, keys={'user_id': message.author.id})
+		else:
+			allow_dm = 0
+			await db.insert('players', {'allow_dm': allow_dm, 'user_id': message.author.id})
+
+		if allow_dm:
+			await self.success(self.gt("DM notifications for you is now turned off."), reply_to=message.author)
+		else:
+			await self.success(self.gt("DM notifications for you is now turned on."), reply_to=message.author)

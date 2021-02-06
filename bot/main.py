@@ -9,7 +9,7 @@ from core.utils import error_embed, ok_embed, get
 import bot
 
 queue_channels = dict()  # {channel.id: QueueChannel()}
-active_pickups = []
+active_queues = []
 active_matches = []
 waiting_reactions = dict()  # {message.id: function}
 allow_offline = []  # [user_id]
@@ -98,3 +98,8 @@ async def load_state():
 				log.error(f"Queue with id {md['queue_id']} not found.")
 		else:
 			log.error(f"Queue channel with id {md['channel_id']} not found.")
+
+
+async def remove_players(*users, reason=None):
+	for qc in set((q.qc for q in active_queues)):
+		await qc.remove_members(*users, reason=reason)

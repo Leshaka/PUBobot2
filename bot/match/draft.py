@@ -78,18 +78,28 @@ class Draft:
 	async def sub_me(self, author):
 		if self.m.state not in [self.m.DRAFT, self.m.WAITING_REPORT]:
 			await self.m.error(self.m.gt("The match must be on the draft or waiting report stage."))
-		elif author not in self.sub_queue:
+			return
+		if author in self.sub_queue:
+			self.sub_queue.remove(author)
+			await self.m.qc.success(self.m.gt("You have stopped looking for a substitute."))
+		else:
 			self.sub_queue.append(author)
+			await self.m.qc.success(self.m.gt("You are now looking for a substitute."))
 
 	async def sub_for(self, author, player):
 		if self.m.state not in [self.m.DRAFT, self.m.WAITING_REPORT]:
 			await self.m.error(self.m.gt("The match must be on the draft or waiting report stage."))
+			return
 		elif player not in self.sub_queue:
 			await self.m.error(self.m.gt("Specified player is not looking for a substitute."))
+			return
 		else:
-			team = find(lambda t: player in t, self.teams)
+			team = find(lambda t: player in t, self.m.teams)
 			team[team.index(player)] = author
 			self.m.players.remove(player)
 			self.m.players.append(author)
 			self.sub_queue.remove(player)
+			self.m.ratings = {
+				p['user_id']: p['rating'] for p in await self.m.qc.rating.get_players((p.id for p in self.m.players))
+			}
 			await self.print()

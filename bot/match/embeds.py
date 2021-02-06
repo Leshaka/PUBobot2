@@ -61,29 +61,31 @@ class Embeds:
 		embed.add_field(name=teams_names[0], value=" \u200b ❲ \u200b " + team_players[0] + " \u200b ❳", inline=False)
 		embed.add_field(name=teams_names[1], value=" \u200b ❲ \u200b " + team_players[1] + " \u200b ❳\n\u200b", inline=False)
 
-		embed.add_field(
-			name=self.m.gt("Unpicked:"),
-			value="\n".join((
-				" \u200b `{rank}{name}`".format(
-					rank=self.m.rank_str(p) if self.m.cfg['ranked'] else "",
-					name=p.nick or p.name
-				)
-			) for p in self.m.teams[2]),
-			inline=False
-		)
-
-		if len(self.m.teams[0]) and len(self.m.teams[1]):
-			msg = self.m.gt(f"Pick players with `{self.m.qc.cfg.prefix}pick @player` command.")
-			pick_step = len(self.m.teams[0]) + len(self.m.teams[1]) - 2
-			picker_team = self.m.teams[self.m.draft.pick_order[pick_step]] if pick_step < len(self.m.draft.pick_order)-1 else None
-			if picker_team:
-				msg += "\n" + self.m.gt("{member}'s turn to pick!").format(member=f"<@{picker_team[0].id}>")
-		else:
-			msg = self.m.gt("Type {cmd} to become a captain and start picking teams.").format(
-				cmd=f"`{self.m.qc.cfg.prefix}capfor {'/'.join((team.name.lower() for team in self.m.teams[:2]))}`"
+		if len(self.m.teams[2]):
+			embed.add_field(
+				name=self.m.gt("Unpicked:"),
+				value="\n".join((
+					" \u200b `{rank}{name}`".format(
+						rank=self.m.rank_str(p) if self.m.cfg['ranked'] else "",
+						name=p.nick or p.name
+					)
+				) for p in self.m.teams[2]),
+				inline=False
 			)
 
-		embed.add_field(name="—", value=msg + "\n\u200b", inline=False)
+			if len(self.m.teams[0]) and len(self.m.teams[1]):
+				msg = self.m.gt(f"Pick players with `{self.m.qc.cfg.prefix}pick @player` command.")
+				pick_step = len(self.m.teams[0]) + len(self.m.teams[1]) - 2
+				picker_team = self.m.teams[self.m.draft.pick_order[pick_step]] if pick_step < len(self.m.draft.pick_order)-1 else None
+				if picker_team:
+					msg += "\n" + self.m.gt("{member}'s turn to pick!").format(member=f"<@{picker_team[0].id}>")
+			else:
+				msg = self.m.gt("Type {cmd} to become a captain and start picking teams.").format(
+					cmd=f"`{self.m.qc.cfg.prefix}capfor {'/'.join((team.name.lower() for team in self.m.teams[:2]))}`"
+				)
+
+			embed.add_field(name="—", value=msg + "\n\u200b", inline=False)
+
 		embed.set_footer(**self.footer)
 
 		return embed
