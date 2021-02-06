@@ -31,6 +31,42 @@ class PickupQueue:
 				default=0,
 				description="Enable ratings feature on this queue."
 			),
+			Variables.TextVar(
+				"start_msg",
+				display="Start message",
+			),
+			Variables.StrVar(
+				"server",
+				display="Server"
+			),
+			Variables.OptionVar(
+				"pick_captains",
+				display="Pick captains",
+				options=["by role and rating", "fair pairs", "random", "no captains"],
+				default="by role and rating",
+				notnull=True
+			),
+			Variables.OptionVar(
+				"pick_teams",
+				display="Pick teams",
+				options=["draft", "matchmaking", "random teams", "no teams"],
+				notnull=True
+			),
+			Variables.StrVar(
+				"pick_order",
+				display="Teams picking order",
+				description="a - 1st team picks, b - 2nd team picks, example: ababba"
+			),
+			Variables.StrVar(
+				"team_names",
+				display="Team names",
+				description="Team names separated by space, example: Alpha Beta"
+			),
+			Variables.DurationVar(
+				"check_in_timeout",
+				display="Require check-in",
+				description="Set the check-in stage duration."
+			),
 			Variables.RoleVar(
 				"promotion_role",
 				display="Promotion role",
@@ -40,6 +76,24 @@ class PickupQueue:
 				"captains_role",
 				display="Captains role",
 				description="Users with this role may have preference in captains choosing process."
+			),
+			Variables.RoleVar(
+				"blacklist_role",
+				display="Blacklist role"
+			),
+			Variables.RoleVar(
+				"whitelist_role",
+				display="Whitelist role"
+			),
+			Variables.BoolVar(
+				"autostart",
+				display="Start when the queue is full.",
+				default=1
+			),
+			Variables.IntVar(
+				"map_count",
+				display="Map count",
+				default=1
 			)
 		],
 		tables=[
@@ -47,6 +101,12 @@ class PickupQueue:
 				"aliases", display="Aliases",
 				variables=[
 					Variables.StrVar("alias", notnull=True)
+				]
+			),
+			VariableTable(
+				"maps", display="Maps",
+				variables=[
+					Variables.StrVar("name", notnull=True)
 				]
 			)
 		]
@@ -124,7 +184,15 @@ class PickupQueue:
 
 	async def start(self):
 		await bot.Match.new(self, self.qc, list(self.queue), check_in_timeout=None, pick_teams="matchmaking", ranked=True)
-		await self.qc.remove_members(*list(self.queue))
+		players = list(self.queue)
+		await self.qc.queue_started(
+			members=players,
+			message="**{queue}** pickup has started @ {channel}!".format(
+				queue=self.name,
+				channel=self.qc.channel.mention
+			)
+		)
+		await self.qc.remove_members()
 
 	async def revert(self, not_ready, ready):
 		old_players = list(self.queue)

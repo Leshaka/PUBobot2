@@ -2,6 +2,7 @@
 import re
 import json
 import time
+import asyncio
 from discord import Embed, Colour, Forbidden
 
 from core.config import cfg
@@ -355,6 +356,9 @@ class QueueChannel:
 		return below[0]
 
 	async def update_rating_roles(self, *members):
+		asyncio.create_task(self._update_rating_roles(*members))
+
+	async def _update_rating_roles(self, *members):
 		data = await self.rating.get_players(user_ids=(i.id for i in members))
 		roles = {i['user_id']: self.rating_rank(i['rating'])['role'] for i in data}
 		all_roles = [i['role'] for i in self.cfg.tables.ranks if i is not None]
@@ -368,6 +372,22 @@ class QueueChannel:
 					await member.add_roles(roles[member.id], reason="Rank update.")
 			except Forbidden:
 				pass
+			await asyncio.sleep(1)
+
+	async def queue_started(self, members, message=None):
+		for m in members:
+			bot.expire.cancel(self, m)
+		if message:
+			asyncio.create_task(self._dm_members(members, message))
+
+	async def _dm_members(self, members, *args, **kwargs):
+		for m in members:
+			if not await db.select_one(("user_id", ), "players", where={'user_id': m.id, 'allow_dm': 0}) and not m.bot:
+				try:
+					await m.send(*args, **kwargs)
+				except Forbidden:
+					pass
+				await asyncio.sleep(1)
 
 	async def process_msg(self, message):
 		if not len(message.content) > 1:
@@ -436,7 +456,7 @@ class QueueChannel:
 		# select queues requested by user
 		elif len(targets):
 			t_queues = (q for q in self.queues if any(
-				(t == q.name or t in (a["alias"] for a in q.cfg.tables.aliases) for t in targets)
+				(t == q.name.lower() or t in (a["alias"] for a in q.cfg.tables.aliases) for t in targets)
 			))
 
 		# select active queues or default queues if no active queues

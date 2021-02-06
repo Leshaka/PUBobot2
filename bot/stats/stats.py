@@ -8,7 +8,7 @@ db.ensure_table(dict(
 	columns=[
 		dict(cname="user_id", ctype=db.types.int),
 		dict(cname="name", ctype=db.types.str),
-		dict(cname="allow_pm", ctype=db.types.bool),
+		dict(cname="allow_dm", ctype=db.types.bool),
 		dict(cname="expire", ctype=db.types.int)
 	],
 	primary_keys=["user_id"]
