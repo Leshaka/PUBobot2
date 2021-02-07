@@ -117,7 +117,6 @@ class Match:
 		self.queue = queue
 		self.qc = qc
 		self.send = qc.channel.send
-		self.error = qc.error
 		self.gt = qc.gt
 
 		# Set configuration variables
@@ -218,15 +217,13 @@ class Match:
 
 	async def report_loss(self, member, draw):
 		if self.state != self.WAITING_REPORT:
-			await self.error(self.gt("The match must be on the waiting report stage."))
-			return
+			raise bot.Exc.MatchStateError(self.gt("The match must be on the waiting report stage."))
 
 		team = find(lambda team: member in team[:1], self.teams[:2])
 		if team is None:
-			await self.error(self.gt("You must be a team captain to report loss."))
-			return
-		enemy_team = self.teams[1-team.idx]
+			raise bot.Exc.PermissionError(self.gt("You must be a team captain to report loss."))
 
+		enemy_team = self.teams[1-team.idx]
 		if draw and not enemy_team.want_draw:
 			team.want_draw = True
 			await self.qc.channel.send(
@@ -239,16 +236,14 @@ class Match:
 
 	async def report_win(self, team_name):  # version for admins/mods
 		if self.state != self.WAITING_REPORT:
-			await self.error(self.gt("The match must be on the waiting report stage."))
-			return
+			raise bot.Exc.MatchStateError(self.gt("The match must be on the waiting report stage."))
 
 		if team_name.lower() == "draw":
 			self.winner = None
 		elif (team := find(lambda t: t.name.lower() == team_name, self.teams[:2])) is not None:
 			self.winner(team.idx)
 		else:
-			await self.error(self.gt("Specified team name not found."))
-			return
+			raise bot.Exc.SyntaxError(self.gt("Specified team name not found."))
 
 		await self.finish_match()
 

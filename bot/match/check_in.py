@@ -57,7 +57,7 @@ class CheckIn:
 
 	async def set_ready(self, member, ready):
 		if self.m.state != self.m.CHECK_IN:
-			await self.m.error(self.m.gt("The match is not on the check-in stage."))
+			raise bot.Exc.MatchStateError(self.m.gt("The match is not on the check-in stage."))
 		if ready and member not in self.ready_players:
 			self.ready_players.append(member)
 			await self.refresh()

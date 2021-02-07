@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import bot
 from core.utils import find
 
 
@@ -36,49 +37,48 @@ class Draft:
 
 	async def cap_for(self, author, team_name):
 		if self.m.state != self.m.DRAFT:
-			await self.m.error(self.m.gt("The match is not on the draft stage."))
+			raise bot.Exc.MatchStateError(self.m.gt("The match is not on the draft stage."))
 		elif self.captains_role_id and self.captains_role_id not in (r.id for r in author.roles):
-			await self.m.error(self.m.gt("You must possess the captain's role."))
+			raise bot.Exc.PermissionError(elf.m.gt("You must possess the captain's role."))
 		elif (team := find(lambda t: t.name.lower() == team_name.lower(), self.m.teams[:2])) is None:
-			await self.m.error(self.m.gt("Team with name '{name}' not found.".format(name=team_name)))
+			raise bot.Exc.SyntaxError(self.m.gt("Team with name '{name}' not found.".format(name=team_name)))
 		elif len(team):
-			await self.m.error(self.m.gt("Team {name} already have a captain.".format(name=f"**{team.name}**")))
-		else:
-			find(lambda t: author in t, self.m.teams).remove(author)
-			team.append(author)
-			await self.print()
+			raise bot.Exc.PermissionError(self.m.gt("Team {name} already have a captain.".format(name=f"**{team.name}**")))
+		find(lambda t: author in t, self.m.teams).remove(author)
+		team.append(author)
+		await self.print()
 
 	async def pick(self, author, player):
 		pick_step = max(0, (len(self.m.teams[0]) + len(self.m.teams[1]) - 2))
 		picker_team = self.m.teams[self.pick_order[pick_step]] if pick_step < len(self.pick_order) - 1 else None
 
 		if self.m.state != self.m.DRAFT:
-			await self.m.error(self.m.gt("The match is not on the draft stage."))
+			raise bot.Exc.MatchStateError(self.m.gt("The match is not on the draft stage."))
 		elif (team := find(lambda t: author in t[:1], self.m.teams[:2])) is None:
-			await self.m.error(self.m.gt("You are not a captain."))
+			raise bot.Exc.PermissionError(self.m.gt("You are not a captain."))
 		elif picker_team is not None and picker_team is not team:
-			await self.m.error(self.m.gt("Not your turn to pick."))
+			raise bot.Exc.PermissionError(self.m.gt("Not your turn to pick."))
 		elif player not in self.m.teams[2]:
-			await self.m.error(self.m.gt("Specified player not in the unpicked list."))
-		else:
-			self.m.teams[2].remove(player)
-			team.append(player)
-			await self.refresh()
+			raise bot.Exc.NotFoundError(self.m.gt("Specified player not in the unpicked list."))
+
+		self.m.teams[2].remove(player)
+		team.append(player)
+		await self.refresh()
 
 	async def put(self, player, team_name):
 		if (team := find(lambda t: t.name.lower() == team_name.lower(), self.m.teams)) is None:
-			await self.m.error(self.m.gt("Team with name '{name}' not found."))
+			raise bot.Exc.SyntaxError(self.m.gt("Team with name '{name}' not found."))
 		if self.m.state not in [self.m.DRAFT, self.m.WAITING_REPORT]:
-			await self.m.error(self.m.gt("The match must be on the draft or waiting report stage."))
-		else:
-			find(lambda t: player in t, self.m.teams).remove(player)
-			team.append(player)
-			await self.refresh()
+			raise bot.Exc.MatchStateError(self.m.gt("The match must be on the draft or waiting report stage."))
+
+		find(lambda t: player in t, self.m.teams).remove(player)
+		team.append(player)
+		await self.refresh()
 
 	async def sub_me(self, author):
 		if self.m.state not in [self.m.DRAFT, self.m.WAITING_REPORT]:
-			await self.m.error(self.m.gt("The match must be on the draft or waiting report stage."))
-			return
+			raise bot.Exc.MatchStateError(self.m.gt("The match must be on the draft or waiting report stage."))
+
 		if author in self.sub_queue:
 			self.sub_queue.remove(author)
 			await self.m.qc.success(self.m.gt("You have stopped looking for a substitute."))
@@ -88,18 +88,16 @@ class Draft:
 
 	async def sub_for(self, author, player):
 		if self.m.state not in [self.m.DRAFT, self.m.WAITING_REPORT]:
-			await self.m.error(self.m.gt("The match must be on the draft or waiting report stage."))
-			return
+			raise bot.Exc.MatchStateError(self.m.gt("The match must be on the draft or waiting report stage."))
 		elif player not in self.sub_queue:
-			await self.m.error(self.m.gt("Specified player is not looking for a substitute."))
-			return
-		else:
-			team = find(lambda t: player in t, self.m.teams)
-			team[team.index(player)] = author
-			self.m.players.remove(player)
-			self.m.players.append(author)
-			self.sub_queue.remove(player)
-			self.m.ratings = {
-				p['user_id']: p['rating'] for p in await self.m.qc.rating.get_players((p.id for p in self.m.players))
-			}
-			await self.print()
+			raise bot.Exc.PermissionError(self.m.gt("Specified player is not looking for a substitute."))
+
+		team = find(lambda t: player in t, self.m.teams)
+		team[team.index(player)] = author
+		self.m.players.remove(player)
+		self.m.players.append(author)
+		self.sub_queue.remove(player)
+		self.m.ratings = {
+			p['user_id']: p['rating'] for p in await self.m.qc.rating.get_players((p.id for p in self.m.players))
+		}
+		await self.print()

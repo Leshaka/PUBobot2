@@ -416,19 +416,24 @@ class QueueChannel:
 
 		f = self.commands.get(cmd[1:])
 		if f:
-			await f(message, *message.content.split(' ', 1)[1:])
+			try:
+				await f(message, *message.content.split(' ', 1)[1:])
+			except bot.Exc.PubobotException as e:
+				await message.channel.send(embed=error_embed(str(e), title=type(e).__name__))
+			except BaseException as e:
+				await message.channel.send(embed=error_embed(str(e), title="RuntimeError"))
+				log.error("Error processing message: " + str(e))
 
 	#  Bot commands #
 
 	async def _add_pickup(self, message, args=""):
 		args = args.lower().split(" ")
 		if len(args) != 2 or not args[1].isdigit():
-			await self.error(f"Usage: {self.cfg.prefix}add_pickups __name__ __size__")
-			return
+			raise bot.Exc.SyntaxError(f"Usage: {self.cfg.prefix}add_pickups __name__ __size__")
 		try:
 			pq = await self.new_queue(args[0], int(args[1]), bot.PickupQueue)
 		except ValueError as e:
-			await self.error(str(e))
+			raise bot.Exc.ValueError(str(e))
 		else:
 			await self.success(f"[**{pq.name}** ({pq.status})]")
 
@@ -442,15 +447,12 @@ class QueueChannel:
 
 	async def _add_member(self, message, args=None):
 		if self.cfg.blacklist_role and self.cfg.blacklist_role in message.author.roles:
-			await self.error(self.gt("You are not allowed to add to queues."), reply_to=message.author)
-			return
+			raise bot.Exc.PermissionError(self.gt("You are not allowed to add to queues."))
 		if self.cfg.whitelist_role and self.cfg.whitelist_role not in message.author.roles:
-			await self.error(self.gt("You are not allowed to add to queues."), reply_to=message.author)
-			return
+			raise bot.Exc.PermissionError(self.gt("You are not allowed to add to queues."))
 
 		if any((message.author in m.players for m in bot.active_matches)):
-			await self.error(self.gt("You are already in an active match."))
-			return
+			raise bot.Exc.InMatchError(self.gt("You are already in an active match."))
 
 		targets = args.lower().split(" ") if args else []
 
@@ -517,36 +519,31 @@ class QueueChannel:
 	async def _set(self, message, args=""):
 		args = args.lower().split(" ", maxsplit=2)
 		if len(args) != 2:
-			await self.error(f"Usage: {self.cfg.prefix}set __variable__ __value__")
-			return
+			raise bot.Exc.SyntaxError(f"Usage: {self.cfg.prefix}set __variable__ __value__")
+
 		var_name = args[0].lower()
 		if var_name not in self.cfg_factory.variables.keys():
-			await self.error(f"No such variable '{var_name}'.")
-			return
+			raise bot.Exc.SyntaxError(f"No such variable '{var_name}'.")
 		try:
 			await self.cfg.update({var_name: args[1]})
 		except Exception as e:
-			await self.error(str(e))
+			raise bot.Exc.ValueError(str(e))
 		else:
 			await self.success(f"Variable __{var_name}__ configured.")
 
 	async def _set_queue(self, message, args=""):
 		args = args.lower().split(" ", maxsplit=3)
 		if len(args) != 3:
-			await self.error(f"Usage: {self.cfg.prefix}set_queue __queue__ __variable__ __value__")
-			return
+			raise bot.Exc.SyntaxError(f"Usage: {self.cfg.prefix}set_queue __queue__ __variable__ __value__")
 		if (queue := find(lambda q: q.name.lower() == args[0].lower(), self.queues)) is None:
-			await self.error("Specified queue not found.")
-			return
-		print(queue)
+			raise bot.Exc.SyntaxError("Specified queue not found.")
 		if (var_name := args[1].lower()) not in queue.cfg_factory.variables.keys():
-			await self.error(f"No such variable '{var_name}'.")
-			return
+			raise bot.Exc.SyntaxError(f"No such variable '{var_name}'.")
 
 		try:
 			await queue.cfg.update({var_name: args[2]})
 		except Exception as e:
-			await self.error(str(e))
+			raise bot.Exc.ValueError(str(e))
 		else:
 			await self.success(f"Variable __{var_name}__ configured.")
 
@@ -555,113 +552,104 @@ class QueueChannel:
 
 	async def _cfg_queue(self, message, args=None):
 		if not args:
-			await self.error(f"Usage: {self.cfg.prefix}cfg_queue __queue__")
-			return
+			raise bot.Exc.SyntaxError(f"Usage: {self.cfg.prefix}cfg_queue __queue__")
+
 		args = args.lower()
 		for q in self.queues:
 			if q.name.lower() == args:
 				await message.author.send(f"```json\n{json.dumps(q.cfg.to_json())}```")
 				return
-		await self.error(f"No such queue '{args}'.")
+		raise bot.Exc.SyntaxError(f"No such queue '{args}'.")
 
 	async def _set_cfg(self, message, args=None):
 		if not args:
-			await self.error(f"Usage: {self.cfg.prefix}set_cfg __json__")
-			return
+			raise bot.Exc.SyntaxError(f"Usage: {self.cfg.prefix}set_cfg __json__")
 		try:
 			await self.cfg.update(json.loads(args))
 		except Exception as e:
-			await self.error(str(e))
-			raise(e)
+			raise bot.Exc.ValueError(str(e))
 		else:
 			await self.success(f"Channel configuration updated.")
 
 	async def _set_cfg_queue(self, message, args=""):
 		args = args.split(" ", maxsplit=1)
 		if len(args) != 2:
-			await self.error(f"Usage: {self.cfg.prefix}set_cfg_queue __queue__ __json__")
-			return
+			raise bot.Exc.SyntaxError(f"Usage: {self.cfg.prefix}set_cfg_queue __queue__ __json__")
+
 		for q in self.queues:
 			if q.name.lower() == args[0].lower():
 				try:
 					await q.cfg.update(json.loads(args[1]))
 				except Exception as e:
-					await self.error(str(e))
+					raise bot.Exc.ValueError(str(e))
 				else:
 					await self.success(f"__{q.name}__ queue configuration updated.")
 				return
-		await self.error(f"No such queue '{args}'.")
+		raise bot.Exc.SyntaxError(f"No such queue '{args}'.")
 
 	async def _ready(self, message, args=None):
 		if match := self.get_match(message.author):
 			await match.check_in.set_ready(message.author, True)
 		else:
-			await self.error(self.gt("You are not in an active match."))
+			raise bot.Exc.NotInMatchError(self.gt("You are not in an active match."))
 
 	async def _not_ready(self, message, args=None):
 		if match := self.get_match(message.author):
 			await match.check_in.set_ready(message.author, False)
 		else:
-			await self.error(self.gt("You are not in an active match."))
+			raise bot.Exc.NotInMatchError(self.gt("You are not in an active match."))
 
 	async def _cap_for(self, message, args=None):
 		if not args:
-			await self.error(f"Usage: {self.cfg.prefix}capfor __team__")
+			raise bot.Exc.SyntaxError(f"Usage: {self.cfg.prefix}capfor __team__")
 		elif (match := self.get_match(message.author)) is None:
-			await self.error(self.gt("You are not in an active match."))
-		else:
-			await match.draft.cap_for(message.author, args)
+			raise bot.Exc.NotInMatchError(self.gt("You are not in an active match."))
+		await match.draft.cap_for(message.author, args)
 
 	async def _pick(self, message, args=None):
 		if not args:
-			await self.error(f"Usage: {self.cfg.prefix}pick __player__")
+			raise bot.Exc.SyntaxError(f"Usage: {self.cfg.prefix}pick __player__")
 		elif (match := self.get_match(message.author)) is None:
-			await self.error(self.gt("You are not in an active match."))
+			raise bot.Exc.NotInMatchError(self.gt("You are not in an active match."))
 		elif (member := self.get_member(args)) is None:
-			await self.error(self.gt("Specified user not found."))
-		else:
-			await match.draft.pick(message.author, member)
+			raise bot.Exc.SyntaxError(self.gt("Specified user not found."))
+		await match.draft.pick(message.author, member)
 
 	async def _teams(self, message, args=None):
 		if (match := self.get_match(message.author)) is None:
-			await self.error(self.gt("You are not in an active match."))
-		else:
-			await match.draft.print()
+			raise bot.Exc.NotInMatchError(self.gt("You are not in an active match."))
+		await match.draft.print()
 
 	async def _put(self, message, args=""):
 		args = args.split(" ")
 		if len(args) < 2:
-			await self.error(f"Usage: {self.cfg.prefix}put __player__ __team__")
+			raise bot.Exc.SyntaxError(f"Usage: {self.cfg.prefix}put __player__ __team__")
 		elif (member := self.get_member(args[0])) is None:
-			await self.error(self.gt("Specified user not found."))
+			raise bot.Exc.SyntaxError(self.gt("Specified user not found."))
 		elif (match := self.get_match(member)) is None:
-			await self.error(self.gt("Specified user is not in a match."))
-		else:
-			await match.draft.put(member, args[1])
+			raise bot.Exc.NotInMatchError(self.gt("Specified user is not in a match."))
+		await match.draft.put(member, args[1])
 
 	async def _sub_me(self, message, args=None):
 		if (match := self.get_match(message.author)) is None:
-			await self.error(self.gt("You are not in an active match."))
-		else:
-			await match.draft.sub_me(message.author)
+			raise bot.Exc.NotInMatchError(self.gt("You are not in an active match."))
+		await match.draft.sub_me(message.author)
 
 	async def _sub_for(self, message, args=None):
 		if self.get_match(message.author) is not None:
-			await self.error(self.gt("You are already in an active match"))
+			raise bot.Exc.InMatchError(self.gt("You are already in an active match"))
 		if not args:
-			await self.error(f"Usage: {self.cfg.prefix}sub_for __player__")
+			raise bot.Exc.SyntaxError(f"Usage: {self.cfg.prefix}sub_for __player__")
 		elif (member := self.get_member(args)) is None:
-			await self.error(self.gt("Specified user not found."))
+			raise bot.Exc.SyntaxError(self.gt("Specified user not found."))
 		elif (match := self.get_match(member)) is None:
-			await self.error(self.gt("Specified user is not in a match."))
-		else:
-			await match.draft.sub_for(message.author, member)
+			raise bot.Exc.NotInMatchError(self.gt("Specified user is not in a match."))
+		await match.draft.sub_for(message.author, member)
 
 	async def _rank(self, message, args=None):
 		if args:
 			if (member := self.get_member(args)) is None:
-				await self.error(self.gt("Specified user not found."))
-				return
+				raise bot.Exc.SyntaxError(self.gt("Specified user not found."))
 		else:
 			member = message.author
 
@@ -697,19 +685,17 @@ class QueueChannel:
 			await self.channel.send(embed=embed)
 
 		else:
-			await self.error(self.gt("No rating data found."))
+			raise bot.Exc.ValueError(self.gt("No rating data found."))
 
 	async def _rl(self, message, args=None):
 		if (match := self.get_match(message.author)) is None:
-			await self.error(self.gt("You are not in an active match."))
-		else:
-			await match.report_loss(message.author, draw=False)
+			raise bot.Exc.NotInMatchError(self.gt("You are not in an active match."))
+		await match.report_loss(message.author, draw=False)
 
 	async def _rd(self, message, args=None):
 		if (match := self.get_match(message.author)) is None:
-			await self.error(self.gt("You are not in an active match."))
-		else:
-			await match.report_loss(message.author, draw=True)
+			raise bot.Exc.NotInMatchError(self.gt("You are not in an active match."))
+		await match.report_loss(message.author, draw=True)
 
 	async def _expire(self, message, args=None):
 		if not args:
@@ -724,14 +710,12 @@ class QueueChannel:
 			try:
 				secs = parse_duration("".join(args))
 			except ValueError:
-				await self.error(self.gt("Invalid duration format. Syntax: 3h2m1s."))
-				return
+				raise bot.Exc.SyntaxError(self.gt("Invalid duration format. Syntax: 3h2m1s."))
 
 			if secs > MAX_EXPIRE_TIME:
-				await self.error(self.gt("Expire time must be less than {time}.".format(
+				raise bot.Exc.ValueError(self.gt("Expire time must be less than {time}.".format(
 					time=seconds_to_str(MAX_EXPIRE_TIME)
 				)))
-				return
 
 			bot.expire.set(self, message.author, secs)
 			await self.success(self.gt("Set your expire time to {duration}.").format(
@@ -754,13 +738,11 @@ class QueueChannel:
 				try:
 					expire = parse_duration("".join(args))
 				except ValueError:
-					await self.error(self.gt("Invalid expire time argument."))
-					return
+					raise bot.Exc.SyntaxError(self.gt("Invalid expire time argument."))
 				if expire > MAX_EXPIRE_TIME:
-					await self.error(self.gt("Expire time must be less than {time}.".format(
+					raise bot.Exc.SyntaxError(self.gt("Expire time must be less than {time}.".format(
 						time=seconds_to_str(MAX_EXPIRE_TIME)
 					)))
-					return
 
 		if expire == 0:
 			text = self.gt("You will be removed from queues on AFK status by default.")
@@ -802,8 +784,7 @@ class QueueChannel:
 		try:
 			page = int(args)
 		except ValueError:
-			await self.error(f"Usage: {self.cfg.prefix}lb [page]")
-			return
+			raise bot.Exc.SyntaxError(f"Usage: {self.cfg.prefix}lb [page]")
 
 		data = await db.select(
 			['nick', 'rating', 'deviation', 'wins', 'losses', 'draws'], 'qc_players',
@@ -830,26 +811,23 @@ class QueueChannel:
 			)
 			await self.channel.send(text)
 		else:
-			await self.error("Leaderboard is empty")
+			raise bot.Exc.NotFoundError("Leaderboard is empty")
 
 	async def _promote(self, message, args=None):
 		if not args:
 			if (queue := next(iter(
 					sorted((q for q in self.queues if q.length), key=lambda q: q.length, reverse=True)
 			), None)) is None:
-				await self.error("Nothing to promote.")
-				return
+				raise bot.Exc.NotFoundError("Nothing to promote.")
 		else:
 			if (queue := find(lambda q: q.name.lower() == args.lower(), self.queues)) is None:
-				await self.error("Specified queue not found.")
-				return
+				raise bot.Exc.NotFoundError("Specified queue not found.")
 
 		now = int(time.time())
 		if self.cfg.promotion_delay and self.cfg.promotion_delay+self.last_promote > now:
-			await self.error(self.gt("You promote to fast, `{delay}` until next promote.".format(
+			raise bot.Exc.PermissionError(self.gt("You promote to fast, `{delay}` until next promote.".format(
 				delay=seconds_to_str((self.cfg.promotion_delay+self.last_promote)-now)
 			)))
-			return
 
 		await self.channel.send(queue.promote)
 		self.last_promote = now
@@ -862,8 +840,7 @@ class QueueChannel:
 			rating = int(args.pop(0))
 			deviation = int(args.pop(0)) if len(args) else None
 		except (ValueError, IndexError):
-			await self.error(f"Usage: {self.cfg.prefix}rating_set __@user__ __rating__ [__deviation__]")
-			return
+			raise bot.Exc.SyntaxError(f"Usage: {self.cfg.prefix}rating_set __@user__ __rating__ [__deviation__]")
 
 		await self.rating.set_rating(member, rating, deviation)
 		await self.update_rating_roles(member)
@@ -871,13 +848,13 @@ class QueueChannel:
 
 	async def _rating_hide(self, message, args=None):
 		if (member := self.get_member(args)) is None:
-			await self.error(f"Usage: {self.cfg.prefix}rating_hide __@user__")
+			raise bot.Exc.SyntaxError(f"Usage: {self.cfg.prefix}rating_hide __@user__")
 		await self.rating.hide_player(member.id)
 		await self.success("Done.")
 
 	async def _rating_unhide(self, message, args=None):
 		if (member := self.get_member(args)) is None:
-			await self.error(f"Usage: {self.cfg.prefix}rating_unhide __@user__")
+			raise bot.Exc.SyntaxError(f"Usage: {self.cfg.prefix}rating_unhide __@user__")
 		await self.rating.hide_player(member.id, hide=False)
 		await self.success("Done.")
 
@@ -887,23 +864,22 @@ class QueueChannel:
 
 	async def _cancel_match(self, message, args=""):
 		if not args.isdigit():
-			await self.error(f"Usage: {self.cfg.prefix}cancel_match __match_id__")
+			raise bot.Exc.SyntaxError(f"Usage: {self.cfg.prefix}cancel_match __match_id__")
 
 		if not (match := get(bot.active_matches, id=int(args))):
-			await self.error(f"Specified match not found.")
+			raise bot.Exc.NotFoundError(f"Specified match not found.")
 
 		await match.cancel()
 
 	async def _undo_match(self, message, args=""):
 		if not args.isdigit():
-			await self.error(f"Usage: {self.cfg.prefix}undo_match __match_id__")
-			return
+			raise bot.Exc.SyntaxError(f"Usage: {self.cfg.prefix}undo_match __match_id__")
 
 		result = await bot.stats.undo_match(int(args), self)
 		if result:
 			await self.success("Done")
 		else:
-			await self.error("Specified match not found.")
+			raise bot.Exc.NotFoundError("Specified match not found.")
 
 	async def _switch_dms(self, message, args=""):
 		data = await db.select_one(('allow_dm', ), 'players', where={'user_id': message.author.id})

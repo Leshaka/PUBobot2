@@ -9,5 +9,6 @@ from .queues.pickup_queue import PickupQueue
 from .match.match import Match
 from .expire import expire
 from .stats import stats
+from .exceptions import Exceptions as Exc
 
 from . import events
