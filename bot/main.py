@@ -66,7 +66,7 @@ def save_state():
 		matches.append(match.serialize())
 
 	f = open("saved_state.json", 'w')
-	f.write(json.dumps(dict(queues=queues, matches=matches, allow_offline=allow_offline)))
+	f.write(json.dumps(dict(queues=queues, matches=matches, allow_offline=allow_offline, expire=bot.expire.serialize())))
 	f.close()
 
 
@@ -98,6 +98,9 @@ async def load_state():
 				log.error(f"Queue with id {md['queue_id']} not found.")
 		else:
 			log.error(f"Queue channel with id {md['channel_id']} not found.")
+
+	if 'expire' in data.keys():
+		await bot.expire.load_json(data['expire'])
 
 
 async def remove_players(*users, reason=None):

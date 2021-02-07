@@ -1,4 +1,5 @@
 import time
+import bot
 
 
 class ExpireTimer:
@@ -7,6 +8,15 @@ class ExpireTimer:
 		self.tasks = dict()  # hash: Task()
 		self.next = None     # Task()
 
+	def serialize(self):
+		return [t.serialize() for t in self.tasks.values()]
+
+	async def load_json(self, data):
+		for task_data in data:
+			if task := await self.ExpireTask.from_json(task_data):
+				self.tasks[task.hash] = task
+		self._define_next()
+
 	class ExpireTask:
 
 		def __init__(self, qc, member, at):
@@ -14,6 +24,16 @@ class ExpireTimer:
 			self.member = member
 			self.at = at
 			self.hash = str(self.qc.channel.id) + str(self.member.id)
+
+		def serialize(self):
+			return {'channel_id': self.qc.channel.id, 'member': self.member.id, 'at': self.at}
+
+		@classmethod
+		async def from_json(cls, data):
+			if qc := bot.queue_channels.get(data['channel_id']):
+				if member := qc.channel.guild.get_member(data['member']):
+					return cls(qc, member, data['at'])
+			return None
 
 	def set(self, qc, member, delay):
 		new_task = self.ExpireTask(qc, member, int(time.time()+delay))
