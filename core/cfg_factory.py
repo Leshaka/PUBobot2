@@ -180,6 +180,8 @@ class Variable:
 
 	async def validate(self, string, guild):
 		""" Validate and return database-friendly object from received string """
+		if string.lower() in ['none', 'null']:
+			return None
 		return string
 
 	async def wrap(self, value, guild):
@@ -211,7 +213,7 @@ class EmojiVar(Variable):
 		self.ctype = db.types.str
 
 	async def validate(self, string, guild):
-		if string is None:
+		if string.lower() in ['none', 'null']:
 			return None
 
 		if re.match("^:[^ ]*:$", string):
@@ -235,7 +237,7 @@ class OptionVar(Variable):
 		self.options = options
 
 	async def validate(self, string, guild):
-		if string is None:
+		if string.lower() in ['none', 'null']:
 			return None
 
 		if string in self.options:
@@ -251,10 +253,10 @@ class BoolVar(Variable):
 
 	async def validate(self, value, guild):
 		# 0 == False and 1 == True in python
-		if value is None:
-			return None
 		value = value.lower()
-		if value in ['1', 'on', 'true']:
+		if value in ['none', 'null']:
+			return None
+		elif value in ['1', 'on', 'true']:
 			return 1
 		elif value in ['0', 'off', 'false']:
 			return 0
@@ -272,10 +274,10 @@ class IntVar(Variable):
 		super().__init__(name, **kwargs)
 		self.ctype = db.types.int
 
-	async def validate(self, value, guild):
-		if value is None:
+	async def validate(self, string, guild):
+		if string.lower() in ['none', 'null']:
 			return None
-		return int(value)
+		return int(string)
 
 
 class RoleVar(Variable):
@@ -284,21 +286,21 @@ class RoleVar(Variable):
 		super().__init__(name, **kwargs)
 		self.ctype = db.types.int
 
-	async def validate(self, value, guild):
-		if value is None:
+	async def validate(self, string, guild):
+		if string.lower() in ['none', 'null']:
 			return None
 
-		mention = re.match('^<@&([0-9]+)>$', value)
+		mention = re.match('^<@&([0-9]+)>$', string)
 		if mention:
 			role_id = int(mention.group(1))
 			if not guild.get_role(role_id):
-				raise ValueError("User '{}' not found on the dc guild.".format(value))
+				raise ValueError("User '{}' not found on the dc guild.".format(string))
 
 		else:
 			try:
-				role_id = next((role for role in guild.roles if role.name == value or str(role.id) == value)).id
+				role_id = next((role for role in guild.roles if role.name == string or str(role.id) == string)).id
 			except StopIteration:
-				raise ValueError("User '{}' not found on the dc guild.".format(value))
+				raise ValueError("User '{}' not found on the dc guild.".format(string))
 
 		return role_id
 
@@ -323,24 +325,24 @@ class MemberVar(Variable):
 		super().__init__(name, **kwargs)
 		self.ctype = db.types.int
 
-	async def validate(self, value, guild):
-		if value is None:
+	async def validate(self, string, guild):
+		if string.lower() in ['none', 'null']:
 			return None
 
-		mention = re.match("^<@[!]*([0-9]+)>$", value)
+		mention = re.match("^<@[!]*([0-9]+)>$", string)
 		if mention:
 			user_id = int(mention.group(1))
 			if not guild.get_member(user_id):
-				raise ValueError("User '{}' not found on the guild.".format(value))
+				raise ValueError("User '{}' not found on the guild.".format(string))
 
 		else:
-			value = value.lower()
+			string = string.lower()
 			try:
 				user_id = next((member for member in guild.members if
-								(member.nick or member.name).lower() == value or str(member.id) == value
+								(member.nick or member.name).lower() == string or str(member.id) == string
 								))
 			except StopIteration:
-				raise ValueError("User '{}' not found on the guild.".format(value))
+				raise ValueError("User '{}' not found on the guild.".format(string))
 
 		return user_id
 
@@ -364,23 +366,23 @@ class TextChanVar(Variable):
 		super().__init__(name, **kwargs)
 		self.ctype = db.types.int
 
-	async def validate(self, value, guild):
-		if value is None:
+	async def validate(self, string, guild):
+		if string.lower() in ['none', 'null']:
 			return None
 
-		mention = re.match("^<#([0-9]+)>$", value)
+		mention = re.match("^<#([0-9]+)>$", string)
 		if mention:
 			channel_id = int(mention.group(1))
 			if not guild.get_channel(channel_id):
-				raise ValueError("Channel '{}' not found on the dc guild.".format(value))
+				raise ValueError("Channel '{}' not found on the dc guild.".format(string))
 
 		else:
 			try:
 				channel_id = next((channel for channel in guild.channels if
-					channel.name == value.lstrip('#') or str(channel.id) == value
+					channel.name == string.lstrip('#') or str(channel.id) == string
 				)).id
 			except StopIteration:
-				raise ValueError("Channel '{}' not found on the guild.".format(value))
+				raise ValueError("Channel '{}' not found on the guild.".format(string))
 
 		return channel_id
 
@@ -404,16 +406,15 @@ class DurationVar(Variable):
 		super().__init__(name, **kwargs)
 		self.ctype = db.types.int
 
-	async def validate(self, value, guild):
-		if value is None:
+	async def validate(self, string, guild):
+		if string.lower() in ['none', 'null']:
 			return None
 
-		if re.match(r"^\d\d:\d\d:\d\d$", value):
-			x = sum(x * int(t) for x, t in zip([3600, 60, 1], value.split(":")))
-			print(x)
+		if re.match(r"^\d\d:\d\d:\d\d$", string):
+			x = sum(x * int(t) for x, t in zip([3600, 60, 1], string.split(":")))
 			return x
 		try:
-			return parse_duration(value)
+			return parse_duration(string)
 		except ValueError:
 			raise ValueError("Invalid duration format.")
 

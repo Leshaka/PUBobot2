@@ -130,7 +130,7 @@ class Embeds:
 				inline=True
 			)
 		if self.m.cfg['server']:
-			embed.add_field(name=self.qc.gt("Server"), value=f"`{self.server}`", inline=True)
+			embed.add_field(name=self.m.qc.gt("Server"), value=f"`{self.m.cfg['server']}`", inline=True)
 		if self.m.cfg['start_msg']:
 			embed.add_field(name="—", value=self.m.cfg['start_msg'] + "\n\u200b", inline=False)
 		embed.set_footer(**self.footer)

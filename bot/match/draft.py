@@ -39,7 +39,7 @@ class Draft:
 		if self.m.state != self.m.DRAFT:
 			raise bot.Exc.MatchStateError(self.m.gt("The match is not on the draft stage."))
 		elif self.captains_role_id and self.captains_role_id not in (r.id for r in author.roles):
-			raise bot.Exc.PermissionError(elf.m.gt("You must possess the captain's role."))
+			raise bot.Exc.PermissionError(self.m.gt("You must possess the captain's role."))
 		elif (team := find(lambda t: t.name.lower() == team_name.lower(), self.m.teams[:2])) is None:
 			raise bot.Exc.SyntaxError(self.m.gt("Team with name '{name}' not found.".format(name=team_name)))
 		elif len(team):

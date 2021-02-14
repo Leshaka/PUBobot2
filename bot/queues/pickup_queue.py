@@ -18,7 +18,8 @@ class PickupQueue:
 			),
 			Variables.IntVar(
 				"size",
-				display="Queue size"
+				display="Queue size",
+				verify=lambda i: 0 < i < 1001
 			),
 			Variables.BoolVar(
 				"is_default",
@@ -34,6 +35,8 @@ class PickupQueue:
 			Variables.TextVar(
 				"start_msg",
 				display="Start message",
+				verify=lambda s: len(s) < 1001,
+				verify_message="Start message is too long."
 			),
 			Variables.StrVar(
 				"server",
@@ -50,21 +53,36 @@ class PickupQueue:
 				"pick_teams",
 				display="Pick teams",
 				options=["draft", "matchmaking", "random teams", "no teams"],
+				default="draft",
 				notnull=True
 			),
 			Variables.StrVar(
 				"pick_order",
 				display="Teams picking order",
+				verify=lambda s: set(s) == set("ab"),
+				default="abababba",
+				verify_message="Pick order can only contain a and b characters.",
 				description="a - 1st team picks, b - 2nd team picks, example: ababba"
 			),
 			Variables.StrVar(
 				"team_names",
 				display="Team names",
+				verify=lambda s: len(s.split()) == 2,
+				verify_message="Team names must be exactly two words separated by space.",
 				description="Team names separated by space, example: Alpha Beta"
+			),
+			Variables.StrVar(
+				"team_emojis",
+				display="Team emojis",
+				verify=lambda s: len(s.split()) == 2,
+				verify_message="Team emojis must be exactly two emojis separated by space.",
+				description="Team emojis separated by space."
 			),
 			Variables.DurationVar(
 				"check_in_timeout",
 				display="Require check-in",
+				verify=lambda i: 0 < i < 3601,
+				verify_message="Check in timeout must be less than a hour.",
 				description="Set the check-in stage duration."
 			),
 			Variables.RoleVar(
@@ -197,7 +215,16 @@ class PickupQueue:
 			raise ValueError("Specified Member is not added to the queue.")
 
 	async def start(self):
-		await bot.Match.new(self, self.qc, list(self.queue), check_in_timeout=None, pick_teams="matchmaking", ranked=True)
+		await bot.Match.new(
+			self, self.qc, list(self.queue),
+			team_names=self.cfg.team_names, team_emojis=self.cfg.team_emojis, ranked=self.cfg.ranked,
+			max_players=self.cfg.size, pick_captains=self.cfg.pick_captains,
+			captains_role_id=self.cfg.captains_role.id if self.cfg.captains_role else None,
+			pick_teams=self.cfg.pick_teams, pick_order=self.cfg.pick_order,
+			maps=[i['name'] for i in self.cfg.tables.maps],
+			map_count=self.cfg.map_count, check_in_timeout=self.cfg.check_in_timeout,
+			start_msg=self.cfg.start_msg, server=self.cfg.server
+		)
 		players = list(self.queue)
 		await self.qc.queue_started(
 			members=players,

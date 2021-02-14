@@ -28,7 +28,7 @@ class Match:
 		teams=None, team_names=['Alpha', 'Beta'], team_emojis=None, ranked=False,
 		max_players=None, pick_captains="no captains", captains_role_id=None, pick_teams="draft",
 		pick_order=None, maps=[], map_count=0, check_in_timeout=0,
-		match_lifetime=0, start_msg=None, server=None
+		match_lifetime=6*60*60, start_msg=None, server=None
 	)
 
 	class Team(list):
@@ -120,6 +120,7 @@ class Match:
 		self.gt = qc.gt
 
 		# Set configuration variables
+		cfg = {k: v for k, v in cfg.items() if v is not None}  # filter kwargs for notnull values
 		self.cfg = self.default_cfg.copy()
 		self.cfg.update(cfg)
 
@@ -151,7 +152,7 @@ class Match:
 		self.embeds = Embeds(self)
 
 	def init_maps(self, maps, map_count):
-		self.maps = random.sample(maps, map_count)
+		self.maps = random.sample(maps, min(map_count, len(maps)))
 
 	def init_captains(self, pick_captains, captains_role_id):
 		if pick_captains == "by role and rating":

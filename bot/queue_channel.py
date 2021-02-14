@@ -3,6 +3,7 @@ import re
 import json
 import time
 import asyncio
+import traceback
 from discord import Embed, Colour, Forbidden
 
 from core.config import cfg
@@ -402,27 +403,28 @@ class QueueChannel:
 
 		# special commands
 		if re.match(r"^\+..", cmd):
-			await self._add_member(message, message.content[1:])
+			f, args = self.commands.get('add'), [message.content[1:]]
 		elif re.match(r"^-..", cmd):
-			await self._remove_member(message, message.content[1:])
+			f, args = self.commands.get('remove'), [message.content[1:]]
 		elif cmd == "++":
-			await self._add_member(message, "")
+			f, args = self.commands.get('add'), []
 		elif cmd == "--":
-			await self._remove_member(message, "")
+			f, args = self.commands.get('add'), []
 
-		# normal commands s<tarting with prefix
-		if self.cfg.prefix != cmd[0]:
+		# normal commands starting with prefix
+		elif self.cfg.prefix == cmd[0]:
+			f, args = self.commands.get(cmd[1:]), message.content.split(' ', 1)[1:]
+		else:
 			return
 
-		f = self.commands.get(cmd[1:])
 		if f:
 			try:
-				await f(message, *message.content.split(' ', 1)[1:])
+				await f(message, *args)
 			except bot.Exc.PubobotException as e:
 				await message.channel.send(embed=error_embed(str(e), title=type(e).__name__))
 			except BaseException as e:
 				await message.channel.send(embed=error_embed(str(e), title="RuntimeError"))
-				log.error("Error processing message: " + str(e))
+				log.error(f"Error processing last message. Traceback:\n{traceback.format_exc()}======")
 
 	#  Bot commands #
 
@@ -532,7 +534,7 @@ class QueueChannel:
 			await self.success(f"Variable __{var_name}__ configured.")
 
 	async def _set_queue(self, message, args=""):
-		args = args.lower().split(" ", maxsplit=3)
+		args = args.split(" ", maxsplit=2)
 		if len(args) != 3:
 			raise bot.Exc.SyntaxError(f"Usage: {self.cfg.prefix}set_queue __queue__ __variable__ __value__")
 		if (queue := find(lambda q: q.name.lower() == args[0].lower(), self.queues)) is None:
@@ -557,7 +559,7 @@ class QueueChannel:
 		args = args.lower()
 		for q in self.queues:
 			if q.name.lower() == args:
-				await message.author.send(f"```json\n{json.dumps(q.cfg.to_json())}```")
+				await message.author.send(f"```json\n{json.dumps(q.cfg.to_json(), ensure_ascii=False, indent=2)}```")
 				return
 		raise bot.Exc.SyntaxError(f"No such queue '{args}'.")
 
