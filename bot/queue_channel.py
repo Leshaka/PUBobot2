@@ -255,6 +255,13 @@ class QueueChannel:
 		else:
 			return 0
 
+	def _check_perms(self, member, req_perms):
+		if self.access_level(member) < req_perms:
+			if req_perms == 2:
+				raise bot.Exc.PermissionError(self.gt("You must possess admin permissions."))
+			else:
+				raise bot.Exc.PermissionError(self.gt("You must possess moderator permissions."))
+
 	async def new_queue(self, name, size, kind):
 		kind.validate_name(name)
 		if 1 > size > 100:
@@ -430,6 +437,7 @@ class QueueChannel:
 	#  Bot commands #
 
 	async def _add_pickup(self, message, args=""):
+		self._check_perms(message.author, 2)
 		args = args.lower().split(" ")
 		if len(args) != 2 or not args[1].isdigit():
 			raise bot.Exc.SyntaxError(f"Usage: {self.cfg.prefix}add_pickup __name__ __size__")
@@ -520,6 +528,7 @@ class QueueChannel:
 			await self.channel.send("\n".join([f"> **{q.name}** ({q.status}) | {q.who}" for q in t_queues]))
 
 	async def _set(self, message, args=""):
+		self._check_perms(message.author, 2)
 		args = args.split(" ", maxsplit=2)
 		if len(args) != 2:
 			raise bot.Exc.SyntaxError(f"Usage: {self.cfg.prefix}set __variable__ __value__")
@@ -535,6 +544,7 @@ class QueueChannel:
 			await self.success(f"Variable __{var_name}__ configured.")
 
 	async def _set_queue(self, message, args=""):
+		self._check_perms(message.author, 2)
 		args = args.split(" ", maxsplit=2)
 		if len(args) != 3:
 			raise bot.Exc.SyntaxError(f"Usage: {self.cfg.prefix}set_queue __queue__ __variable__ __value__")
@@ -565,6 +575,7 @@ class QueueChannel:
 		raise bot.Exc.SyntaxError(f"No such queue '{args}'.")
 
 	async def _set_cfg(self, message, args=None):
+		self._check_perms(message.author, 2)
 		if not args:
 			raise bot.Exc.SyntaxError(f"Usage: {self.cfg.prefix}set_cfg __json__")
 		try:
@@ -575,6 +586,7 @@ class QueueChannel:
 			await self.success(f"Channel configuration updated.")
 
 	async def _set_cfg_queue(self, message, args=""):
+		self._check_perms(message.author, 2)
 		args = args.split(" ", maxsplit=1)
 		if len(args) != 2:
 			raise bot.Exc.SyntaxError(f"Usage: {self.cfg.prefix}set_cfg_queue __queue__ __json__")
@@ -624,6 +636,7 @@ class QueueChannel:
 		await match.draft.print()
 
 	async def _put(self, message, args=""):
+		self._check_perms(message.author, 1)
 		args = args.split(" ")
 		if len(args) < 2:
 			raise bot.Exc.SyntaxError(f"Usage: {self.cfg.prefix}put __player__ __team__")
@@ -844,6 +857,7 @@ class QueueChannel:
 		self.last_promote = now
 
 	async def _rating_set(self, message, args=None):
+		self._check_perms(message.author, 1)
 		args = args.split(" ")
 		try:
 			if (member := self.get_member(args.pop(0))) is None:
@@ -858,22 +872,26 @@ class QueueChannel:
 		await self.success("Done.")
 
 	async def _rating_hide(self, message, args=None):
+		self._check_perms(message.author, 1)
 		if (member := self.get_member(args)) is None:
 			raise bot.Exc.SyntaxError(f"Usage: {self.cfg.prefix}rating_hide __@user__")
 		await self.rating.hide_player(member.id)
 		await self.success("Done.")
 
 	async def _rating_unhide(self, message, args=None):
+		self._check_perms(message.author, 1)
 		if (member := self.get_member(args)) is None:
 			raise bot.Exc.SyntaxError(f"Usage: {self.cfg.prefix}rating_unhide __@user__")
 		await self.rating.hide_player(member.id, hide=False)
 		await self.success("Done.")
 
 	async def _rating_reset(self, message, args=None):
+		self._check_perms(message.author, 2)
 		await self.rating.reset()
 		await self.success("Done.")
 
 	async def _cancel_match(self, message, args=""):
+		self._check_perms(message.author, 1)
 		if not args.isdigit():
 			raise bot.Exc.SyntaxError(f"Usage: {self.cfg.prefix}cancel_match __match_id__")
 
@@ -883,6 +901,7 @@ class QueueChannel:
 		await match.cancel()
 
 	async def _undo_match(self, message, args=""):
+		self._check_perms(message.author, 1)
 		if not args.isdigit():
 			raise bot.Exc.SyntaxError(f"Usage: {self.cfg.prefix}undo_match __match_id__")
 
@@ -907,6 +926,7 @@ class QueueChannel:
 			await self.success(self.gt("DM notifications for you is now turned on."), reply_to=message.author)
 
 	async def _start(self, message, args=None):
+		self._check_perms(message.author, 1)
 		if not args:
 			raise bot.Exc.SyntaxError(f"Usage: {self.cfg.prefix}start __queue__")
 		if (queue := get(self.queues, name=args)) is None:

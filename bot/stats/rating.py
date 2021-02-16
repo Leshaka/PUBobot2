@@ -53,6 +53,7 @@ class BaseRating:
 			)
 			old = dict(rating=self.init_rp, deviation=self.init_deviation)
 		else:
+			old['rating'] = old['rating'] or self.init_rp
 			old['deviation'] = old['deviation'] or self.init_deviation
 			await db.update(
 					self.table,
