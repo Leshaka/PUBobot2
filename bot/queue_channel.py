@@ -217,6 +217,7 @@ class QueueChannel:
 			leaderboard=self._leaderboard,
 			rl=self._rl,
 			rd=self._rd,
+			rw=self._rw,
 			expire=self._expire,
 			default_expire=self._default_expire,
 			ao=self._allow_offline,
@@ -719,6 +720,15 @@ class QueueChannel:
 		if (match := self.get_match(message.author)) is None:
 			raise bot.Exc.NotInMatchError(self.gt("You are not in an active match."))
 		await match.report_loss(message.author, draw=True)
+
+	async def _rw(self, message, args=[]):
+		self._check_perms(message.author, 1)
+		args = args.split(" ", maxsplit=1)
+		if len(args) != 2 or not args[0].isdigit():
+			raise bot.Exc.SyntaxError(f"Usage: {self.cfg.prefix}rw __match_id__ __team_name__ or draw")
+		if (match := find(lambda m: m.qc == self and m.id == int(args[0]), bot.active_matches)) is None:
+			raise bot.Exc.NotFoundError(f"Could not find match with specified id. Check `{self.cfg.prefix}matches`.")
+		await match.report_win(args[1])
 
 	async def _expire(self, message, args=None):
 		if not args:

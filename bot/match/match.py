@@ -243,10 +243,11 @@ class Match:
 		if self.state != self.WAITING_REPORT:
 			raise bot.Exc.MatchStateError(self.gt("The match must be on the waiting report stage."))
 
-		if team_name.lower() == "draw":
+		team_name = team_name.lower()
+		if team_name == "draw":
 			self.winner = None
 		elif (team := find(lambda t: t.name.lower() == team_name, self.teams[:2])) is not None:
-			self.winner(team.idx)
+			self.winner = team.idx
 		else:
 			raise bot.Exc.SyntaxError(self.gt("Specified team name not found."))
 
