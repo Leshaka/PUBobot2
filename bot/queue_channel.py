@@ -230,7 +230,8 @@ class QueueChannel:
 			rating_reset=self._rating_reset,
 			cancel_match=self._cancel_match,
 			undo_match=self._undo_match,
-			switch_dms=self._switch_dms
+			switch_dms=self._switch_dms,
+			start=self._start
 		)
 
 	def update_lang(self):
@@ -409,7 +410,7 @@ class QueueChannel:
 		elif cmd == "++":
 			f, args = self.commands.get('add'), []
 		elif cmd == "--":
-			f, args = self.commands.get('add'), []
+			f, args = self.commands.get('remove'), []
 
 		# normal commands starting with prefix
 		elif self.cfg.prefix == cmd[0]:
@@ -896,3 +897,10 @@ class QueueChannel:
 			await self.success(self.gt("DM notifications for you is now turned off."), reply_to=message.author)
 		else:
 			await self.success(self.gt("DM notifications for you is now turned on."), reply_to=message.author)
+
+	async def _start(self, message, args=None):
+		if not args:
+			raise bot.Exc.SyntaxError(f"Usage: {self.cfg.prefix}start __queue__")
+		if (queue := get(self.queues, name=args)) is None:
+			raise bot.Exc.NotFoundError(f"Specified queue not found on the channel")
+		await queue.start()

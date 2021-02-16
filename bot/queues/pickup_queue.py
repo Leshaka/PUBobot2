@@ -27,6 +27,11 @@ class PickupQueue:
 				default=1
 			),
 			Variables.BoolVar(
+				"autostart",
+				display="Autostart",
+				default=1
+			),
+			Variables.BoolVar(
 				"ranked",
 				display="Ranked",
 				default=0,
@@ -200,7 +205,7 @@ class PickupQueue:
 			if self not in bot.active_queues:
 				bot.active_queues.append(self)
 
-			if len(self.queue) == self.cfg.size:
+			if len(self.queue) == self.cfg.size and self.cfg.autostart:
 				await self.start()
 				return True
 
@@ -215,10 +220,13 @@ class PickupQueue:
 			raise ValueError("Specified Member is not added to the queue.")
 
 	async def start(self):
+		if len(self.queue) < 2:
+			raise bot.Exc.PubobotException("Not enough players to start the queue.")
+
 		await bot.Match.new(
 			self, self.qc, list(self.queue),
 			team_names=self.cfg.team_names, team_emojis=self.cfg.team_emojis, ranked=self.cfg.ranked,
-			max_players=self.cfg.size, pick_captains=self.cfg.pick_captains,
+			team_size=int(self.cfg.size/2), pick_captains=self.cfg.pick_captains,
 			captains_role_id=self.cfg.captains_role.id if self.cfg.captains_role else None,
 			pick_teams=self.cfg.pick_teams, pick_order=self.cfg.pick_order,
 			maps=[i['name'] for i in self.cfg.tables.maps],

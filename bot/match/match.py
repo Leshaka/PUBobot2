@@ -26,7 +26,7 @@ class Match:
 
 	default_cfg = dict(
 		teams=None, team_names=['Alpha', 'Beta'], team_emojis=None, ranked=False,
-		max_players=None, pick_captains="no captains", captains_role_id=None, pick_teams="draft",
+		team_size=1, pick_captains="no captains", captains_role_id=None, pick_teams="draft",
 		pick_order=None, maps=[], map_count=0, check_in_timeout=0,
 		match_lifetime=6*60*60, start_msg=None, server=None
 	)
@@ -180,11 +180,11 @@ class Match:
 				combinations(self.players, team_len),
 				key=lambda team: abs(sum([self.ratings[m.id] for m in team])-best_rating)
 			)
-			self.teams[0].set(best_team)
-			self.teams[1].set((p for p in self.players if p not in best_team))
+			self.teams[0].set(best_team[:self.cfg['team_size']])
+			self.teams[1].set([p for p in self.players if p not in best_team][:self.cfg['team_size']])
 		elif pick_teams == "random teams":
-			self.teams[0].set(random.sample(self.players, int(len(self.players)/2)))
-			self.teams[1].set((p for p in self.players if p not in self.teams[0]))
+			self.teams[0].set(random.sample(self.players, self.cfg['team_size']))
+			self.teams[1].set([p for p in self.players if p not in self.teams[0]][:self.cfg['team_size']])
 
 	async def think(self, frame_time):
 		if self.state == self.INIT:

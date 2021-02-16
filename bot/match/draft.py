@@ -20,17 +20,15 @@ class Draft:
 			self.m.states.append(self.m.DRAFT)
 
 	async def start(self):
-		if not len(self.m.teams[2]):
-			await self.m.next_state()
-			return
-
-		await self.print()
+		await self.refresh()
 
 	async def print(self):
 		await self.m.send(embed=self.m.embeds.draft())
 
 	async def refresh(self):
-		if len(self.m.teams[2]) or self.m.state != self.m.DRAFT:
+		if self.m.state != self.m.DRAFT:
+			await self.print()
+		elif len(self.m.teams[2]) and any((len(t) < self.m.cfg['team_size'] for t in self.m.teams)):
 			await self.print()
 		else:
 			await self.m.next_state()
