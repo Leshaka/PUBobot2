@@ -17,29 +17,25 @@ class BaseRating:
 		self.init_deviation = init_deviation
 		self.scale = scale
 
-	async def get_players(self, user_ids=None, limit=None):
+	async def get_players(self, user_ids):
+		""" Return rating or initial rating for each member """
 		data = await db.select(
-			['user_id', 'nick', 'rating', 'deviation', 'channel_id', 'wins', 'losses', 'draws'], self.table,
-			where={'channel_id': self.channel_id}, order_by="rating", limit=limit
+			['user_id', 'rating', 'deviation', 'channel_id', 'wins', 'losses', 'draws'], self.table,
+			where={'channel_id': self.channel_id}
 		)
-		if user_ids:
-			return [
-				find(lambda p: p['user_id'] == user_id, data) or
-				dict(
-					channel_id=self.channel_id, user_id=user_id, rating=self.init_rp, deviation=self.init_deviation,
-					wins=0, losses=0, draws=0
+		results = []
+		for user_id in user_ids:
+			if d := find(lambda p: p['user_id'] == user_id, data):
+				if d['rating'] is None:
+					d['rating'] = self.init_rp
+					d['deviation'] = self.init_deviation
+			else:
+				d = dict(
+					channel_id=self.channel_id, user_id=user_id, rating=self.init_rp,
+					deviation=self.init_deviation, wins=0, losses=0, draws=0
 				)
-				for user_id in user_ids
-			]
-		else:
-			return data
-
-	async def get_player(self, user_id):
-		data = await db.select_one(
-			['user_id', 'nick', 'rating', 'deviation', 'channel_id', 'wins', 'losses', 'draws'], self.table,
-			where={"channel_id": self.channel_id, "user_id": user_id}
-		)
-		return data or dict(rating=self.init_rp, deviation=self.init_deviation)
+			results.append(d)
+		return results
 
 	async def set_rating(self, member, rating, deviation=None):
 		old = await db.select_one(
@@ -57,9 +53,10 @@ class BaseRating:
 			)
 			old = dict(rating=self.init_rp, deviation=self.init_deviation)
 		else:
+			old['deviation'] = old['deviation'] or self.init_deviation
 			await db.update(
 					self.table,
-					dict(rating=rating, deviation=deviation or self.init_deviation),
+					dict(rating=rating, deviation=deviation or old['deviation']),
 					keys=dict(channel_id=self.channel_id, user_id=member.id)
 				)
 
@@ -96,7 +93,7 @@ class BaseRating:
 				))
 
 		await db.update(
-			self.table, dict(rating=self.init_rp, deviation=self.init_deviation), keys=dict(channel_id=self.channel_id)
+			self.table, dict(rating=None, deviation=None), keys=dict(channel_id=self.channel_id)
 		)
 		if len(history):
 			await db.insert_many('qc_rating_history', history)

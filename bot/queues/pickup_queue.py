@@ -144,7 +144,7 @@ class PickupQueue:
 	@classmethod
 	async def create(cls, qc, name, size=2):
 		cfg = await cls.cfg_factory.spawn(qc.channel.guild, f_key=qc.channel.id)
-		await cfg.update({"name": name, "size": size})
+		await cfg.update({"name": name, "size": str(size)})
 		return cls(qc, cfg)
 
 	def serialize(self):

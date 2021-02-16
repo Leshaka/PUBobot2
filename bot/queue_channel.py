@@ -364,7 +364,7 @@ class QueueChannel:
 		asyncio.create_task(self._update_rating_roles(*members))
 
 	async def _update_rating_roles(self, *members):
-		data = await self.rating.get_players(user_ids=(i.id for i in members))
+		data = await self.rating.get_players((i.id for i in members))
 		roles = {i['user_id']: self.rating_rank(i['rating'])['role'] for i in data}
 		all_roles = [i['role'] for i in self.cfg.tables.ranks if i is not None]
 
@@ -432,7 +432,7 @@ class QueueChannel:
 	async def _add_pickup(self, message, args=""):
 		args = args.lower().split(" ")
 		if len(args) != 2 or not args[1].isdigit():
-			raise bot.Exc.SyntaxError(f"Usage: {self.cfg.prefix}add_pickups __name__ __size__")
+			raise bot.Exc.SyntaxError(f"Usage: {self.cfg.prefix}add_pickup __name__ __size__")
 		try:
 			pq = await self.new_queue(args[0], int(args[1]), bot.PickupQueue)
 		except ValueError as e:
@@ -656,13 +656,20 @@ class QueueChannel:
 		else:
 			member = message.author
 
-		data = await self.rating.get_players()
+		data = await db.select(
+			['user_id', 'rating', 'deviation', 'channel_id', 'wins', 'losses', 'draws'], "qc_players",
+			where={'channel_id': self.channel.id}, order_by="rating"
+		)
 		if p := find(lambda i: i['user_id'] == member.id, data):
-			embed = Embed(title=f"__{p['nick']}__", colour=Colour(0x7289DA))
+			embed = Embed(title=f"__{member.nick or member.name}__", colour=Colour(0x7289DA))
 			embed.add_field(name="№", value=f"**{data.index(p)+1}**", inline=True)
 			embed.add_field(name="Matches", value=f"**{(p['wins']+p['losses']+p['draws'])}**", inline=True)
-			embed.add_field(name="Rank", value=f"**{self.rating_rank(p['rating'])['rank']}**", inline=True)
-			embed.add_field(name="Rating", value=f"**{p['rating']}**±{p['deviation']}")
+			if p['rating']:
+				embed.add_field(name="Rank", value=f"**{self.rating_rank(p['rating'])['rank']}**", inline=True)
+				embed.add_field(name="Rating", value=f"**{p['rating']}**±{p['deviation']}")
+			else:
+				embed.add_field(name="Rank", value="**〈?〉**", inline=True)
+				embed.add_field(name="Rating", value="**?**")
 			embed.add_field(name="W/L/D", value=f"**{p['wins']}**/**{p['losses']}**/**{p['draws']}**", inline=True)
 			embed.add_field(name="Winrate", value="**{}%**\n\u200b".format(
 				int(p['wins']*100 / (p['wins']+p['losses'] or 1))
@@ -793,6 +800,7 @@ class QueueChannel:
 			['nick', 'rating', 'deviation', 'wins', 'losses', 'draws'], 'qc_players',
 			where={'channel_id': self.channel.id, 'is_hidden': 0}, order_by="rating"
 		)
+		data = [i for i in data if i['rating'] is not None]
 
 		if len(data):
 			lines = ["{0:^3}|{1:^11}|{2:^25.25}|{3:^9}| {4}".format(

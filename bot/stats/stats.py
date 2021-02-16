@@ -21,8 +21,8 @@ db.ensure_table(dict(
 		dict(cname="user_id", ctype=db.types.int),
 		dict(cname="nick", ctype=db.types.str),
 		dict(cname="is_hidden", ctype=db.types.bool, default=0),
-		dict(cname="rating", ctype=db.types.int, notnull=True),
-		dict(cname="deviation", ctype=db.types.int, notnull=True),
+		dict(cname="rating", ctype=db.types.int),
+		dict(cname="deviation", ctype=db.types.int),
 		dict(cname="wins", ctype=db.types.int, notnull=True, default=0),
 		dict(cname="losses", ctype=db.types.int, notnull=True, default=0),
 		dict(cname="draws", ctype=db.types.int, notnull=True, default=0)
@@ -88,7 +88,7 @@ async def register_match_unranked(m):
 	))
 
 	await db.insert_many('qc_players', (
-		dict(channel_id=m.qc.channel.id, user_id=p.id, rating=m.qc.rating.init_rp, deviation=m.qc.rating.init_deviation)
+		dict(channel_id=m.qc.channel.id, user_id=p.id)
 		for p in m.players
 	), on_dublicate="ignore")
 
@@ -116,7 +116,7 @@ async def register_match_ranked(m):
 	))
 
 	await db.insert_many('qc_players', (
-		dict(channel_id=m.qc.channel.id, user_id=p.id, rating=m.qc.rating.init_rp, deviation=m.qc.rating.init_deviation)
+		dict(channel_id=m.qc.channel.id, user_id=p.id)
 		for p in m.players
 	), on_dublicate="ignore")
 
@@ -187,7 +187,8 @@ async def undo_match(match_id, qc):
 			), key='user_id'
 		)
 		stats = iter_to_dict(
-			await qc.rating.get_players((p['user_id'] for p in p_matches)), key='user_id')
+			await qc.rating.get_players((p['user_id'] for p in p_matches)), key='user_id'
+		)
 
 		for p in p_matches:
 			new = stats[p['user_id']]
