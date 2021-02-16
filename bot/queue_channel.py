@@ -24,7 +24,7 @@ class QueueChannel:
 
 	rating_names = {
 		'flat': FlatRating,
-		'glicko2': Glicko2Rating,
+		'Glicko2': Glicko2Rating,
 		'TrueSkill': TrueSkillRating
 	}
 
@@ -70,7 +70,7 @@ class QueueChannel:
 				display="Rating system",
 				description="Set player's rating calculation method.",
 				options=rating_names.keys(),
-				default="glicko2",
+				default="Glicko2",
 				notnull=True,
 				on_change=bot.update_rating_system
 			),
@@ -519,7 +519,7 @@ class QueueChannel:
 			await self.channel.send("\n".join([f"> **{q.name}** ({q.status}) | {q.who}" for q in t_queues]))
 
 	async def _set(self, message, args=""):
-		args = args.lower().split(" ", maxsplit=2)
+		args = args.split(" ", maxsplit=2)
 		if len(args) != 2:
 			raise bot.Exc.SyntaxError(f"Usage: {self.cfg.prefix}set __variable__ __value__")
 

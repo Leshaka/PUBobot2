@@ -228,11 +228,15 @@ class Match:
 		if draw and not enemy_team.want_draw:
 			team.want_draw = True
 			await self.qc.channel.send(
-				self.gt("{team} team captain is calling a draw, waiting for {enemy} to type `{prefix}rd`.")
+				self.gt("{team} team captain is calling a draw, waiting for {enemy} to type `{prefix}rd`.").format(
+					team=team.name,
+					enemy=enemy_team[0].mention,
+					prefix=self.qc.cfg.prefix
+				)
 			)
 			return
 
-		self.winner = None if draw is None else enemy_team.idx
+		self.winner = None if draw else enemy_team.idx
 		await self.finish_match()
 
 	async def report_win(self, team_name):  # version for admins/mods

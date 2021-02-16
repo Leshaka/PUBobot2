@@ -240,8 +240,10 @@ class OptionVar(Variable):
 		if string.lower() in ['none', 'null']:
 			return None
 
-		if string in self.options:
-			return string
+		string = string.lower()
+		for i in self.options:
+			if i.lower() == string:
+				return i
 		raise ValueError('Specified value not in options list.')
 
 

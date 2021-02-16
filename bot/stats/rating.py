@@ -116,9 +116,9 @@ class FlatRating(BaseRating):
 				new['rating'] += self.scale
 				results.append(new)
 
-			for p in losers.keys():
+			for p in losers:
 				new = p.copy()
-				new['rating'] = min((new['rating']-self.scale, 0))
+				new['rating'] = max((new['rating']-self.scale, 0))
 				results.append(new)
 		else:
 			results = [p.copy() for p in (*winners, *losers)]
@@ -135,6 +135,8 @@ class Glicko2Rating(BaseRating):
 	def rate(self, winners, losers, draw=False):
 		score_w = 0.5 if draw else 1
 		score_l = 0.5 if draw else 0
+		print("Scores:")
+		print(score_l, score_w)
 
 		avg_w = [
 			[int(sum((p['rating'] for p in winners)) / len(winners))],  # average rating

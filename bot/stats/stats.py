@@ -126,8 +126,8 @@ async def register_match_ranked(m):
 	]
 
 	after = m.qc.rating.rate(
-		winners=before[int(m.winner)],
-		losers=before[abs(int(m.winner)-1)],
+		winners=before[m.winner or 0],
+		losers=before[abs((m.winner or 0)-1)],
 		draw=m.winner is None
 	)
 
