@@ -27,11 +27,6 @@ class PickupQueue:
 				default=1
 			),
 			Variables.BoolVar(
-				"autostart",
-				display="Autostart",
-				default=1
-			),
-			Variables.BoolVar(
 				"ranked",
 				display="Ranked",
 				default=0,
