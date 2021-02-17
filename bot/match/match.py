@@ -126,6 +126,7 @@ class Match:
 
 		# Set working objects
 		self.id = match_id
+		self.ranked = self.cfg['ranked']
 		self.players = list(players)
 		self.ratings = ratings
 		self.winner = None
@@ -256,7 +257,7 @@ class Match:
 	async def print_rating_results(self, before, after):
 		msg = "```markdown\n"
 		msg += f"{self.queue.name.capitalize()}({self.id}) results\n"
-		msg += "-------------\n"
+		msg += "-------------"
 
 		if self.winner is not None:
 			winners, losers = self.teams[self.winner], self.teams[abs(self.winner-1)]
@@ -265,15 +266,15 @@ class Match:
 
 		if len(winners) == 1 and len(losers) == 1:
 			p = winners[0]
-			msg += f"1. {p.nick or p.name} {before[p.id]['rating']} ⟼ {after[p.id]['rating']}\n"
+			msg += f"\n1. {p.nick or p.name} {before[p.id]['rating']} ⟼ {after[p.id]['rating']}"
 			p = losers[0]
-			msg += f"2. {p.nick or p.name} {before[p.id]['rating']} ⟼ {after[p.id]['rating']}"
+			msg += f"\n2. {p.nick or p.name} {before[p.id]['rating']} ⟼ {after[p.id]['rating']}"
 		else:
 			n = 0
 			for team in (winners, losers):
 				avg_bf = int(sum((before[p.id]['rating'] for p in team))/len(team))
 				avg_af = int(sum((after[p.id]['rating'] for p in team))/len(team))
-				msg += f"{n}. {team.name} {avg_bf} ⟼ {avg_af}\n"
+				msg += f"\n{n}. {team.name} {avg_bf} ⟼ {avg_af}\n"
 				msg += "\n".join(
 					(f"> {p.name or p.nick} {before[p.id]['rating']} ⟼ {after[p.id]['rating']}" for p in team)
 				)
