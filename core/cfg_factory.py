@@ -188,7 +188,7 @@ class Variable:
 
 	async def validate(self, string, guild):
 		""" Validate and return database-friendly object from received string """
-		if string.lower() in ['none', 'null']:
+		if not string or string.lower() in ['none', 'null']:
 			return None
 		return string
 
@@ -221,7 +221,7 @@ class EmojiVar(Variable):
 		self.ctype = db.types.str
 
 	async def validate(self, string, guild):
-		if string.lower() in ['none', 'null']:
+		if not string or string.lower() in ['none', 'null']:
 			return None
 
 		if re.match("^:[^ ]*:$", string):
@@ -245,7 +245,7 @@ class OptionVar(Variable):
 		self.options = options
 
 	async def validate(self, string, guild):
-		if string.lower() in ['none', 'null']:
+		if not string or string.lower() in ['none', 'null']:
 			return None
 
 		string = string.lower()
@@ -261,9 +261,12 @@ class BoolVar(Variable):
 		super().__init__(name, **kwargs)
 		self.ctype = db.types.int
 
-	async def validate(self, value, guild):
+	async def validate(self, string, guild):
 		# 0 == False and 1 == True in python
-		value = value.lower()
+		if not string:
+			return None
+
+		value = string.lower()
 		if value in ['none', 'null']:
 			return None
 		elif value in ['1', 'on', 'true']:
@@ -285,7 +288,7 @@ class IntVar(Variable):
 		self.ctype = db.types.int
 
 	async def validate(self, string, guild):
-		if string.lower() in ['none', 'null']:
+		if not string or string.lower() in ['none', 'null']:
 			return None
 		return int(string)
 
@@ -297,7 +300,7 @@ class RoleVar(Variable):
 		self.ctype = db.types.int
 
 	async def validate(self, string, guild):
-		if string.lower() in ['none', 'null']:
+		if not string or string.lower() in ['none', 'null']:
 			return None
 
 		mention = re.match('^<@&([0-9]+)>$', string)
@@ -336,7 +339,7 @@ class MemberVar(Variable):
 		self.ctype = db.types.int
 
 	async def validate(self, string, guild):
-		if string.lower() in ['none', 'null']:
+		if not string or string.lower() in ['none', 'null']:
 			return None
 
 		mention = re.match("^<@[!]*([0-9]+)>$", string)
@@ -377,7 +380,7 @@ class TextChanVar(Variable):
 		self.ctype = db.types.int
 
 	async def validate(self, string, guild):
-		if string.lower() in ['none', 'null']:
+		if not string or string.lower() in ['none', 'null']:
 			return None
 
 		mention = re.match("^<#([0-9]+)>$", string)
@@ -417,7 +420,7 @@ class DurationVar(Variable):
 		self.ctype = db.types.int
 
 	async def validate(self, string, guild):
-		if string.lower() in ['none', 'null']:
+		if not string or string.lower() in ['none', 'null']:
 			return None
 
 		if re.match(r"^\d\d:\d\d:\d\d$", string):
