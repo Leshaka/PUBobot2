@@ -207,7 +207,7 @@ async def undo_match(match_id, qc):
 
 			await db.update("qc_players", new, keys=dict(channel_id=qc.channel.id, user_id=p['user_id']))
 		await db.delete("qc_rating_history", where=dict(match_id=match_id))
-		members = [await qc.channel.guild.get_member(p['user_id']) for p in p_matches]
+		members = (qc.channel.guild.get_member(p['user_id']) for p in p_matches)
 		await qc.update_rating_roles(*(m for m in members if m is not None))
 
 	await db.delete('qc_player_matches', where=dict(match_id=match_id))
