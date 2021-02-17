@@ -54,6 +54,7 @@ class CfgFactory:
 			return await Config.load(self, row, guild)
 		else:
 			row = {v.name: v.default for v in self.variables.values()}
+			row['cfg_info'] = "{}"
 			row[self.p_key] = p_key if p_key else await self.get_max(self.p_key)+1
 			if f_key:
 				row[self.f_key] = f_key
