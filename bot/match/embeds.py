@@ -48,7 +48,7 @@ class Embeds:
 
 		teams_names = [
 			f"{t.emoji} \u200b **{t.name}**" +
-			(f" \u200b `〈{sum((self.m.ratings[p.id] for p in t))}〉`" if self.m.cfg['ranked'] else "")
+			(f" \u200b `〈{sum((self.m.ratings[p.id] for p in t))//(len(t) or 1)}〉`" if self.m.cfg['ranked'] else "")
 			for t in self.m.teams[:2]
 		]
 		team_players = [
@@ -108,7 +108,7 @@ class Embeds:
 		else:  # team vs team
 			teams_names = [
 				f"{t.emoji} \u200b **{t.name}**" +
-				(f" \u200b `〈{sum((self.m.ratings[p.id] for p in t))}〉`" if self.m.cfg['ranked'] else "")
+				(f" \u200b `〈{sum((self.m.ratings[p.id] for p in t))//(len(t) or 1)}〉`" if self.m.cfg['ranked'] else "")
 				for t in self.m.teams[:2]
 			]
 			team_players = [
