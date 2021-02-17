@@ -446,7 +446,7 @@ class QueueChannel:
 
 	async def _create_pickup(self, message, args=""):
 		self._check_perms(message.author, 2)
-		args = args.lower().split(" ")
+		args = args.split(" ")
 		if len(args) != 2 or not args[1].isdigit():
 			raise bot.Exc.SyntaxError(f"Usage: {self.cfg.prefix}add_pickup __name__ __size__")
 		try:
