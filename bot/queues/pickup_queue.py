@@ -221,7 +221,7 @@ class PickupQueue:
 
 	async def start(self):
 		if len(self.queue) < 2:
-			raise bot.Exc.PubobotException("Not enough players to start the queue.")
+			raise bot.Exc.PubobotException(self.qc.gt("Not enough players to start the queue."))
 
 		await bot.Match.new(
 			self, self.qc, list(self.queue),
@@ -236,7 +236,7 @@ class PickupQueue:
 		players = list(self.queue)
 		await self.qc.queue_started(
 			members=players,
-			message="**{queue}** pickup has started @ {channel}!".format(
+			message=self.qc.gt("**{queue}** pickup has started @ {channel}!").format(
 				queue=self.name,
 				channel=self.qc.channel.mention
 			)

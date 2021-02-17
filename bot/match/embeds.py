@@ -55,7 +55,7 @@ class Embeds:
 			" \u200b ".join([
 				(f"`{self.m.rank_str(p)}" if self.m.cfg['ranked'] else "`") + f"{p.nick or p.name}`"
 				for p in t
-			]) if len(t) else "empty"
+			]) if len(t) else self.m.gt("empty")
 			for t in self.m.teams[:2]
 		]
 		embed.add_field(name=teams_names[0], value=" \u200b ❲ \u200b " + team_players[0] + " \u200b ❳", inline=False)
@@ -104,7 +104,7 @@ class Embeds:
 				rating2=f" \u200b `〈{self.m.ratings[p2.id]}〉`" if self.m.cfg['ranked'] else "",
 				player2=f"<@{p2.id}>",
 			)
-			embed.add_field(name="Players", value=players, inline=False)
+			embed.add_field(name=self.m.gt("Players"), value=players, inline=False)
 		else:  # team vs team
 			teams_names = [
 				f"{t.emoji} \u200b **{t.name}**" +

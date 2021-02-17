@@ -310,13 +310,13 @@ class QueueChannel:
 				if reason == "expire":
 					reason = self.gt("expire time ran off")
 				elif reason == "offline":
-					reason = self.gt("user offline")
+					reason = self.gt("member offline")
 				elif reason == "afk":
-					reason = self.gt("user AFK")
+					reason = self.gt("member AFK")
 				elif reason == "left guild":
-					reason = self.gt("user left the guild")
+					reason = self.gt("member left the guild")
 				elif reason == "pickup started":
-					reason = self.gt("pickup started on another channel")
+					reason = self.gt("queue started on another channel")
 
 				if len(affected) == 1:
 					await self.channel.send(self.gt("{member} were removed from all queues ({reason}).").format(
@@ -727,7 +727,9 @@ class QueueChannel:
 		if len(args) != 2 or not args[0].isdigit():
 			raise bot.Exc.SyntaxError(f"Usage: {self.cfg.prefix}rw __match_id__ __team_name__ or draw")
 		if (match := find(lambda m: m.qc == self and m.id == int(args[0]), bot.active_matches)) is None:
-			raise bot.Exc.NotFoundError(f"Could not find match with specified id. Check `{self.cfg.prefix}matches`.")
+			raise bot.Exc.NotFoundError(self.gt("Could not find match with specified id. Check `{prefix}matches`.").format(
+				prefix=self.cfg.prefix
+			))
 		await match.report_win(args[1])
 
 	async def _expire(self, message, args=None):
@@ -743,7 +745,7 @@ class QueueChannel:
 			try:
 				secs = parse_duration("".join(args))
 			except ValueError:
-				raise bot.Exc.SyntaxError(self.gt("Invalid duration format. Syntax: 3h2m1s."))
+				raise bot.Exc.SyntaxError(self.gt("Invalid duration format. Syntax: 3h2m1s or 03:02:01."))
 
 			if secs > MAX_EXPIRE_TIME:
 				raise bot.Exc.ValueError(self.gt("Expire time must be less than {time}.".format(
@@ -771,7 +773,7 @@ class QueueChannel:
 				try:
 					expire = parse_duration("".join(args))
 				except ValueError:
-					raise bot.Exc.SyntaxError(self.gt("Invalid expire time argument."))
+					raise bot.Exc.SyntaxError(self.gt("Invalid duration format. Syntax: 3h2m1s or 03:02:01 or AFK."))
 				if expire > MAX_EXPIRE_TIME:
 					raise bot.Exc.SyntaxError(self.gt("Expire time must be less than {time}.".format(
 						time=seconds_to_str(MAX_EXPIRE_TIME)
@@ -845,17 +847,17 @@ class QueueChannel:
 			)
 			await self.channel.send(text)
 		else:
-			raise bot.Exc.NotFoundError("Leaderboard is empty")
+			raise bot.Exc.NotFoundError(self.gt("Leaderboard is empty."))
 
 	async def _promote(self, message, args=None):
 		if not args:
 			if (queue := next(iter(
 					sorted((q for q in self.queues if q.length), key=lambda q: q.length, reverse=True)
 			), None)) is None:
-				raise bot.Exc.NotFoundError("Nothing to promote.")
+				raise bot.Exc.NotFoundError(self.gt("Nothing to promote."))
 		else:
 			if (queue := find(lambda q: q.name.lower() == args.lower(), self.queues)) is None:
-				raise bot.Exc.NotFoundError("Specified queue not found.")
+				raise bot.Exc.NotFoundError(self.gt("Specified queue not found."))
 
 		now = int(time.time())
 		if self.cfg.promotion_delay and self.cfg.promotion_delay+self.last_promote > now:
@@ -879,26 +881,26 @@ class QueueChannel:
 
 		await self.rating.set_rating(member, rating, deviation)
 		await self.update_rating_roles(member)
-		await self.success("Done.")
+		await self.success(self.gt("Done."))
 
 	async def _rating_hide(self, message, args=None):
 		self._check_perms(message.author, 1)
 		if (member := self.get_member(args)) is None:
 			raise bot.Exc.SyntaxError(f"Usage: {self.cfg.prefix}rating_hide __@user__")
 		await self.rating.hide_player(member.id)
-		await self.success("Done.")
+		await self.success(self.gt("Done."))
 
 	async def _rating_unhide(self, message, args=None):
 		self._check_perms(message.author, 1)
 		if (member := self.get_member(args)) is None:
 			raise bot.Exc.SyntaxError(f"Usage: {self.cfg.prefix}rating_unhide __@user__")
 		await self.rating.hide_player(member.id, hide=False)
-		await self.success("Done.")
+		await self.success(self.gt("Done."))
 
 	async def _rating_reset(self, message, args=None):
 		self._check_perms(message.author, 2)
 		await self.rating.reset()
-		await self.success("Done.")
+		await self.success(self.gt("Done."))
 
 	async def _cancel_match(self, message, args=""):
 		self._check_perms(message.author, 1)
@@ -906,7 +908,9 @@ class QueueChannel:
 			raise bot.Exc.SyntaxError(f"Usage: {self.cfg.prefix}cancel_match __match_id__")
 
 		if not (match := get(bot.active_matches, id=int(args))):
-			raise bot.Exc.NotFoundError(f"Specified match not found.")
+			raise bot.Exc.NotFoundError(self.gt("Could not find match with specified id. Check `{prefix}matches`.".format(
+				prefix=self.cfg.prefix
+			)))
 
 		await match.cancel()
 
@@ -917,9 +921,11 @@ class QueueChannel:
 
 		result = await bot.stats.undo_match(int(args), self)
 		if result:
-			await self.success("Done")
+			await self.success(self.gt("Done."))
 		else:
-			raise bot.Exc.NotFoundError("Specified match not found.")
+			raise bot.Exc.NotFoundError(self.gt("Could not find match with specified id. Check `{prefix}matches`.".format(
+				prefix=self.cfg.prefix
+			)))
 
 	async def _switch_dms(self, message, args=""):
 		data = await db.select_one(('allow_dm', ), 'players', where={'user_id': message.author.id})
@@ -931,14 +937,14 @@ class QueueChannel:
 			await db.insert('players', {'allow_dm': allow_dm, 'user_id': message.author.id})
 
 		if allow_dm:
-			await self.success(self.gt("DM notifications for you is now turned off."), reply_to=message.author)
+			await self.success(self.gt("Your DM notifications is now turned off."), reply_to=message.author)
 		else:
-			await self.success(self.gt("DM notifications for you is now turned on."), reply_to=message.author)
+			await self.success(self.gt("Your DM notifications is now turned on."), reply_to=message.author)
 
 	async def _start(self, message, args=None):
 		self._check_perms(message.author, 1)
 		if not args:
 			raise bot.Exc.SyntaxError(f"Usage: {self.cfg.prefix}start __queue__")
 		if (queue := get(self.queues, name=args)) is None:
-			raise bot.Exc.NotFoundError(f"Specified queue not found on the channel")
+			raise bot.Exc.NotFoundError(self.gt("Specified queue not found."))
 		await queue.start()

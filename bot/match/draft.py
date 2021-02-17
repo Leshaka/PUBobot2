@@ -39,7 +39,7 @@ class Draft:
 		elif self.captains_role_id and self.captains_role_id not in (r.id for r in author.roles):
 			raise bot.Exc.PermissionError(self.m.gt("You must possess the captain's role."))
 		elif (team := find(lambda t: t.name.lower() == team_name.lower(), self.m.teams[:2])) is None:
-			raise bot.Exc.SyntaxError(self.m.gt("Team with name '{name}' not found.".format(name=team_name)))
+			raise bot.Exc.SyntaxError(self.m.gt("Specified team name not found."))
 		elif len(team):
 			raise bot.Exc.PermissionError(self.m.gt("Team {name} already have a captain.".format(name=f"**{team.name}**")))
 		find(lambda t: author in t, self.m.teams).remove(author)
@@ -65,7 +65,7 @@ class Draft:
 
 	async def put(self, player, team_name):
 		if (team := find(lambda t: t.name.lower() == team_name.lower(), self.m.teams)) is None:
-			raise bot.Exc.SyntaxError(self.m.gt("Team with name '{name}' not found."))
+			raise bot.Exc.SyntaxError(self.m.gt("Specified team name not found."))
 		if self.m.state not in [self.m.DRAFT, self.m.WAITING_REPORT]:
 			raise bot.Exc.MatchStateError(self.m.gt("The match must be on the draft or waiting report stage."))
 

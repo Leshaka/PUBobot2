@@ -222,14 +222,14 @@ class Match:
 
 		team = find(lambda team: member in team[:1], self.teams[:2])
 		if team is None:
-			raise bot.Exc.PermissionError(self.gt("You must be a team captain to report loss."))
+			raise bot.Exc.PermissionError(self.gt("You must be a team captain to report a loss or draw."))
 
 		enemy_team = self.teams[1-team.idx]
 		if draw and not enemy_team.want_draw:
 			team.want_draw = True
 			await self.qc.channel.send(
-				self.gt("{team} team captain is calling a draw, waiting for {enemy} to type `{prefix}rd`.").format(
-					team=team.name,
+				self.gt("{self} is calling a draw, waiting for {enemy} to type `{prefix}rd`.").format(
+					self=member.mention,
 					enemy=enemy_team[0].mention,
 					prefix=self.qc.cfg.prefix
 				)
