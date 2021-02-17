@@ -188,7 +188,7 @@ class QueueChannel:
 		self.topic = f"> {self.gt('no players')}"
 		self.last_promote = 0
 		self.commands = dict(
-			add_pickup=self._add_pickup,
+			create_pickup=self._create_pickup,
 			queues=self._show_queues,
 			pickups=self._show_queues,
 			add=self._add_member,
@@ -234,6 +234,13 @@ class QueueChannel:
 			switch_dms=self._switch_dms,
 			start=self._start
 		)
+
+	async def update_info(self):
+		self.cfg.cfg_info['channel_name'] = self.channel.name
+		self.cfg.cfg_info['guild_id'] = self.channel.guild.id
+		self.cfg.cfg_info['guild_name'] = self.channel.guild.name
+
+		await self.cfg.set_info(self.cfg.cfg_info)
 
 	def update_lang(self):
 		self.gt = locales[self.cfg.lang]
@@ -437,7 +444,7 @@ class QueueChannel:
 
 	#  Bot commands #
 
-	async def _add_pickup(self, message, args=""):
+	async def _create_pickup(self, message, args=""):
 		self._check_perms(message.author, 2)
 		args = args.lower().split(" ")
 		if len(args) != 2 or not args[1].isdigit():

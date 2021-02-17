@@ -2,6 +2,7 @@
 from types import SimpleNamespace
 import re
 import emoji
+import json
 from datetime import datetime
 
 from core.database import db
@@ -29,6 +30,7 @@ class CfgFactory:
 			tname=self.table,
 			columns=[
 				*self.keys,
+				dict(cname='cfg_info', ctype=db.types.text, default="{}"),
 				*(dict(cname=v.name, ctype=v.ctype, default=v.default) for v in variables)
 			],
 			primary_keys=[self.p_key]
@@ -111,6 +113,7 @@ class Config:
 	def __init__(self, cfg_factory, row, guild):
 		self._guild = guild
 		self._factory = cfg_factory
+		self.cfg_info = json.loads(row.pop("cfg_info"))
 		self.p_key = row.pop(cfg_factory.p_key)
 		self.f_key = row.pop(cfg_factory.f_key) if cfg_factory.f_key else None
 		self.tables = SimpleNamespace()
@@ -160,6 +163,10 @@ class Config:
 		for key, value in self._factory.tables.items():
 			data["tables"][key] = value.readable(getattr(self.tables, key))
 		return data
+
+	async def set_info(self, d):
+		self.cfg_info = d
+		await db.update(self._factory.table, {'cfg_info': json.dumps(d)}, {self._factory.p_key: self.p_key})
 
 
 class Variable:
