@@ -4,7 +4,7 @@ import trueskill
 import time
 
 from core.database import db
-from core.utils import find
+from core.utils import find, get_nick
 
 
 class BaseRating:
@@ -47,7 +47,7 @@ class BaseRating:
 			await db.insert(
 				self.table,
 				dict(
-					channel_id=self.channel_id, nick=member.nick or member.name, user_id=member.id,
+					channel_id=self.channel_id, nick=get_nick(member), user_id=member.id,
 					rating=rating, deviation=deviation or self.init_deviation
 				)
 			)
