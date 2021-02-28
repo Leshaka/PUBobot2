@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import time
 from core.database import db
-from core.utils import iter_to_dict, find
+from core.utils import iter_to_dict, find, get_nick
 
 db.ensure_table(dict(
 	tname="players",
@@ -95,7 +95,7 @@ async def register_match_unranked(m):
 	for p in m.players:
 		await db.update(
 			"qc_players",
-			dict(nick=p.nick or p.name),
+			dict(nick=get_nick(p)),
 			keys=dict(channel_id=m.qc.channel.id, user_id=p.id)
 		)
 
@@ -147,7 +147,7 @@ async def register_match_ranked(m):
 		await db.update(
 			"qc_players",
 			dict(
-				nick=p.nick or p.name,
+				nick=get_nick(p),
 				rating=after[p.id]['rating'],
 				deviation=after[p.id]['deviation'],
 				wins=after[p.id]['wins'],

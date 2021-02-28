@@ -504,4 +504,4 @@ class Variables:
 
 class VerifyError(BaseException):
 	def __init__(self, message=None):
-		self.message=message
+		self.message = message

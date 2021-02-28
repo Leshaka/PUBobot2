@@ -4,7 +4,7 @@ from itertools import combinations
 import random
 
 import bot
-from core.utils import find, get, iter_to_dict, join_and
+from core.utils import find, get, iter_to_dict, join_and, get_nick
 from core.client import dc
 
 from .check_in import CheckIn
@@ -27,7 +27,7 @@ class Match:
 	default_cfg = dict(
 		teams=None, team_names=['Alpha', 'Beta'], team_emojis=None, ranked=False,
 		team_size=1, pick_captains="no captains", captains_role_id=None, pick_teams="draft",
-		pick_order=None, maps=[], map_count=0, check_in_timeout=0,
+		pick_order=None, maps=[], vote_maps=0, map_count=0, check_in_timeout=0,
 		match_lifetime=6*60*60, start_msg=None, server=None
 	)
 
@@ -102,7 +102,7 @@ class Match:
 		# Set state data
 		for i in range(len(match.teams)):
 			match.teams[i].set(data['teams'][i])
-		match.check_in.ready_players = data['ready_players']
+		match.check_in.ready_players = set(data['ready_players'])
 		match.maps = data['maps']
 		match.state = data['state']
 		match.states = data['states']
@@ -266,9 +266,9 @@ class Match:
 
 		if len(winners) == 1 and len(losers) == 1:
 			p = winners[0]
-			msg += f"\n1. {p.nick or p.name} {before[p.id]['rating']} ⟼ {after[p.id]['rating']}"
+			msg += f"\n1. {get_nick(p)} {before[p.id]['rating']} ⟼ {after[p.id]['rating']}"
 			p = losers[0]
-			msg += f"\n2. {p.nick or p.name} {before[p.id]['rating']} ⟼ {after[p.id]['rating']}"
+			msg += f"\n2. {get_nick(p)} {before[p.id]['rating']} ⟼ {after[p.id]['rating']}"
 		else:
 			n = 0
 			for team in (winners, losers):
@@ -276,7 +276,7 @@ class Match:
 				avg_af = int(sum((after[p.id]['rating'] for p in team))/len(team))
 				msg += f"\n{n}. {team.name} {avg_bf} ⟼ {avg_af}\n"
 				msg += "\n".join(
-					(f"> {p.name or p.nick} {before[p.id]['rating']} ⟼ {after[p.id]['rating']}" for p in team)
+					(f"> {get_nick(p)} {before[p.id]['rating']} ⟼ {after[p.id]['rating']}" for p in team)
 				)
 				n += 1
 		msg += "```"
@@ -295,7 +295,7 @@ class Match:
 			await bot.stats.register_match_unranked(self)
 
 	def print(self):
-		return f"> *({self.id})* **{self.queue.name}** | `{join_and([p.nick or p.name for p in self.players])}`"
+		return f"> *({self.id})* **{self.queue.name}** | `{join_and([get_nick(p) for p in self.players])}`"
 
 	async def cancel(self):
 		if self.check_in.message and self.check_in.message.id in bot.waiting_reactions.keys():

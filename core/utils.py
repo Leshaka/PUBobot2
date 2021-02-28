@@ -2,7 +2,7 @@
 import random
 import re
 from discord import Embed
-from discord.utils import get, find
+from discord.utils import get, find, escape_markdown
 from datetime import timedelta
 
 
@@ -106,3 +106,16 @@ def iter_to_dict(it, key):
 
 def seconds_to_str(seconds):
 	return str(timedelta(seconds=seconds))
+
+
+def escape_cb(string):
+	""" Removes bad characters for string inside a dc codeblock """
+	return re.sub(r"([`<>\*_\\\[\]\~])|((?=\s)[^ ])", "", string)
+
+
+def get_nick(user):
+	""" Remove rating tag and text formatting characters """
+	string = user.nick or user.name
+	if x := re.match(r"^\[\d+\] (.+)", string):
+		string = x.group(1)
+	return escape_cb(string)

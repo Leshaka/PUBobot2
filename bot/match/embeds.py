@@ -1,5 +1,6 @@
 from discord import Embed, Colour
 from core.client import dc
+from core.utils import get_nick
 
 
 class Embeds:
@@ -18,7 +19,7 @@ class Embeds:
 		embed = Embed(
 			colour=Colour(0xf5d858),
 			title=self.m.gt("__**{queue}** is now on the check-in stage!__").format(
-				queue=self.m.queue.name.capitalize()
+				queue=self.m.queue.name[0].upper()+self.m.queue.name[1:]
 			)
 		)
 		embed.add_field(
@@ -26,14 +27,32 @@ class Embeds:
 			value="\n".join((f" \u200b <@{p.id}>" for p in not_ready)),
 			inline=False
 		)
-		embed.add_field(
-			name="—",
-			value=self.m.gt(
-				"Please react with {ready_emoji} to **check-in** or {not_ready_emoji} to **abort**!").format(
-				ready_emoji=self.m.check_in.READY_EMOJI, not_ready_emoji=self.m.check_in.NOT_READY_EMOJI
-			) + "\n\u200b",
-			inline=False
-		)
+		if not len(self.m.check_in.maps):
+			embed.add_field(
+				name="—",
+				value=self.m.gt(
+					"Please react with {ready_emoji} to **check-in** or {not_ready_emoji} to **abort**!").format(
+					ready_emoji=self.m.check_in.READY_EMOJI, not_ready_emoji=self.m.check_in.NOT_READY_EMOJI
+				) + "\n\u200b",
+				inline=False
+			)
+		else:
+			embed.add_field(
+				name="—",
+				value="\n".join([
+					self.m.gt("Please react with {ready_emoji} or vote for a map to **check-in**.").format(
+						ready_emoji=self.m.check_in.READY_EMOJI
+					),
+					self.m.gt("React with {not_ready_emoji} to **abort**!").format(
+						not_ready_emoji=self.m.check_in.NOT_READY_EMOJI
+					) + "\n\u200b\nMaps:",
+					"\n".join([
+						f" \u200b \u200b {self.m.check_in.INT_EMOJIS[i]} \u200b {self.m.check_in.maps[i]}"
+						for i in range(len(self.m.check_in.maps))
+					])
+				]),
+				inline=False
+			)
 		embed.set_footer(**self.footer)
 
 		return embed
@@ -42,18 +61,18 @@ class Embeds:
 		embed = Embed(
 			colour=Colour(0x8758f5),
 			title=self.m.gt("__**{queue}** is now on the draft stage!__").format(
-				queue=self.m.queue.name.capitalize()
+				queue=self.m.queue.name[0].upper()+self.m.queue.name[1:]
 			)
 		)
 
 		teams_names = [
 			f"{t.emoji} \u200b **{t.name}**" +
-			(f" \u200b `〈{sum((self.m.ratings[p.id] for p in t))//(len(t) or 1)}〉`" if self.m.cfg['ranked'] else "")
+			(f" \u200b `〈{sum((self.m.ratings[p.id] for p in t))//(len(t) or 1)}〉`" if self.m.ranked else "")
 			for t in self.m.teams[:2]
 		]
 		team_players = [
 			" \u200b ".join([
-				(f"`{self.m.rank_str(p)}" if self.m.cfg['ranked'] else "`") + f"{p.nick or p.name}`"
+				(f"`{self.m.rank_str(p)}" if self.m.ranked else "`") + f"{get_nick(p)}`"
 				for p in t
 			]) if len(t) else self.m.gt("empty")
 			for t in self.m.teams[:2]
@@ -66,8 +85,8 @@ class Embeds:
 				name=self.m.gt("Unpicked:"),
 				value="\n".join((
 					" \u200b `{rank}{name}`".format(
-						rank=self.m.rank_str(p) if self.m.cfg['ranked'] else "",
-						name=p.nick or p.name
+						rank=self.m.rank_str(p) if self.m.ranked else "",
+						name=get_nick(p)
 					)
 				) for p in self.m.teams[2]),
 				inline=False
@@ -91,30 +110,33 @@ class Embeds:
 		return embed
 
 	def final_message(self):
+		show_ranks = bool(self.m.ranked and not self.m.qc.cfg.rating_nicks)
 		embed = Embed(
 			colour=Colour(0x27b75e),
-			title=self.m.qc.gt("__**{queue}** is started!__").format(queue=self.m.queue.name.capitalize())
+			title=self.m.qc.gt("__**{queue}** is started!__").format(
+				queue=self.m.queue.name[0].upper()+self.m.queue.name[1:]
+			)
 		)
 
 		if len(self.m.teams[0]) == 1 and len(self.m.teams[1]) == 1:  # 1v1
 			p1, p2 = self.m.teams[0][0], self.m.teams[1][0]
 			players = " \u200b {player1}{rating1}\n \u200b {player2}{rating2}".format(
-				rating1=f" \u200b `〈{self.m.ratings[p1.id]}〉`" if self.m.cfg['ranked'] else "",
+				rating1=f" \u200b `〈{self.m.ratings[p1.id]}〉`" if show_ranks else "",
 				player1=f"<@{p1.id}>",
-				rating2=f" \u200b `〈{self.m.ratings[p2.id]}〉`" if self.m.cfg['ranked'] else "",
+				rating2=f" \u200b `〈{self.m.ratings[p2.id]}〉`" if show_ranks else "",
 				player2=f"<@{p2.id}>",
 			)
 			embed.add_field(name=self.m.gt("Players"), value=players, inline=False)
 		else:  # team vs team
 			teams_names = [
 				f"{t.emoji} \u200b **{t.name}**" +
-				(f" \u200b `〈{sum((self.m.ratings[p.id] for p in t))//(len(t) or 1)}〉`" if self.m.cfg['ranked'] else "")
+				(f" \u200b `〈{sum((self.m.ratings[p.id] for p in t))//(len(t) or 1)}〉`" if self.m.ranked else "")
 				for t in self.m.teams[:2]
 			]
 			team_players = [
 				" \u200b " +
 				" \u200b ".join([
-					(f"`{self.m.rank_str(p)}`" if self.m.ranked else "") + f"<@{p.id}>"
+					(f"`{self.m.rank_str(p)}`" if show_ranks else "") + f"<@{p.id}>"
 					for p in t
 				])
 				for t in self.m.teams[:2]

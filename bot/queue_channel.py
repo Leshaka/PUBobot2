@@ -10,7 +10,7 @@ from core.config import cfg
 from core.console import log
 from core.cfg_factory import CfgFactory, Variables, VariableTable
 from core.locales import locales
-from core.utils import error_embed, ok_embed, find, get, join_and, seconds_to_str, parse_duration
+from core.utils import error_embed, ok_embed, find, get, join_and, seconds_to_str, parse_duration, get_nick
 from core.database import db
 
 import bot
@@ -35,7 +35,7 @@ class QueueChannel:
 			Variables.RoleVar(
 				"admin_role",
 				display="Admin role",
-				description="Members with this role will be able to use the bot`s settings and use moderation commands."
+				description="Members with this role will be able to change the bot`s settings and use moderation commands."
 			),
 			Variables.RoleVar(
 				"moderator_role",
@@ -102,6 +102,11 @@ class QueueChannel:
 				verify_message="Rating scale must be between 4 and 256",
 				notnull=True,
 				default=32
+			),
+			Variables.BoolVar(
+				"rating_nicks",
+				display="Set ratings to nicks",
+				default=0
 			),
 			Variables.BoolVar(
 				"remove_afk",
@@ -313,7 +318,7 @@ class QueueChannel:
 		if len(affected):
 			await self.update_topic()
 			if reason:
-				mention = join_and(['**' + (m.nick or m.name) + '**' for m in affected])
+				mention = join_and(['**' + get_nick(m) + '**' for m in affected])
 				if reason == "expire":
 					reason = self.gt("expire time ran off")
 				elif reason == "offline":
@@ -343,7 +348,7 @@ class QueueChannel:
 		await self.channel.send(embed=error_embed(content, title=title))
 
 	async def success(self, content, title=None, reply_to=None):
-		title = title or self.gt("Success")
+		# title = title or self.gt("Success")
 		if reply_to:
 			content = f"<@{reply_to.id}>, " + content
 		await self.channel.send(embed=ok_embed(content, title=title))
@@ -381,6 +386,7 @@ class QueueChannel:
 	async def _update_rating_roles(self, *members):
 		data = await self.rating.get_players((i.id for i in members))
 		roles = {i['user_id']: self.rating_rank(i['rating'])['role'] for i in data}
+		ratings = {i['user_id']: i['rating'] for i in data}
 		all_roles = [i['role'] for i in self.cfg.tables.ranks if i is not None]
 
 		for member in members:
@@ -390,8 +396,14 @@ class QueueChannel:
 					await member.remove_roles(*to_delete, reason="Rank update.")
 				if roles[member.id] is not None and roles[member.id] not in member.roles:
 					await member.add_roles(roles[member.id], reason="Rank update.")
+				if self.cfg.rating_nicks:
+					if member.nick and (x := re.match(r"^\[\d+\] (.+)", member.nick)):
+						await member.edit(nick=f"[{ratings[member.id]}] " + x.group(1))
+					else:
+						await member.edit(nick=f"[{ratings[member.id]}] " + (member.nick or member.name))
+
 			except Forbidden:
-				pass
+				print(traceback.format_exc())
 			await asyncio.sleep(1)
 
 	async def queue_started(self, members, message=None):
@@ -682,7 +694,7 @@ class QueueChannel:
 			where={'channel_id': self.channel.id}, order_by="rating"
 		)
 		if p := find(lambda i: i['user_id'] == member.id, data):
-			embed = Embed(title=f"__{member.nick or member.name}__", colour=Colour(0x7289DA))
+			embed = Embed(title=f"__{get_nick(member)}__", colour=Colour(0x7289DA))
 			embed.add_field(name="№", value=f"**{data.index(p)+1}**", inline=True)
 			embed.add_field(name="Matches", value=f"**{(p['wins']+p['losses']+p['draws'])}**", inline=True)
 			if p['rating']:
@@ -805,10 +817,10 @@ class QueueChannel:
 	async def _allow_offline(self, message, args=None):
 		if message.author.id in bot.allow_offline:
 			bot.allow_offline.remove(message.author.id)
-			await self.channel.send(embed=ok_embed(self.gt("Your allow offline immune is gone.")))
+			await self.success(self.gt("Your allow offline immune is gone."))
 		else:
 			bot.allow_offline.append(message.author.id)
-			await self.channel.send(embed=ok_embed(self.gt("You now have the allow offline immune.")))
+			await self.success(self.gt("You now have the allow offline immune."))
 
 	async def _matches(self, message, args=0):
 		try:

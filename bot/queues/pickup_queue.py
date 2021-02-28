@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from core.console import log
 from core.cfg_factory import CfgFactory, Variables, VariableTable
+from core.utils import get_nick
 
 import bot
 
@@ -111,7 +112,16 @@ class PickupQueue:
 			Variables.IntVar(
 				"map_count",
 				display="Map count",
-				default=1
+				default=1,
+				verify=lambda n: 0 <= n <= 5,
+				verify_message="Maps number must be between 0 and 5."
+			),
+			Variables.IntVar(
+				"vote_maps",
+				display="Vote poll map count",
+				default=None,
+				verify=lambda n: 0 <= n <= 5,
+				verify_message="Vote maps number must be between 0 and 5."
 			)
 		],
 		tables=[
@@ -174,7 +184,7 @@ class PickupQueue:
 
 	@property
 	def who(self):
-		return "/".join([f"`{m.nick or m.name}`" for m in self.queue])
+		return "/".join([f"`{get_nick(m)}`" for m in self.queue])
 
 	@property
 	def length(self):
@@ -225,7 +235,7 @@ class PickupQueue:
 			team_size=int(self.cfg.size/2), pick_captains=self.cfg.pick_captains,
 			captains_role_id=self.cfg.captains_role.id if self.cfg.captains_role else None,
 			pick_teams=self.cfg.pick_teams, pick_order=self.cfg.pick_order,
-			maps=[i['name'] for i in self.cfg.tables.maps],
+			maps=[i['name'] for i in self.cfg.tables.maps], vote_maps=self.cfg.vote_maps,
 			map_count=self.cfg.map_count, check_in_timeout=self.cfg.check_in_timeout,
 			start_msg=self.cfg.start_msg, server=self.cfg.server
 		)
