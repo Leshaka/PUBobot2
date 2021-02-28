@@ -231,8 +231,8 @@ class PickupQueue:
 		await bot.Match.new(
 			self, self.qc, list(self.queue),
 			team_names=self.cfg.team_names.split(" ") if self.cfg.team_names else None,
-			team_emojis=self.cfg.team_emojis, ranked=self.cfg.ranked,
-			team_size=int(self.cfg.size/2), pick_captains=self.cfg.pick_captains,
+			team_emojis=self.cfg.team_emojis.split(" ") if self.cfg.team_emojis else None,
+			ranked=self.cfg.ranked, team_size=int(self.cfg.size/2), pick_captains=self.cfg.pick_captains,
 			captains_role_id=self.cfg.captains_role.id if self.cfg.captains_role else None,
 			pick_teams=self.cfg.pick_teams, pick_order=self.cfg.pick_order,
 			maps=[i['name'] for i in self.cfg.tables.maps], vote_maps=self.cfg.vote_maps,
