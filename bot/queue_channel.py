@@ -32,20 +32,10 @@ class QueueChannel:
 		"qc_configs",
 		p_key="channel_id",
 		variables=[
-			Variables.RoleVar(
-				"admin_role",
-				display="Admin role",
-				description="Members with this role will be able to change the bot`s settings and use moderation commands."
-			),
-			Variables.RoleVar(
-				"moderator_role",
-				display="Moderator role",
-				description="Members with this role will be able to use the bot`s moderation commands."
-			),
 			Variables.StrVar(
 				"prefix",
 				display="Command prefix",
-				description="Set the prefix before all bot`s commands",
+				description="Set the prefix before for the bot`s commands",
 				verify=lambda x: len(x) == 1,
 				verify_message="Command prefix must be exactly one symbol.",
 				default="!",
@@ -61,16 +51,59 @@ class QueueChannel:
 				on_change=bot.update_qc_lang
 			),
 			Variables.RoleVar(
+				"admin_role",
+				display="Admin role",
+				description="Members with this role will be able to change the bot`s settings and use moderation commands."
+			),
+			Variables.RoleVar(
+				"moderator_role",
+				display="Moderator role",
+				description="Members with this role will be able to use the bot`s moderation commands."
+			),
+			Variables.RoleVar(
 				"promotion_role",
 				display="Promotion role",
 				description="Set a role to highlight on !promote and !sub commands.",
+			),
+			Variables.DurationVar(
+				"promotion_delay",
+				display="Promotion delay",
+				description="Set time delay between players can promote queues.",
+				verify=lambda x: 0 <= MAX_PROMOTION_DELAY,
+				verify_message=f"Promotion delay time must be less than {seconds_to_str(MAX_EXPIRE_TIME)}"
+			),
+			Variables.BoolVar(
+				"remove_afk",
+				display="Auto remove on AFK status",
+				default=1
+			),
+			Variables.BoolVar(
+				"remove_offline",
+				display="Auto remove on offline status",
+				default=1
+			),
+			Variables.DurationVar(
+				"expire_time",
+				display="Auto remove on timer after last !add command",
+				verify=lambda x: 0 < x <= MAX_EXPIRE_TIME,
+				verify_message=f"Expire time must be less than {seconds_to_str(MAX_EXPIRE_TIME)}"
+			),
+			Variables.RoleVar(
+				"blacklist_role",
+				display="Blacklist role",
+				description="Players with this role wont be able to add to queues.",
+			),
+			Variables.RoleVar(
+				"whitelist_role",
+				display="Whitelist role",
+				description="If set, only players with this role will be able to add to queues."
 			),
 			Variables.OptionVar(
 				"rating_system",
 				display="Rating system",
 				description="Set player's rating calculation method.",
 				options=rating_names.keys(),
-				default="Glicko2",
+				default="TrueSkill",
 				notnull=True,
 				on_change=bot.update_rating_system
 			),
@@ -107,39 +140,6 @@ class QueueChannel:
 				"rating_nicks",
 				display="Set ratings to nicks",
 				default=0
-			),
-			Variables.BoolVar(
-				"remove_afk",
-				display="Auto remove on AFK status",
-				default=1
-			),
-			Variables.BoolVar(
-				"remove_offline",
-				display="Auto remove on offline status",
-				default=1
-			),
-			Variables.DurationVar(
-				"expire_time",
-				display="Auto remove on timer after last !add command",
-				verify=lambda x: 0 < x <= MAX_EXPIRE_TIME,
-				verify_message=f"Expire time must be less than {seconds_to_str(MAX_EXPIRE_TIME)}"
-			),
-			Variables.RoleVar(
-				"blacklist_role",
-				display="Blacklist role",
-				description="Players with this role wont be able to add to queues.",
-			),
-			Variables.RoleVar(
-				"whitelist_role",
-				display="Whitelist role",
-				description="If set, only players with this role will be able to add to queues."
-			),
-			Variables.DurationVar(
-				"promotion_delay",
-				display="Promotion delay",
-				description="Set time delay between players can promote queues.",
-				verify=lambda x: 0 <= MAX_PROMOTION_DELAY,
-				verify_message=f"Promotion delay time must be less than {seconds_to_str(MAX_EXPIRE_TIME)}"
 			)
 		],
 		tables=[
@@ -858,7 +858,7 @@ class QueueChannel:
 					data[n]['draws'],
 					int(data[n]['wins']*100/((data[n]['wins']+data[n]['losses']) or 1))
 				)
-			) for n in range(page*10, min((page+1)*10, len(data)))]
+			) for n in range(min((0, page-1))*10, min((page+1)*10, len(data)))]
 
 			text = "```markdown\n № | Rating〈Ξ〉 |         Nickname        | Matches |  W/L/D\n{0}\n{1}```".format(
 				"-"*60,
