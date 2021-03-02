@@ -122,7 +122,6 @@ class Config:
 	async def update(self, data):
 		tables = data.pop('tables') if 'tables' in data.keys() else {}
 
-		print(data)
 		objects = dict()
 		table_objects = dict()
 		# Validate data
@@ -203,7 +202,7 @@ class Variable:
 	def verify(self, obj):
 		""" optional verification of generated object """
 		if obj and not self.verify_f(obj):
-			raise(VerifyError(message=self.verify_message))
+			raise(VerifyError(self.verify_message))
 
 
 class StrVar(Variable):
@@ -423,9 +422,6 @@ class DurationVar(Variable):
 		if not string or string.lower() in ['none', 'null']:
 			return None
 
-		if re.match(r"^\d\d:\d\d:\d\d$", string):
-			x = sum(x * int(t) for x, t in zip([3600, 60, 1], string.split(":")))
-			return x
 		try:
 			return parse_duration(string)
 		except ValueError:
@@ -436,7 +432,10 @@ class DurationVar(Variable):
 
 	def readable(self, obj):
 		if obj:
-			return seconds_to_str(obj)
+			#  return seconds_to_str(obj)
+			hours, remainder = divmod(obj, 3600)
+			minutes, seconds = divmod(remainder, 60)
+			return '{:02}:{:02}:{:02}'.format(int(hours), int(minutes), int(seconds))
 		else:
 			return None
 
@@ -502,6 +501,6 @@ class Variables:
 	DurationVar = DurationVar
 
 
-class VerifyError(BaseException):
+class VerifyError(Exception):
 	def __init__(self, message=None):
 		self.message = message

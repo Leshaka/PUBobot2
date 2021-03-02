@@ -81,6 +81,10 @@ def parse_duration(string):
 	if string == 'inf':
 		return 0
 
+	if re.match(r"^\d\d:\d\d:\d\d$", string):
+		x = sum(x * int(t) for x, t in zip([3600, 60, 1], string.split(":")))
+		return x
+
 	duration = float(string[:-1])
 	if string[-1] == 'm':
 		duration = duration * 60

@@ -460,7 +460,7 @@ class QueueChannel:
 		self._check_perms(message.author, 2)
 		args = args.split(" ")
 		if len(args) != 2 or not args[1].isdigit():
-			raise bot.Exc.SyntaxError(f"Usage: {self.cfg.prefix}add_pickup __name__ __size__")
+			raise bot.Exc.SyntaxError(f"Usage: {self.cfg.prefix}create_pickup __name__ __size__")
 		try:
 			pq = await self.new_queue(args[0], int(args[1]), bot.PickupQueue)
 		except ValueError as e:
