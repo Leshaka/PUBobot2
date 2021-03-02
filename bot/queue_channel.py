@@ -834,9 +834,9 @@ class QueueChannel:
 		else:
 			await self.channel.send(self.gt("> no active matches"))
 
-	async def _leaderboard(self, message, args=0):
+	async def _leaderboard(self, message, args=1):
 		try:
-			page = int(args)
+			page = int(args)-1
 		except ValueError:
 			raise bot.Exc.SyntaxError(f"Usage: {self.cfg.prefix}lb [page]")
 
