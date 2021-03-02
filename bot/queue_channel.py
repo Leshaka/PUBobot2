@@ -844,7 +844,7 @@ class QueueChannel:
 			['nick', 'rating', 'deviation', 'wins', 'losses', 'draws'], 'qc_players',
 			where={'channel_id': self.channel.id, 'is_hidden': 0}, order_by="rating"
 		)
-		data = [i for i in data if i['rating'] is not None]
+		data = [i for i in data if i['rating'] is not None][max(page-1, 0)*10:(page+1)*10]
 
 		if len(data):
 			lines = ["{0:^3}|{1:^11}|{2:^25.25}|{3:^9}| {4}".format(
@@ -858,7 +858,7 @@ class QueueChannel:
 					data[n]['draws'],
 					int(data[n]['wins']*100/((data[n]['wins']+data[n]['losses']) or 1))
 				)
-			) for n in range(min((0, page-1))*10, min((page+1)*10, len(data)))]
+			) for n in range(len(data))]
 
 			text = "```markdown\n № | Rating〈Ξ〉 |         Nickname        | Matches |  W/L/D\n{0}\n{1}```".format(
 				"-"*60,
