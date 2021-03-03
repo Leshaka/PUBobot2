@@ -75,12 +75,14 @@ class QueueChannel:
 			Variables.BoolVar(
 				"remove_afk",
 				display="Auto remove on AFK status",
-				default=1
+				default=1,
+				notnull=True
 			),
 			Variables.BoolVar(
 				"remove_offline",
 				display="Auto remove on offline status",
-				default=1
+				default=1,
+				notnull=True
 			),
 			Variables.DurationVar(
 				"expire_time",
@@ -139,7 +141,8 @@ class QueueChannel:
 			Variables.BoolVar(
 				"rating_nicks",
 				display="Set ratings to nicks",
-				default=0
+				default=0,
+				notnull=True
 			)
 		],
 		tables=[
@@ -159,7 +162,8 @@ class QueueChannel:
 					dict(rank="〈B〉", rating=1800, role=None),
 					dict(rank="〈A〉", rating=1900, role=None),
 					dict(rank="〈★〉", rating=2000, role=None)
-				]
+				],
+				blank=dict(rank="〈G〉", rating=0, role=None)
 			)
 		]
 	)

@@ -20,41 +20,49 @@ class PickupQueue:
 			Variables.IntVar(
 				"size",
 				display="Queue size",
-				verify=lambda i: 0 < i < 1001
+				verify=lambda i: 0 < i < 1001,
+				notnull=True
 			),
 			Variables.BoolVar(
 				"is_default",
-				display="Default",
-				default=1
+				display="is default",
+				default=1,
+				description="Users can add to this queue without specifying its name.",
+				notnull=True
 			),
 			Variables.BoolVar(
 				"ranked",
-				display="Ranked",
+				display="is ranked",
 				default=0,
-				description="Enable ratings feature on this queue."
-			),
-			Variables.TextVar(
-				"start_msg",
-				display="Start message",
-				verify=lambda s: len(s) < 1001,
-				verify_message="Start message is too long."
-			),
-			Variables.StrVar(
-				"server",
-				display="Server"
-			),
-			Variables.OptionVar(
-				"pick_captains",
-				display="Pick captains",
-				options=["by role and rating", "fair pairs", "random", "no captains"],
-				default="by role and rating",
+				description="Enable rating features on this queue.",
 				notnull=True
+			),
+			Variables.BoolVar(
+				"autostart",
+				display="Start when full",
+				default=1,
+				notnull=True
+			),
+			Variables.DurationVar(
+				"check_in_timeout",
+				display="Require check-in",
+				verify=lambda i: 0 < i < 3601,
+				default=60*5,
+				verify_message="Check in timeout must be less than a hour.",
+				description="Set the check-in stage duration."
 			),
 			Variables.OptionVar(
 				"pick_teams",
 				display="Pick teams",
 				options=["draft", "matchmaking", "random teams", "no teams"],
 				default="draft",
+				notnull=True
+			),
+			Variables.OptionVar(
+				"pick_captains",
+				display="Pick captains",
+				options=["by role and rating", "fair pairs", "random", "no captains"],
+				default="by role and rating",
 				notnull=True
 			),
 			Variables.StrVar(
@@ -79,12 +87,16 @@ class PickupQueue:
 				verify_message="Team emojis must be exactly two emojis separated by space.",
 				description="Team emojis separated by space."
 			),
-			Variables.DurationVar(
-				"check_in_timeout",
-				display="Require check-in",
-				verify=lambda i: 0 < i < 3601,
-				verify_message="Check in timeout must be less than a hour.",
-				description="Set the check-in stage duration."
+			Variables.TextVar(
+				"start_msg",
+				display="Start message",
+				verify=lambda s: len(s) < 1001,
+				verify_message="Start message is too long."
+			),
+			Variables.StrVar(
+				"server",
+				display="Server",
+				description="Print this server on match start."
 			),
 			Variables.RoleVar(
 				"promotion_role",
@@ -98,41 +110,42 @@ class PickupQueue:
 			),
 			Variables.RoleVar(
 				"blacklist_role",
-				display="Blacklist role"
+				display="Blacklist role",
+				description="Users with this role wont be able to add to this queue."
 			),
 			Variables.RoleVar(
 				"whitelist_role",
-				display="Whitelist role"
-			),
-			Variables.BoolVar(
-				"autostart",
-				display="Start when the queue is full.",
-				default=1
+				display="Whitelist role",
+				description="Only users with this role will be able to add to this queue."
 			),
 			Variables.IntVar(
 				"map_count",
 				display="Map count",
 				default=1,
 				verify=lambda n: 0 <= n <= 5,
-				verify_message="Maps number must be between 0 and 5."
+				verify_message="Maps number must be between 0 and 5.",
+				description="Number of maps to show on match start."
 			),
 			Variables.IntVar(
 				"vote_maps",
 				display="Vote poll map count",
 				default=None,
 				verify=lambda n: 0 <= n <= 5,
-				verify_message="Vote maps number must be between 0 and 5."
+				verify_message="Vote maps number must be between 0 and 5.",
+				description="Set to enable map voting, this requires check-in timeout to be set."
 			)
 		],
 		tables=[
 			VariableTable(
 				"aliases", display="Aliases",
+				description="Other names for this queue, you can also group queues by giving them a same alias.",
 				variables=[
 					Variables.StrVar("alias", notnull=True)
 				]
 			),
 			VariableTable(
 				"maps", display="Maps",
+				description="List of maps to choose from.",
 				variables=[
 					Variables.StrVar("name", notnull=True)
 				]
