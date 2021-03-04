@@ -80,7 +80,7 @@ class BaseRating:
 		now = int(time.time())
 
 		for p in data:
-			if p['rating'] != self.init_rp or p['deviation'] != self.init_deviation:
+			if p['rating'] is not None and (p['rating'] != self.init_rp or p['deviation'] != self.init_deviation):
 				history.append(dict(
 					user_id=p['user_id'],
 					channel_id=self.channel_id,
