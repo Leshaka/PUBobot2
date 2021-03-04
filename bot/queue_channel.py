@@ -902,7 +902,7 @@ class QueueChannel:
 		except (ValueError, IndexError):
 			raise bot.Exc.SyntaxError(f"Usage: {self.cfg.prefix}rating_set __@user__ __rating__ [__deviation__]")
 
-		if (0 > rating > 10000) or (0 > deviation > 3000):
+		if (0 > rating > 10000) or (0 > (deviation or 1) > 3000):
 			raise bot.Exc.ValueError("Bad rating or deviation value.")
 
 		await self.rating.set_rating(member, rating, deviation)
