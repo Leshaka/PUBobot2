@@ -242,7 +242,9 @@ class QueueChannel:
 			cancel_match=self._cancel_match,
 			undo_match=self._undo_match,
 			switch_dms=self._switch_dms,
-			start=self._start
+			start=self._start,
+			stats_reset=self._stats_reset,
+			stats_reset_player=self._stats_reset_player
 		)
 
 	async def update_info(self):
@@ -985,3 +987,15 @@ class QueueChannel:
 		if (queue := get(self.queues, name=args)) is None:
 			raise bot.Exc.NotFoundError(self.gt("Specified queue not found."))
 		await queue.start()
+
+	async def _stats_reset(self, message, args=None):
+		self._check_perms(message.author, 2)
+		await bot.stats.reset_channel(self.channel.id)
+		await self.success(self.gt("Done."))
+
+	async def _stats_reset_player(self, message, args=None):
+		self._check_perms(message.author, 1)
+		if (member := self.get_member(args)) is None:
+			raise bot.Exc.SyntaxError(f"Usage: {self.cfg.prefix}stats_reset_player __@user__")
+		await bot.stats.reset_player(self.channel.id, member.id)
+		await self.success(self.gt("Done."))

@@ -68,6 +68,7 @@ db.ensure_table(dict(
 	tname="qc_player_matches",
 	columns=[
 		dict(cname="match_id", ctype=db.types.int),
+		dict(cname="channel_id", ctype=db.types.int),
 		dict(cname="user_id", ctype=db.types.int),
 		dict(cname="team", ctype=db.types.bool)
 	],
@@ -106,7 +107,7 @@ async def register_match_unranked(m):
 		else:
 			team = None
 
-		await db.insert('qc_player_matches', dict(match_id=m.id, user_id=p.id, team=team))
+		await db.insert('qc_player_matches', dict(match_id=m.id, channel_id=m.qc.channel.id, user_id=p.id, team=team))
 
 
 async def register_match_ranked(m):
@@ -157,7 +158,7 @@ async def register_match_ranked(m):
 			keys=dict(channel_id=m.qc.channel.id, user_id=p.id)
 		)
 
-		await db.insert('qc_player_matches', dict(match_id=m.id, user_id=p.id, team=team))
+		await db.insert('qc_player_matches', dict(match_id=m.id, channel_id=m.qc.channel.id, user_id=p.id, team=team))
 		await db.insert('qc_rating_history', dict(
 			channel_id=m.qc.channel.id,
 			user_id=p.id,
@@ -213,3 +214,18 @@ async def undo_match(match_id, qc):
 	await db.delete('qc_player_matches', where=dict(match_id=match_id))
 	await db.delete('qc_matches', where=dict(match_id=match_id))
 	return True
+
+
+async def reset_channel(channel_id):
+	where = {'channel_id': channel_id}
+	await db.delete("qc_players", where=where)
+	await db.delete("qc_rating_history", where=where)
+	await db.delete("qc_matches", where=where)
+	await db.delete("qc_player_matches", where=where)
+
+
+async def reset_player(channel_id, user_id):
+	where = {'channel_id': channel_id, 'user_id': user_id}
+	await db.delete("qc_players", where=where)
+	await db.delete("qc_rating_history", where=where)
+	await db.delete("qc_player_matches", where=where)
