@@ -479,7 +479,7 @@ class QueueChannel:
 			raise bot.Exc.SyntaxError(f"Usage: {self.cfg.prefix}delete_queue __name__")
 		if (queue := get(self.queues, name=args)) is None:
 			raise bot.Exc.NotFoundError(f"Specified queue name not found on the channel.")
-		await queue.delete()
+		await queue.cfg.delete()
 		self.queues.remove(queue)
 		await self._show_queues(message, args=None)
 
