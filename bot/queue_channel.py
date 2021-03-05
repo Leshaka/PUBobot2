@@ -766,7 +766,7 @@ class QueueChannel:
 
 		else:
 			try:
-				secs = parse_duration("".join(args))
+				secs = parse_duration(args)
 			except ValueError:
 				raise bot.Exc.SyntaxError(self.gt("Invalid duration format. Syntax: 3h2m1s or 03:02:01."))
 
@@ -794,7 +794,7 @@ class QueueChannel:
 				expire = None
 			else:
 				try:
-					expire = parse_duration("".join(args))
+					expire = parse_duration(args)
 				except ValueError:
 					raise bot.Exc.SyntaxError(self.gt("Invalid duration format. Syntax: 3h2m1s or 03:02:01 or AFK."))
 				if expire > MAX_EXPIRE_TIME:

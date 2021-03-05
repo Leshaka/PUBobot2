@@ -85,22 +85,29 @@ def parse_duration(string):
 		x = sum(x * int(t) for x, t in zip([3600, 60, 1], string.split(":")))
 		return x
 
-	duration = float(string[:-1])
-	if string[-1] == 'm':
-		duration = duration * 60
-	elif string[-1] == 'h':
-		duration = duration * 60 * 60
-	elif string[-1] == 'd':
-		duration = duration * 60 * 60 * 24
-	elif string[-1] == 'W':
-		duration = duration * 60 * 60 * 24 * 7
-	elif string[-1] == 'M':
-		duration = duration * 60 * 60 * 24 * 30
-	elif string[-1] == 'Y':
-		duration = duration * 60 * 60 * 24 * 30
+	elif re.match(r"^([\d\.]+\w *)+$", string):
+		duration = 0
+		for part in re.findall(r"[\d\.]+\w", string):
+			val = float(part[:-1])
+			if part[-1] == 's':
+				duration += val
+			elif part[-1] == 'm':
+				duration += val * 60
+			elif part[-1] == 'h':
+				duration += val * 60 * 60
+			elif part[-1] == 'd':
+				duration += val * 60 * 60 * 24
+			elif part[-1] == 'W':
+				duration += val * 60 * 60 * 24 * 7
+			elif part[-1] == 'M':
+				duration += val * 60 * 60 * 24 * 30
+			elif part[-1] == 'Y':
+				duration += val * 365 * 24 * 60
+			else:
+				raise ValueError()
+		return int(duration)
 	else:
 		raise ValueError()
-	return int(duration)
 
 
 def iter_to_dict(it, key):

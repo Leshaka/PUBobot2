@@ -15,7 +15,8 @@ class PickupQueue:
 		variables=[
 			Variables.StrVar(
 				"name",
-				display="Queue name"
+				display="Queue name",
+				notnull=True
 			),
 			Variables.IntVar(
 				"size",
