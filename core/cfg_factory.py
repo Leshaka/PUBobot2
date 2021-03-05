@@ -188,6 +188,8 @@ class Variable:
 	async def validate(self, string, guild):
 		""" Validate and return database-friendly object from received string """
 		if not string or string.lower() in ['none', 'null']:
+			if self.notnull:
+				raise ValueError(f"{self.name} can't be null.")
 			return None
 		return string
 
@@ -221,6 +223,8 @@ class EmojiVar(Variable):
 
 	async def validate(self, string, guild):
 		if not string or string.lower() in ['none', 'null']:
+			if self.notnull:
+				raise ValueError(f"{self.name} can't be null.")
 			return None
 
 		if re.match("^:[^ ]*:$", string):
@@ -245,6 +249,8 @@ class OptionVar(Variable):
 
 	async def validate(self, string, guild):
 		if not string or string.lower() in ['none', 'null']:
+			if self.notnull:
+				raise ValueError(f"{self.name} can't be null.")
 			return None
 
 		string = string.lower()
@@ -262,11 +268,10 @@ class BoolVar(Variable):
 
 	async def validate(self, string, guild):
 		# 0 == False and 1 == True in python
-		if not string:
-			return None
-
 		value = string.lower()
 		if value in ['none', 'null']:
+			if self.notnull:
+				raise ValueError(f"{self.name} can't be null.")
 			return None
 		elif value in ['1', 'on', 'true']:
 			return 1
@@ -288,6 +293,8 @@ class IntVar(Variable):
 
 	async def validate(self, string, guild):
 		if not string or string.lower() in ['none', 'null']:
+			if self.notnull:
+				raise ValueError(f"{self.name} can't be null.")
 			return None
 		return int(string)
 
@@ -300,6 +307,8 @@ class RoleVar(Variable):
 
 	async def validate(self, string, guild):
 		if not string or string.lower() in ['none', 'null']:
+			if self.notnull:
+				raise ValueError(f"{self.name} can't be null.")
 			return None
 
 		mention = re.match('^<@&([0-9]+)>$', string)
@@ -339,6 +348,8 @@ class MemberVar(Variable):
 
 	async def validate(self, string, guild):
 		if not string or string.lower() in ['none', 'null']:
+			if self.notnull:
+				raise ValueError(f"{self.name} can't be null.")
 			return None
 
 		mention = re.match("^<@[!]*([0-9]+)>$", string)
@@ -380,6 +391,8 @@ class TextChanVar(Variable):
 
 	async def validate(self, string, guild):
 		if not string or string.lower() in ['none', 'null']:
+			if self.notnull:
+				raise ValueError(f"{self.name} can't be null.")
 			return None
 
 		mention = re.match("^<#([0-9]+)>$", string)
@@ -420,6 +433,8 @@ class DurationVar(Variable):
 
 	async def validate(self, string, guild):
 		if not string or string.lower() in ['none', 'null']:
+			if self.notnull:
+				raise ValueError(f"{self.name} can't be null.")
 			return None
 
 		try:
