@@ -39,6 +39,9 @@ async def disable_channel(message):
 		return
 	qc = queue_channels.get(message.channel.id)
 	if qc:
+		for queue in qc.queues:
+			await queue.cfg.delete()
+		await qc.cfg.delete()
 		queue_channels.pop(message.channel.id)
 		await message.channel.send(embed=ok_embed("The bot has been disabled."))
 	else:

@@ -168,6 +168,11 @@ class Config:
 		self.cfg_info = d
 		await db.update(self._factory.table, {'cfg_info': json.dumps(d)}, {self._factory.p_key: self.p_key})
 
+	async def delete(self):
+		await db.delete(self._factory.table, {self._factory.p_key: self.p_key})
+		for table in self._factory.tables.values():
+			await db.delete(table.table, {self._factory.p_key: self.p_key})
+
 
 class Variable:
 	""" Variable base class """

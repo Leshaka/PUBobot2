@@ -198,6 +198,7 @@ class QueueChannel:
 		self.last_promote = 0
 		self.commands = dict(
 			create_pickup=self._create_pickup,
+			delete_queue=self._delete_queue,
 			queues=self._show_queues,
 			pickups=self._show_queues,
 			add=self._add_member,
@@ -471,6 +472,16 @@ class QueueChannel:
 			raise bot.Exc.ValueError(str(e))
 		else:
 			await self.success(f"[**{pq.name}** ({pq.status})]")
+
+	async def _delete_queue(self, message, args=None):
+		self._check_perms(message.author, 2)
+		if not args:
+			raise bot.Exc.SyntaxError(f"Usage: {self.cfg.prefix}delete_queue __name__")
+		if (queue := get(self.queues, name=args)) is None:
+			raise bot.Exc.NotFoundError(f"Specified queue name not found on the channel.")
+		await queue.delete()
+		self.queues.remove(queue)
+		await self._show_queues(message, args=None)
 
 	async def _show_queues(self, message, args=None):
 		if len(self.queues):
