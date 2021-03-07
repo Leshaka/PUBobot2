@@ -12,6 +12,7 @@ from core.cfg_factory import CfgFactory, Variables, VariableTable
 from core.locales import locales
 from core.utils import error_embed, ok_embed, find, get, join_and, seconds_to_str, parse_duration, get_nick
 from core.database import db
+from core.client import FakeMember
 
 import bot
 from bot.stats.rating import FlatRating, Glicko2Rating, TrueSkillRating
@@ -371,6 +372,9 @@ class QueueChannel:
 		if highlight := re.match(r"<@!?(\d+)>", string):
 			print(highlight.group(1))
 			return self.channel.guild.get_member(int(highlight.group(1)))
+		elif mask := re.match(r"^(\w+)@(\d{5,20})$", string):
+			name, user_id = mask.groups()
+			return FakeMember(guild=self.channel.guild, user_id=int(user_id), name=name)
 		else:
 			string = string.lower()
 			return find(

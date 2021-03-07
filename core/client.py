@@ -4,6 +4,30 @@ from asyncio import iscoroutinefunction
 from core.console import log
 
 
+class FakeMember:
+	def __init__(self, guild, user_id, name):
+		self.id = user_id
+		self.name = name
+		self.nick = None
+		self.roles = []
+
+	@property
+	def mention(self):
+		return f"<@{self.id}>"
+
+	async def send(self, *args, **kwargs):
+		pass
+
+	async def add_roles(self, *args, **kwargs):
+		pass
+
+	async def remove_roles(self, *args, **kwargs):
+		pass
+
+	async def edit(self, *args, **kwargs):
+		pass
+
+
 class DiscordClient(discord.Client):
 	def __init__(self, *args, **kwargs):
 		super().__init__(*args, **kwargs)
