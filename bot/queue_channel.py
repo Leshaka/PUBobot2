@@ -245,7 +245,8 @@ class QueueChannel:
 			switch_dms=self._switch_dms,
 			start=self._start,
 			stats_reset=self._stats_reset,
-			stats_reset_player=self._stats_reset_player
+			stats_reset_player=self._stats_reset_player,
+			stats_replace_player=self._stats_replace_player
 		)
 
 	async def update_info(self):
@@ -761,7 +762,7 @@ class QueueChannel:
 			raise bot.Exc.NotInMatchError(self.gt("You are not in an active match."))
 		await match.report_loss(message.author, draw=True)
 
-	async def _rw(self, message, args=[]):
+	async def _rw(self, message, args=""):
 		self._check_perms(message.author, 1)
 		args = args.split(" ", maxsplit=1)
 		if len(args) != 2 or not args[0].isdigit():
@@ -1002,4 +1003,13 @@ class QueueChannel:
 		if (member := self.get_member(args)) is None:
 			raise bot.Exc.SyntaxError(f"Usage: {self.cfg.prefix}stats_reset_player __@user__")
 		await bot.stats.reset_player(self.channel.id, member.id)
+		await self.success(self.gt("Done."))
+
+	async def _stats_replace_player(self, message, args=""):
+		self._check_perms(message.author, 1)
+		if (args := args.split(" ")).__len__() != 2:
+			raise bot.Exc.SyntaxError(f"Usage: {self.cfg.prefix}stats_reset_player __@user1__ __@user2__")
+		if None in (members := [self.get_member(string) for string in args]):
+			raise bot.Exc.SyntaxError(f"Usage: {self.cfg.prefix}stats_reset_player __@user1__ __@user2__")
+		await bot.stats.replace_player(self.channel.id, members[0].id, members[1].id, get_nick(members[1]))
 		await self.success(self.gt("Done."))

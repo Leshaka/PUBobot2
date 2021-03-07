@@ -229,3 +229,11 @@ async def reset_player(channel_id, user_id):
 	await db.delete("qc_players", where=where)
 	await db.delete("qc_rating_history", where=where)
 	await db.delete("qc_player_matches", where=where)
+
+
+async def replace_player(channel_id, user_id1, user_id2, new_nick):
+	where = {'channel_id': channel_id, 'user_id': user_id1}
+	update = {'user_id': user_id2}
+	await db.update("qc_players", {'user_id': user_id2, 'nick': new_nick}, where)
+	await db.update("qc_rating_history", {'user_id': user_id2}, where)
+	await db.update("qc_player_matches", {'user_id': user_id2}, where)
