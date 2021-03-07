@@ -60,7 +60,7 @@ class Match:
 		bot.last_match_id += 1
 		match = cls(bot.last_match_id, queue, qc, players, ratings, **kwargs)
 		# Prepare the Match object
-		match.init_maps(match.cfg['maps'], match.cfg['map_count'])
+		match.maps = match.random_maps(match.cfg['maps'], match.cfg['map_count'], queue.last_map)
 		match.init_captains(match.cfg['pick_captains'], match.cfg['captains_role_id'])
 		match.init_teams(match.cfg['pick_teams'])
 		if match.cfg['ranked']:
@@ -152,8 +152,11 @@ class Match:
 		self.draft = Draft(self, self.cfg['pick_order'], self.cfg['captains_role_id'])
 		self.embeds = Embeds(self)
 
-	def init_maps(self, maps, map_count):
-		self.maps = random.sample(maps, min(map_count, len(maps)))
+	@staticmethod
+	def random_maps(maps, map_count, last_map=None):
+		if last_map and last_map in maps and map_count < len(maps):
+			maps.remove(last_map)
+		return random.sample(maps, min(map_count, len(maps)))
 
 	def init_captains(self, pick_captains, captains_role_id):
 		if pick_captains == "by role and rating":
@@ -288,6 +291,7 @@ class Match:
 
 	async def finish_match(self):
 		bot.active_matches.remove(self)
+		self.queue.last_map = self.maps[0] if len(self.maps) == 1 else None
 
 		if self.cfg['ranked']:
 			await bot.stats.register_match_ranked(self)

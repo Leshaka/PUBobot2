@@ -131,8 +131,8 @@ class PickupQueue:
 				"vote_maps",
 				display="Vote poll map count",
 				default=None,
-				verify=lambda n: 0 <= n <= 5,
-				verify_message="Vote maps number must be between 0 and 5.",
+				verify=lambda n: 2 <= n <= 5,
+				verify_message="Vote maps number must be between 2 and 5.",
 				description="Set to enable map voting, this requires check-in timeout to be set."
 			)
 		],
@@ -187,6 +187,7 @@ class PickupQueue:
 		self.cfg = cfg
 		self.id = self.cfg.p_key
 		self.queue = []
+		self.last_map = None
 
 	@property
 	def name(self):

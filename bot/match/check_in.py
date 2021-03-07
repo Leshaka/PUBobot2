@@ -18,8 +18,8 @@ class CheckIn:
 		self.ready_players = set()
 		self.message = None
 
-		if len(self.m.cfg['maps']) and self.m.cfg['vote_maps']:
-			self.maps = random.sample(self.m.cfg['maps'], min(len(self.m.cfg['maps']), self.m.cfg['vote_maps'], 5))
+		if len(self.m.cfg['maps']) > 1 and self.m.cfg['vote_maps']:
+			self.maps = self.m.random_maps(self.m.cfg['maps'], self.m.cfg['vote_maps'], self.m.queue.last_map)
 			self.map_votes = [set() for i in self.maps]
 		else:
 			self.maps = []
