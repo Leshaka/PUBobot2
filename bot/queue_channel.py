@@ -718,15 +718,15 @@ class QueueChannel:
 		if p := find(lambda i: i['user_id'] == member.id, data):
 			embed = Embed(title=f"__{get_nick(member)}__", colour=Colour(0x7289DA))
 			embed.add_field(name="№", value=f"**{data.index(p)+1}**", inline=True)
-			embed.add_field(name="Matches", value=f"**{(p['wins']+p['losses']+p['draws'])}**", inline=True)
+			embed.add_field(name=self.gt("Matches"), value=f"**{(p['wins']+p['losses']+p['draws'])}**", inline=True)
 			if p['rating']:
-				embed.add_field(name="Rank", value=f"**{self.rating_rank(p['rating'])['rank']}**", inline=True)
-				embed.add_field(name="Rating", value=f"**{p['rating']}**±{p['deviation']}")
+				embed.add_field(name=self.gt("Rank"), value=f"**{self.rating_rank(p['rating'])['rank']}**", inline=True)
+				embed.add_field(name=self.gt("Rating"), value=f"**{p['rating']}**±{p['deviation']}")
 			else:
-				embed.add_field(name="Rank", value="**〈?〉**", inline=True)
-				embed.add_field(name="Rating", value="**?**")
+				embed.add_field(name=self.gt("Rank"), value="**〈?〉**", inline=True)
+				embed.add_field(name=self.gt("Rating"), value="**?**")
 			embed.add_field(name="W/L/D", value=f"**{p['wins']}**/**{p['losses']}**/**{p['draws']}**", inline=True)
-			embed.add_field(name="Winrate", value="**{}%**\n\u200b".format(
+			embed.add_field(name=self.gt("Winrate"), value="**{}%**\n\u200b".format(
 				int(p['wins']*100 / (p['wins']+p['losses'] or 1))
 			), inline=True)
 			if member.avatar_url:

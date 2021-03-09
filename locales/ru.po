@@ -58,6 +58,18 @@ msgstr "Указанный пользователь не найден."
 msgid "Specified user is not in a match."
 msgstr "Указанный пользователь не находится в матче."
 
+msgid "Matches"
+msgstr "Матчей"
+
+msgid "Rank"
+msgstr "Ранг"
+
+msgid "Rating"
+msgstr "Рейтинг"
+
+msgid "Winrate"
+msgstr "Винрейт"
+
 msgid "Last changes:"
 msgstr "Последние изменения:"
 
