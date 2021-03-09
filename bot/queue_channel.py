@@ -695,7 +695,7 @@ class QueueChannel:
 
 	async def _sub_for(self, message, args=None):
 		if self.get_match(message.author) is not None:
-			raise bot.Exc.InMatchError(self.gt("You are already in an active match"))
+			raise bot.Exc.InMatchError(self.gt("You are already in an active match."))
 		if not args:
 			raise bot.Exc.SyntaxError(f"Usage: {self.cfg.prefix}sub_for __player__")
 		elif (member := self.get_member(args)) is None:

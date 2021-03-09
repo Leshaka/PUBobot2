@@ -34,8 +34,14 @@ msgstr "начался пикап на другом канале"
 msgid "{member} were removed from all queues ({reason})."
 msgstr "{member} был удален из всех очередей ({reason})."
 
+msgid "{members} were removed from all queues ({reason})."
+msgstr "{members} были удалены из всех очередей ({reason})."
+
 msgid "Success"
 msgstr "Успешно"
+
+msgid "Error"
+msgstr "Ошибка"
 
 msgid "You are not allowed to add to queues."
 msgstr "Вам не разрешено добавлятся в очереди."
@@ -115,6 +121,9 @@ msgstr "Ваши DM оповещения выключены."
 msgid "Your DM notifications is now turned on."
 msgstr "Ваши DM оповещения включены."
 
+msgid "Leaderboard is empty"
+msgstr "Таблица лидеров пуста"
+
 # bot/queues/pickup_queue.py
 
 msgid "{role}Please add to **{name}** pickup, `{num}` players left!"
@@ -153,6 +162,12 @@ msgstr "Ожидаем:"
 
 msgid "Please react with {ready_emoji} to **check-in** or {not_ready_emoji} to **abort**!"
 msgstr "Нажмите {ready_emoji} чтобы **подтвердить** или {not_ready_emoji} чтобы **отменить** участие!"
+
+msgid "Please react with {ready_emoji} or vote for a map to **check-in**."
+msgstr "Нажмите {ready_emoji} или проголосуйте за карту чтобы **подтвердить** участие."
+
+msgid "React with {not_ready_emoji} to **abort**!"
+msgstr "Нажмите {not_ready_emoji} чтобы **abort** участие!"
 
 msgid "__**{queue}** is now on the draft stage!__"
 msgstr "__**{queue}** на стадии драфта!__"
