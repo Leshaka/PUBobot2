@@ -127,7 +127,7 @@ class Embeds:
 				player2=f"<@{p2.id}>",
 			)
 			embed.add_field(name=self.m.gt("Players"), value=players, inline=False)
-		else:  # team vs team
+		elif len(self.m.teams[0]):  # team vs team
 			teams_names = [
 				f"{t.emoji} \u200b **{t.name}**" +
 				(f" \u200b `〈{sum((self.m.ratings[p.id] for p in t))//(len(t) or 1)}〉`" if self.m.ranked else "")
@@ -144,6 +144,12 @@ class Embeds:
 			team_players[1] += "\n\u200b"  # Extra empty line
 			embed.add_field(name=teams_names[0], value=team_players[0], inline=False)
 			embed.add_field(name=teams_names[1], value=team_players[1], inline=False)
+
+		else:
+			embed.add_field(
+				name=self.m.qc.gt("Players"),
+				value=" \u200b " + " \u200b ".join((m.mention for m in self.m.players)) + "\n\u200b"
+			)
 
 		if len(self.m.maps):
 			embed.add_field(

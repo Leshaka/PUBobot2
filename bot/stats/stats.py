@@ -70,6 +70,7 @@ db.ensure_table(dict(
 		dict(cname="match_id", ctype=db.types.int),
 		dict(cname="channel_id", ctype=db.types.int),
 		dict(cname="user_id", ctype=db.types.int),
+		dict(cname="nick", ctype=db.types.str),
 		dict(cname="team", ctype=db.types.bool)
 	],
 	primary_keys=["match_id", "user_id"]
@@ -85,6 +86,7 @@ async def last_match_id():
 async def register_match_unranked(m):
 	await db.insert('qc_matches', dict(
 		match_id=m.id, channel_id=m.qc.channel.id, queue_id=m.queue.cfg.p_key, queue_name=m.queue.name,
+		alpha_name=m.teams[0].name, beta_name=m.teams[1].name,
 		at=int(time.time()), ranked=0, winner=None, maps="\n".join(m.maps)
 	))
 
@@ -94,9 +96,10 @@ async def register_match_unranked(m):
 	), on_dublicate="ignore")
 
 	for p in m.players:
+		nick = get_nick(p)
 		await db.update(
 			"qc_players",
-			dict(nick=get_nick(p)),
+			dict(nick=nick),
 			keys=dict(channel_id=m.qc.channel.id, user_id=p.id)
 		)
 
@@ -107,12 +110,16 @@ async def register_match_unranked(m):
 		else:
 			team = None
 
-		await db.insert('qc_player_matches', dict(match_id=m.id, channel_id=m.qc.channel.id, user_id=p.id, team=team))
+		await db.insert(
+			'qc_player_matches',
+			dict(match_id=m.id, channel_id=m.qc.channel.id, user_id=p.id, nick=nick, team=team)
+		)
 
 
 async def register_match_ranked(m):
 	await db.insert('qc_matches', dict(
 		match_id=m.id, channel_id=m.qc.channel.id, queue_id=m.queue.cfg.p_key, queue_name=m.queue.name,
+		alpha_name=m.teams[0].name, beta_name=m.teams[1].name,
 		at=int(time.time()), ranked=1, winner=m.winner, maps="\n".join(m.maps)
 	))
 
@@ -136,6 +143,7 @@ async def register_match_ranked(m):
 	before = iter_to_dict((*before[0], *before[1]), key='user_id')
 
 	for p in m.players:
+		nick = get_nick(p)
 		team = 0 if p in m.teams[0] else 1
 
 		if m.winner is None:
@@ -148,7 +156,7 @@ async def register_match_ranked(m):
 		await db.update(
 			"qc_players",
 			dict(
-				nick=get_nick(p),
+				nick=nick,
 				rating=after[p.id]['rating'],
 				deviation=after[p.id]['deviation'],
 				wins=after[p.id]['wins'],
@@ -158,7 +166,10 @@ async def register_match_ranked(m):
 			keys=dict(channel_id=m.qc.channel.id, user_id=p.id)
 		)
 
-		await db.insert('qc_player_matches', dict(match_id=m.id, channel_id=m.qc.channel.id, user_id=p.id, team=team))
+		await db.insert(
+			'qc_player_matches',
+			dict(match_id=m.id, channel_id=m.qc.channel.id, user_id=p.id, nick=nick, team=team)
+		)
 		await db.insert('qc_rating_history', dict(
 			channel_id=m.qc.channel.id,
 			user_id=p.id,

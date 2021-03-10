@@ -136,6 +136,9 @@ msgstr "Ваши DM оповещения включены."
 msgid "Leaderboard is empty"
 msgstr "Таблица лидеров пуста"
 
+msgid "Nothing found"
+msgstr "Нет результатов"
+
 # bot/queues/pickup_queue.py
 
 msgid "{role}Please add to **{name}** pickup, `{num}` players left!"

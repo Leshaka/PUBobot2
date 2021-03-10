@@ -219,6 +219,7 @@ class QueueChannel:
 			not_ready=self._not_ready,
 			capfor=self._cap_for,
 			pick=self._pick,
+			p=self._pick,
 			teams=self._teams,
 			put=self._put,
 			subme=self._sub_me,
@@ -246,7 +247,9 @@ class QueueChannel:
 			start=self._start,
 			stats_reset=self._stats_reset,
 			stats_reset_player=self._stats_reset_player,
-			stats_replace_player=self._stats_replace_player
+			stats_replace_player=self._stats_replace_player,
+			lastgame=self._last_game,
+			lg=self._last_game
 		)
 
 	async def update_info(self):
@@ -1013,3 +1016,39 @@ class QueueChannel:
 			raise bot.Exc.SyntaxError(f"Usage: {self.cfg.prefix}stats_reset_player __@user1__ __@user2__")
 		await bot.stats.replace_player(self.channel.id, members[0].id, members[1].id, get_nick(members[1]))
 		await self.success(self.gt("Done."))
+
+	async def _last_game(self, message, args=None):
+		if args:
+			if queue := find(lambda q: q.name.lower() == args.lower(), self.queues):
+				last_game = await db.select_one(
+					['*'], "qc_matches", where=dict(channel_id=self.id, queue_id=queue.id), order_by="match_id", limit=1
+				)
+			elif member := self.get_member(args):
+				if match := await db.select_one(
+					['match_id'], "qc_player_matches", where=dict(channel_id=self.id, user_id=member.id), order_by="match_id", limit=1
+				):
+					last_game = await db.select_one(
+						['*'], "qc_matches", where=dict(channel_id=self.id, match_id=match['match_id'])
+					)
+				else:
+					last_game = None
+			else:
+				raise bot.Exc.SyntaxError(f"Usage: {self.cfg.prefix}lastgame [__queue__]")
+		else:
+			last_game = await db.select_one(
+				['*'], "qc_matches", where=dict(channel_id=self.id), order_by="match_id", limit=1
+			)
+
+		if not last_game:
+			raise bot.Exc.NotFoundError(self.gt("Nothing found"))
+
+		players = await db.select(['user_id', 'nick', 'team'], "qc_player_matches", where=dict(match_id=last_game['match_id']))
+		embed = Embed(colour=Colour(0x50e3c2))
+		embed.add_field(name=last_game['queue_name'], value=seconds_to_str(int(time.time())-last_game['at']) + " ago")
+		if len(team := [p['nick'] for p in players if p['team'] == 0]):
+			embed.add_field(name=last_game['alpha_name'], value="`"+", ".join(team)+"`")
+		if len(team := [p['nick'] for p in players if p['team'] == 1]):
+			embed.add_field(name=last_game['beta_name'], value="`" + ", ".join(team) + "`")
+		if len(team := [p['nick'] for p in players if p['team'] is None]):
+			embed.add_field(name="Players", value="`" + ", ".join(team) + "`")
+		await self.channel.send(embed=embed)
