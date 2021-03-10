@@ -1050,5 +1050,5 @@ class QueueChannel:
 		if len(team := [p['nick'] for p in players if p['team'] == 1]):
 			embed.add_field(name=last_game['beta_name'], value="`" + ", ".join(team) + "`")
 		if len(team := [p['nick'] for p in players if p['team'] is None]):
-			embed.add_field(name="Players", value="`" + ", ".join(team) + "`")
+			embed.add_field(name=self.gt("Players"), value="`" + ", ".join(team) + "`")
 		await self.channel.send(embed=embed)
