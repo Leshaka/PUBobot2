@@ -524,7 +524,7 @@ class QueueChannel:
 		# select queues requested by user
 		elif len(targets):
 			t_queues = (q for q in self.queues if any(
-				(t == q.name.lower() or t in (a["alias"] for a in q.cfg.tables.aliases) for t in targets)
+				(t == q.name.lower() or t in (a["alias"].lower() for a in q.cfg.tables.aliases) for t in targets)
 			))
 
 		# select active queues or default queues if no active queues
@@ -723,6 +723,7 @@ class QueueChannel:
 			['user_id', 'rating', 'deviation', 'channel_id', 'wins', 'losses', 'draws'], "qc_players",
 			where={'channel_id': self.channel.id}, order_by="rating"
 		)
+		data = [i for i in data if not i['is_hidden'] and i['rating']]
 		if p := find(lambda i: i['user_id'] == member.id, data):
 			embed = Embed(title=f"__{get_nick(member)}__", colour=Colour(0x7289DA))
 			embed.add_field(name="№", value=f"**{data.index(p)+1}**", inline=True)
