@@ -250,7 +250,9 @@ class QueueChannel:
 			stats_replace_player=self._stats_replace_player,
 			lastgame=self._last_game,
 			lg=self._last_game,
-			commands=self._commands
+			commands=self._commands,
+			reset=self._reset,
+			remove_player=self._remove_player
 		)
 
 	async def update_info(self):
@@ -342,6 +344,8 @@ class QueueChannel:
 					reason = self.gt("member left the guild")
 				elif reason == "pickup started":
 					reason = self.gt("queue started on another channel")
+				elif reason == "moderator":
+					reason = self.gt("removed by a moderator")
 
 				if len(affected) == 1:
 					await self._send(self.gt("{member} were removed from all queues ({reason}).").format(
@@ -446,7 +450,7 @@ class QueueChannel:
 		if not permissions.send_messages:
 			# should we log when bot doesn't have permission to send message in this channel?
 			log.info(
-				"{}>{}# Tried to send message in channel"
+				"{}>{}# Tried to send message in channel "
 				"without send_messages permission. "
 				"Guild owner: {}"
 				.format(self.channel.guild, self.channel.name, self.channel.guild.owner))
@@ -537,7 +541,7 @@ class QueueChannel:
 		# select queues requested by user
 		elif len(targets):
 			t_queues = (q for q in self.queues if any(
-				(t == q.name.lower() or t in (a["alias"] for a in q.cfg.tables.aliases) for t in targets)
+				(t == q.name.lower() or t in (a["alias"].lower() for a in q.cfg.tables.aliases) for t in targets)
 			))
 
 		# select active queues or default queues if no active queues
@@ -736,6 +740,7 @@ class QueueChannel:
 			['user_id', 'rating', 'deviation', 'channel_id', 'wins', 'losses', 'draws'], "qc_players",
 			where={'channel_id': self.channel.id}, order_by="rating"
 		)
+		data = [i for i in data if not i['is_hidden'] and i['rating']]
 		if p := find(lambda i: i['user_id'] == member.id, data):
 			embed = Embed(title=f"__{get_nick(member)}__", colour=Colour(0x7289DA))
 			embed.add_field(name="№", value=f"**{data.index(p)+1}**", inline=True)
@@ -1073,3 +1078,22 @@ class QueueChannel:
 
 	async def _commands(self, message, args=None):
 		await self._send(f"<{cfg.COMMANDS_URL}>")
+
+	async def _reset(self, message, args=None):
+		self._check_perms(message.author, 1)
+		if not args:
+			for q in self.queues:
+				await q.reset()
+		elif q := find(lambda q: q.name.lower() == args.lower(), self.queues):
+			await q.reset()
+		else:
+			raise bot.Exc.NotFoundError(self.gt("Specified queue not found."))
+		await self.update_topic(force_announce=True)
+
+	async def _remove_player(self, message, args=None):
+		self._check_perms(message.author, 1)
+		if not args:
+			raise bot.Exc.SyntaxError(f"Usage: {self.cfg.prefix}remove_player __@user__")
+		elif (member := self.get_member(args)) is None:
+			raise bot.Exc.SyntaxError(f"Usage: {self.cfg.prefix}remove_player __@user__")
+		await self.remove_members(member, reason="moderator")

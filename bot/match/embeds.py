@@ -145,10 +145,11 @@ class Embeds:
 			embed.add_field(name=teams_names[0], value=team_players[0], inline=False)
 			embed.add_field(name=teams_names[1], value=team_players[1], inline=False)
 
-		else:
+		else:  # just players list
 			embed.add_field(
 				name=self.m.qc.gt("Players"),
-				value=" \u200b " + " \u200b ".join((m.mention for m in self.m.players)) + "\n\u200b"
+				value=" \u200b " + " \u200b ".join((m.mention for m in self.m.players)) + "\n\u200b",
+				inline=False
 			)
 
 		if len(self.m.maps):

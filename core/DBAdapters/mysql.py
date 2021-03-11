@@ -93,7 +93,7 @@ class Adapter:
 
 	@staticmethod
 	def _mysql_column(kwargs):
-		return "{cname} {ctype}{notnull}{unique}{autoincrement}{default}".format(
+		return "`{cname}` {ctype}{notnull}{unique}{autoincrement}{default}".format(
 			cname=kwargs['cname'],
 			ctype=kwargs['ctype'],
 			notnull=" NOT NULL" if kwargs['notnull'] else "",

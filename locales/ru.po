@@ -31,6 +31,9 @@ msgstr "пользователь покинул гильдию"
 msgid "queue started on another channel"
 msgstr "начался пикап на другом канале"
 
+msgid "removed by a moderator"
+msgstr "удалён модератором"
+
 msgid "{member} were removed from all queues ({reason})."
 msgstr "{member} был удален из всех очередей ({reason})."
 
