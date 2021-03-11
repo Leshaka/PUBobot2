@@ -992,7 +992,7 @@ class QueueChannel:
 		self._check_perms(message.author, 1)
 		if not args:
 			raise bot.Exc.SyntaxError(f"Usage: {self.cfg.prefix}start __queue__")
-		if (queue := get(self.queues, name=args)) is None:
+		if (queue := find(lambda q: q.name.lower() == args.lower(), self.queues)) is None:
 			raise bot.Exc.NotFoundError(self.gt("Specified queue not found."))
 		await queue.start()
 

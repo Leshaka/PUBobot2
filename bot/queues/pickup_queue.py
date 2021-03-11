@@ -97,7 +97,9 @@ class PickupQueue:
 			Variables.StrVar(
 				"server",
 				display="Server",
-				description="Print this server on match start."
+				description="Print this server on match start.",
+				verify=lambda s: len(s) < 101,
+				verify_message="Server string is too long."
 			),
 			Variables.RoleVar(
 				"promotion_role",
