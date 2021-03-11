@@ -3,9 +3,9 @@ import pymysql
 
 SQLITE_FILE = "database.sqlite3"
 MYSQL_HOST = "localhost"
-MYSQL_USER = ""
-MYSQL_PASS = ""
-MYSQL_DB = ""
+MYSQL_USER = "pubobot"
+MYSQL_PASS = "pUbOpAAss"
+MYSQL_DB = "pubodb"
 
 
 def dict_factory(cursor, row):
@@ -107,7 +107,7 @@ for chan in channels:
 		q_server = get_value(queue, chan, 'ip')
 		q_start_msg = get_value(queue, chan, 'startmsg')
 		if q_start_msg:
-			q_start_msg = q_start_msg.replace("%ip%", q_server)
+			q_start_msg = q_start_msg.replace("%ip%", q_server or "")
 			q_start_msg = q_start_msg.replace("%password%", get_value(queue, chan, 'password') or "")
 		new_queue = {
 			'channel_id': queue['channel_id'],
