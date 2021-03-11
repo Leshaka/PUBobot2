@@ -250,7 +250,8 @@ class QueueChannel:
 			stats_replace_player=self._stats_replace_player,
 			lastgame=self._last_game,
 			lg=self._last_game,
-			commands=self._commands
+			commands=self._commands,
+			reset=self._reset
 		)
 
 	async def update_info(self):
@@ -1056,3 +1057,13 @@ class QueueChannel:
 
 	async def _commands(self, message, args=None):
 		await self.channel.send(f"<{cfg.COMMANDS_URL}>")
+
+	async def _reset(self, message, args=None):
+		if not args:
+			for q in self.queues:
+				await q.reset()
+		elif q := find(lambda q: q.name.lower() == args.lower(), self.queues):
+			await q.reset()
+		else:
+			raise bot.Exc.NotFoundError(self.gt("Specified queue not found."))
+		await self.update_topic(force_announce=True)

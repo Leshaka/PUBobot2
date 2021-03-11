@@ -4,6 +4,7 @@ import bot
 from discord.errors import DiscordException
 
 from core.utils import join_and
+from core.console import log
 
 
 class CheckIn:
@@ -100,11 +101,12 @@ class CheckIn:
 
 	async def abort_timeout(self):
 		not_ready = [m for m in self.m.players if m not in self.ready_players]
-		bot.waiting_reactions.pop(self.message.id, None)
-		try:
-			await self.message.delete()
-		except DiscordException:
-			pass
+		if self.message:
+			bot.waiting_reactions.pop(self.message.id, None)
+			try:
+				await self.message.delete()
+			except DiscordException:
+				pass
 
 		await self.m.send("\n".join((
 			self.m.gt("{members} was not ready in time.").format(members=join_and([m.mention for m in not_ready])),
