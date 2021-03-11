@@ -249,7 +249,8 @@ class QueueChannel:
 			stats_reset_player=self._stats_reset_player,
 			stats_replace_player=self._stats_replace_player,
 			lastgame=self._last_game,
-			lg=self._last_game
+			lg=self._last_game,
+			commands=self._commands
 		)
 
 	async def update_info(self):
@@ -1052,3 +1053,6 @@ class QueueChannel:
 		if len(team := [p['nick'] for p in players if p['team'] is None]):
 			embed.add_field(name=self.gt("Players"), value="`" + ", ".join(team) + "`")
 		await self.channel.send(embed=embed)
+
+	async def _commands(self, message, args=None):
+		await self.channel.send(f"<{cfg.COMMANDS_URL}>")

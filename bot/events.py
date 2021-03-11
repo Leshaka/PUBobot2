@@ -2,6 +2,7 @@ from discord import ChannelType
 
 from core.client import dc
 from core.console import log
+from core.config import cfg
 import bot
 
 
@@ -16,7 +17,10 @@ async def on_think(frame_time):
 async def on_message(message):
 	log.chat('{}: {}'.format(message.author, message.content))
 
-	if message.channel.type != ChannelType.text:  # This is a private message
+	if message.channel.type == ChannelType.private and message.author.id != dc.user.id:
+		await message.channel.send(cfg.HELP)
+
+	if message.channel.type != ChannelType.text:
 		return
 
 	if message.content == '!enable_pubobot':
