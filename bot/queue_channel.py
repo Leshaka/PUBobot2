@@ -251,7 +251,8 @@ class QueueChannel:
 			lastgame=self._last_game,
 			lg=self._last_game,
 			commands=self._commands,
-			reset=self._reset
+			reset=self._reset,
+			remove_player=self._remove_player
 		)
 
 	async def update_info(self):
@@ -343,6 +344,8 @@ class QueueChannel:
 					reason = self.gt("member left the guild")
 				elif reason == "pickup started":
 					reason = self.gt("queue started on another channel")
+				elif reason == "moderator":
+					reason = self.gt("removed by a moderator")
 
 				if len(affected) == 1:
 					await self.channel.send(self.gt("{member} were removed from all queues ({reason}).").format(
@@ -1059,6 +1062,7 @@ class QueueChannel:
 		await self.channel.send(f"<{cfg.COMMANDS_URL}>")
 
 	async def _reset(self, message, args=None):
+		self._check_perms(message.author, 1)
 		if not args:
 			for q in self.queues:
 				await q.reset()
@@ -1067,3 +1071,11 @@ class QueueChannel:
 		else:
 			raise bot.Exc.NotFoundError(self.gt("Specified queue not found."))
 		await self.update_topic(force_announce=True)
+
+	async def _remove_player(self, message, args=None):
+		self._check_perms(message.author, 1)
+		if not args:
+			raise bot.Exc.SyntaxError(f"Usage: {self.cfg.prefix}remove_player __@user__")
+		elif (member := self.get_member(args)) is None:
+			raise bot.Exc.SyntaxError(f"Usage: {self.cfg.prefix}remove_player __@user__")
+		await self.remove_members(member, reason="moderator")

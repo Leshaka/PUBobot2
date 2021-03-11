@@ -3,9 +3,9 @@ import pymysql
 
 SQLITE_FILE = "database.sqlite3"
 MYSQL_HOST = "localhost"
-MYSQL_USER = "pubobot"
-MYSQL_PASS = "pUbOpAAss"
-MYSQL_DB = "pubodb"
+MYSQL_USER = ""
+MYSQL_PASS = ""
+MYSQL_DB = ""
 
 
 def dict_factory(cursor, row):
