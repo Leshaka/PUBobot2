@@ -309,7 +309,7 @@ class QueueChannel:
 			new_topic = "> [" + " | ".join([f"**{q.name}** ({q.status})" for q in populated]) + "]"
 		if new_topic != self.topic or force_announce:
 			self.topic = new_topic
-			await self.channel.send(self.topic)
+			await self._send(self.topic)
 
 	async def auto_remove(self, member):
 		if bot.expire.get(self, member) is None:
@@ -344,12 +344,12 @@ class QueueChannel:
 					reason = self.gt("queue started on another channel")
 
 				if len(affected) == 1:
-					await self.channel.send(self.gt("{member} were removed from all queues ({reason}).").format(
+					await self._send(self.gt("{member} were removed from all queues ({reason}).").format(
 						member=mention,
 						reason=reason
 					))
 				else:
-					await self.channel.send(self.gt("{members} were removed from all queues ({reason}).").format(
+					await self._send(self.gt("{members} were removed from all queues ({reason}).").format(
 						members=mention,
 						reason=reason
 					))
@@ -358,13 +358,13 @@ class QueueChannel:
 		title = title or self.gt("Error")
 		if reply_to:
 			content = f"<@{reply_to.id}>, " + content
-		await self.channel.send(embed=error_embed(content, title=title))
+		await self._send(embed=error_embed(content, title=title))
 
 	async def success(self, content, title=None, reply_to=None):
 		# title = title or self.gt("Success")
 		if reply_to:
 			content = f"<@{reply_to.id}>, " + content
-		await self.channel.send(embed=ok_embed(content, title=title))
+		await self._send(embed=ok_embed(content, title=title))
 
 	def get_match(self, member):
 		for match in bot.active_matches:
@@ -439,6 +439,23 @@ class QueueChannel:
 					pass
 				await asyncio.sleep(1)
 
+	async def _send(self, content=None, *args, **kwargs):
+		permissions = self.channel.permissions_for(self.channel.guild.me)
+
+		# saves api call
+		if not permissions.send_messages:
+			# should we log when bot doesn't have permission to send message in this channel?
+			log.info(
+				"{}>{}# Tried to send message in channel"
+				"without send_messages permission. "
+				"Guild owner: {}"
+				.format(self.channel.guild, self.channel.name, self.channel.guild.owner))
+			return
+		if 'embed' in kwargs and kwargs['embed'] is not None and not permissions.embed_links:
+			await self.channel.send("I don't have permission to embed links in this channel")
+			return
+		await self.channel.send(content, **kwargs)
+
 	async def process_msg(self, message):
 		if not len(message.content) > 1:
 			return
@@ -465,9 +482,9 @@ class QueueChannel:
 			try:
 				await f(message, *args)
 			except bot.Exc.PubobotException as e:
-				await message.channel.send(embed=error_embed(str(e), title=type(e).__name__))
+				await self._send(embed=error_embed(str(e), title=type(e).__name__))
 			except BaseException as e:
-				await message.channel.send(embed=error_embed(str(e), title="RuntimeError"))
+				await self._send(embed=error_embed(str(e), title="RuntimeError"))
 				log.error(f"Error processing last message. Traceback:\n{traceback.format_exc()}======")
 
 	#  Bot commands #
@@ -496,11 +513,11 @@ class QueueChannel:
 
 	async def _show_queues(self, message, args=None):
 		if len(self.queues):
-			await self.channel.send("> [" + " | ".join(
+			await self._send("> [" + " | ".join(
 				[f"**{q.name}** ({q.status})" for q in self.queues]
 			) + "]")
 		else:
-			await self.channel.send("> [ **no queues configured** ]")
+			await self._send("> [ **no queues configured** ]")
 
 	async def _add_member(self, message, args=None):
 		if self.cfg.blacklist_role and self.cfg.blacklist_role in message.author.roles:
@@ -569,9 +586,9 @@ class QueueChannel:
 			t_queues = [q for q in self.queues if len(q.queue)]
 
 		if not len(t_queues):
-			await self.channel.send(f"> {self.gt('no players')}")
+			await self._send(f"> {self.gt('no players')}")
 		else:
-			await self.channel.send("\n".join([f"> **{q.name}** ({q.status}) | {q.who}" for q in t_queues]))
+			await self._send("\n".join([f"> **{q.name}** ({q.status}) | {q.who}" for q in t_queues]))
 
 	async def _set(self, message, args=""):
 		self._check_perms(message.author, 2)
@@ -751,7 +768,7 @@ class QueueChannel:
 						change=("+" if c['rating_change'] >= 0 else "") + str(c['rating_change'])
 					) for c in changes))
 				)
-			await self.channel.send(embed=embed)
+			await self._send(embed=embed)
 
 		else:
 			raise bot.Exc.ValueError(self.gt("No rating data found."))
@@ -780,11 +797,11 @@ class QueueChannel:
 	async def _expire(self, message, args=None):
 		if not args:
 			if task := bot.expire.get(self, message.author):
-				await self.channel.send(self.gt("You have {duration} expire time left.").format(
+				await self._send(self.gt("You have {duration} expire time left.").format(
 					duration=seconds_to_str(task.at-int(time.time()))
 				))
 			else:
-				await self.channel.send(self.gt("You don't have an expire timer set right now."))
+				await self._send(self.gt("You don't have an expire timer set right now."))
 
 		else:
 			try:
@@ -832,7 +849,7 @@ class QueueChannel:
 			text = self.gt("Your default expire time is {time}.".format(time=seconds_to_str(expire)))
 
 		if not modify:
-			await self.channel.send(text)
+			await self._send(text)
 		else:
 			try:
 				await db.insert('players', {'user_id': message.author.id, 'expire': expire})
@@ -856,9 +873,9 @@ class QueueChannel:
 
 		matches = [m for m in bot.active_matches if m.qc.channel.id == self.channel.id]
 		if len(matches):
-			await self.channel.send("\n".join((m.print() for m in matches)))
+			await self._send("\n".join((m.print() for m in matches)))
 		else:
-			await self.channel.send(self.gt("> no active matches"))
+			await self._send(self.gt("> no active matches"))
 
 	async def _leaderboard(self, message, args=1):
 		try:
@@ -890,7 +907,7 @@ class QueueChannel:
 				"-"*60,
 				"\n".join(lines)
 			)
-			await self.channel.send(text)
+			await self._send(text)
 		else:
 			raise bot.Exc.NotFoundError(self.gt("Leaderboard is empty."))
 
@@ -910,7 +927,7 @@ class QueueChannel:
 				delay=seconds_to_str((self.cfg.promotion_delay+self.last_promote)-now)
 			)))
 
-		await self.channel.send(queue.promote)
+		await self._send(queue.promote)
 		self.last_promote = now
 
 	async def _rating_set(self, message, args=None):
@@ -1052,7 +1069,7 @@ class QueueChannel:
 			embed.add_field(name=last_game['beta_name'], value="`" + ", ".join(team) + "`")
 		if len(team := [p['nick'] for p in players if p['team'] is None]):
 			embed.add_field(name=self.gt("Players"), value="`" + ", ".join(team) + "`")
-		await self.channel.send(embed=embed)
+		await self._send(embed=embed)
 
 	async def _commands(self, message, args=None):
-		await self.channel.send(f"<{cfg.COMMANDS_URL}>")
+		await self._send(f"<{cfg.COMMANDS_URL}>")
