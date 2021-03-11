@@ -720,7 +720,7 @@ class QueueChannel:
 			member = message.author
 
 		data = await db.select(
-			['user_id', 'rating', 'deviation', 'channel_id', 'wins', 'losses', 'draws'], "qc_players",
+			['user_id', 'rating', 'deviation', 'channel_id', 'wins', 'losses', 'draws', 'is_hidden'], "qc_players",
 			where={'channel_id': self.channel.id}, order_by="rating"
 		)
 		data = [i for i in data if not i['is_hidden'] and i['rating']]
