@@ -2,6 +2,7 @@
 from time import time
 from itertools import combinations
 import random
+from discord import DiscordException
 
 import bot
 from core.utils import find, get, iter_to_dict, join_and, get_nick
@@ -287,7 +288,10 @@ class Match:
 
 	async def final_message(self):
 		#  Embed message with teams
-		await self.qc.channel.send(embed=self.embeds.final_message())
+		try:
+			await self.qc.channel.send(embed=self.embeds.final_message())
+		except DiscordException:
+			pass
 
 	async def finish_match(self):
 		bot.active_matches.remove(self)

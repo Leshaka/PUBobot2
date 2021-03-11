@@ -44,7 +44,10 @@ class CheckIn:
 	async def refresh(self):
 		not_ready = list(filter(lambda m: m not in self.ready_players, self.m.players))
 		if len(not_ready):
-			await self.message.edit(content=None, embed=self.m.embeds.check_in(not_ready))
+			try:
+				await self.message.edit(content=None, embed=self.m.embeds.check_in(not_ready))
+			except DiscordException:
+				pass
 		else:
 			bot.waiting_reactions.pop(self.message.id)
 			self.ready_players = set()

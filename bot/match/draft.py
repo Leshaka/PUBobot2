@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import bot
 from core.utils import find
+from discord import DiscordException
 
 
 class Draft:
@@ -23,7 +24,11 @@ class Draft:
 		await self.refresh()
 
 	async def print(self):
-		await self.m.send(embed=self.m.embeds.draft())
+		try:
+			await self.m.send(embed=self.m.embeds.draft())
+		except DiscordException:
+			pass
+
 
 	async def refresh(self):
 		if self.m.state != self.m.DRAFT:
