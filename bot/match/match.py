@@ -164,7 +164,7 @@ class Match:
 				self.players,
 				key=lambda p: [captains_role_id in [role.id for role in p.roles], self.ratings[p.id]],
 				reverse=True
-			)
+			)[:2]
 		elif pick_captains == "fair pairs":
 			candidates = sorted(self.players, key=lambda p: [self.ratings[p.id]], reverse=True)
 			i = random.randrange(len(candidates) - 1)
