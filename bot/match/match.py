@@ -159,13 +159,17 @@ class Match:
 			maps.remove(last_map)
 		return random.sample(maps, min(map_count, len(maps)))
 
+	def sort_players(self, players):
+		""" sort given list of members by captains role and rating """
+		return sorted(
+			players,
+			key=lambda p: [self.cfg['captains_role_id'] in [role.id for role in p.roles], self.ratings[p.id]],
+			reverse=True
+		)
+
 	def init_captains(self, pick_captains, captains_role_id):
 		if pick_captains == "by role and rating":
-			self.captains = sorted(
-				self.players,
-				key=lambda p: [captains_role_id in [role.id for role in p.roles], self.ratings[p.id]],
-				reverse=True
-			)[:2]
+			self.captains = self.sort_players(self.players)[:2]
 		elif pick_captains == "fair pairs":
 			candidates = sorted(self.players, key=lambda p: [self.ratings[p.id]], reverse=True)
 			i = random.randrange(len(candidates) - 1)
@@ -185,8 +189,12 @@ class Match:
 				combinations(self.players, team_len),
 				key=lambda team: abs(sum([self.ratings[m.id] for m in team])-best_rating)
 			)
-			self.teams[0].set(best_team[:self.cfg['team_size']])
-			self.teams[1].set([p for p in self.players if p not in best_team][:self.cfg['team_size']])
+			self.teams[0].set(self.sort_players(
+				best_team[:self.cfg['team_size']]
+			))
+			self.teams[1].set(self.sort_players(
+				[p for p in self.players if p not in best_team][:self.cfg['team_size']]
+			))
 		elif pick_teams == "random teams":
 			self.teams[0].set(random.sample(self.players, self.cfg['team_size']))
 			self.teams[1].set([p for p in self.players if p not in self.teams[0]][:self.cfg['team_size']])
