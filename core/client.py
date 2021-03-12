@@ -12,6 +12,12 @@ class FakeMember:
 		self.roles = []
 		self.avatar_url = "https://cdn.discordapp.com/embed/avatars/0.png"
 
+	def __eq__(self, other):
+		return True if self.id == getattr(other, 'id', None) else False
+
+	def __hash__(self):
+		return self.id
+
 	@property
 	def mention(self):
 		return f"<@{self.id}>"

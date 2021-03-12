@@ -252,7 +252,8 @@ class QueueChannel:
 			lg=self._last_game,
 			commands=self._commands,
 			reset=self._reset,
-			remove_player=self._remove_player
+			remove_player=self._remove_player,
+			add_player=self._add_player
 		)
 
 	async def update_info(self):
@@ -377,9 +378,7 @@ class QueueChannel:
 		return None
 
 	def get_member(self, string):
-		print(string)
 		if highlight := re.match(r"<@!?(\d+)>", string):
-			print(highlight.group(1))
 			return self.channel.guild.get_member(int(highlight.group(1)))
 		elif mask := re.match(r"^(\w+)@(\d{5,20})$", string):
 			name, user_id = mask.groups()
@@ -402,6 +401,15 @@ class QueueChannel:
 
 	async def update_rating_roles(self, *members):
 		asyncio.create_task(self._update_rating_roles(*members))
+
+	async def update_expire(self, member):
+		""" update expire timer on !add command """
+		personal_expire = await db.select_one(['expire'], 'players', where={'user_id': member.id})
+		personal_expire = personal_expire.get('expire') if personal_expire else None
+		if personal_expire not in [0, None]:
+			bot.expire.set(self, member, personal_expire)
+		elif self.cfg.expire_time and personal_expire is None:
+			bot.expire.set(self, member, self.cfg.expire_time)
 
 	async def _update_rating_roles(self, *members):
 		data = await self.rating.get_players((i.id for i in members))
@@ -538,12 +546,7 @@ class QueueChannel:
 			if is_started := await q.add_member(message.author):
 				break
 		if not is_started:
-			personal_expire = await db.select_one(['expire'], 'players', where={'user_id': message.author.id})
-			personal_expire = personal_expire.get('expire') if personal_expire else None
-			if personal_expire not in [0, None]:
-				bot.expire.set(self, message.author, personal_expire)
-			elif self.cfg.expire_time and personal_expire is None:
-				bot.expire.set(self, message.author, self.cfg.expire_time)
+			await self.update_expire(message.author)
 
 		await self.update_topic()
 
@@ -1080,3 +1083,19 @@ class QueueChannel:
 		elif (member := self.get_member(args)) is None:
 			raise bot.Exc.SyntaxError(f"Usage: {self.cfg.prefix}remove_player __@user__")
 		await self.remove_members(member, reason="moderator")
+
+	async def _add_player(self, message, args=""):
+		self._check_perms(message.author, 1)
+		args = args.split(" ", maxsplit=1)
+		if len(args) != 2:
+			raise bot.Exc.SyntaxError(f"Usage: {self.cfg.prefix}add_player __queue__ __@user__")
+		elif (queue := find(lambda q: q.name.lower() == args[0].lower(), self.queues)) is None:
+			raise bot.Exc.SyntaxError(f"Usage: {self.cfg.prefix}add_player __queue__ __@user__")
+		elif (member := self.get_member(args[1])) is None:
+			raise bot.Exc.SyntaxError(f"Usage: {self.cfg.prefix}add_player __queue__ __@user__")
+
+		is_started = await queue.add_member(member)
+		if not is_started:
+			await self.update_expire(member)
+
+		await self.update_topic()
