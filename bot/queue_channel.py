@@ -518,9 +518,9 @@ class QueueChannel:
 
 	async def _add_member(self, message, args=None):
 		if self.cfg.blacklist_role and self.cfg.blacklist_role in message.author.roles:
-			raise bot.Exc.PermissionError(self.gt("You are not allowed to add to queues."))
+			raise bot.Exc.PermissionError(self.gt("You are not allowed to add to queues on this channel."))
 		if self.cfg.whitelist_role and self.cfg.whitelist_role not in message.author.roles:
-			raise bot.Exc.PermissionError(self.gt("You are not allowed to add to queues."))
+			raise bot.Exc.PermissionError(self.gt("You are not allowed to add to queues on this channel."))
 
 		if any((message.author in m.players for m in bot.active_matches)):
 			raise bot.Exc.InMatchError(self.gt("You are already in an active match."))
@@ -533,18 +533,29 @@ class QueueChannel:
 
 		# select queues requested by user
 		elif len(targets):
-			t_queues = (q for q in self.queues if any(
+			t_queues = [q for q in self.queues if any(
 				(t == q.name.lower() or t in (a["alias"].lower() for a in q.cfg.tables.aliases) for t in targets)
-			))
+			)]
 
 		# select active queues or default queues if no active queues
 		else:
 			t_queues = [q for q in self.queues if len(q.queue)]
 			if not len(t_queues):
-				t_queues = (q for q in self.queues if q.cfg.is_default)
+				t_queues = [q for q in self.queues if q.cfg.is_default]
+
+		allowed = [
+			q for q in t_queues if
+			(not q.cfg.blacklist_role or q.cfg.blacklist_role not in message.author.roles) and
+			(not q.cfg.whitelist_role or q.cfg.whitelist_role in message.author.roles)
+		]
+
+		if len(allowed) != len(t_queues):
+			await self.error(self.gt("You are not allowed to add to {queues} queues.".format(
+				queues=join_and([f"**{q.name}**" for q in t_queues if q not in allowed])
+			)))
 
 		is_started = False
-		for q in t_queues:
+		for q in allowed:
 			if is_started := await q.add_member(message.author):
 				break
 		if not is_started:

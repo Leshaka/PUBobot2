@@ -46,8 +46,11 @@ msgstr "Успешно"
 msgid "Error"
 msgstr "Ошибка"
 
-msgid "You are not allowed to add to queues."
-msgstr "Вам не разрешено добавлятся в очереди."
+msgid "You are not allowed to add to queues on this channel."
+msgstr "Вам не разрешено добавлятся в очереди на этом канале."
+
+msgid "You are not allowed to add to {queues} queues."
+msgstr "Вам не разрешено добавлятся в очереди {queues}."
 
 msgid "You are already in an active match."
 msgstr "Вы уже находитесь в активном матче."
