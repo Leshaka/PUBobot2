@@ -29,7 +29,7 @@ class Match:
 		teams=None, team_names=['Alpha', 'Beta'], team_emojis=None, ranked=False,
 		team_size=1, pick_captains="no captains", captains_role_id=None, pick_teams="draft",
 		pick_order=None, maps=[], vote_maps=0, map_count=0, check_in_timeout=0,
-		match_lifetime=6*60*60, start_msg=None, server=None
+		match_lifetime=3*60*60, start_msg=None, server=None
 	)
 
 	class Team(list):
@@ -207,7 +207,11 @@ class Match:
 			await self.check_in.think(frame_time)
 
 		elif frame_time > self.lifetime + self.start_time:
-			pass
+			await self.qc.error(self.gt("Match {queue} ({id}) has timed out.").format(
+				queue=self.queue.name,
+				id=self.id
+			))
+			await self.cancel()
 
 	async def next_state(self):
 		if len(self.states):

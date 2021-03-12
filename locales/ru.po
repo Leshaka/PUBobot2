@@ -167,6 +167,9 @@ msgstr "{self} предлагает ничью, ожидаем `{prefix}rd` от
 msgid "Specified team name not found."
 msgstr "Указанная команда не найдена."
 
+msgid "Match {queue} ({id}) has timed out."
+msgstr "Истекло время ожидания для матча {queue} ({id})."
+
 msgid "{players} your match has been canceled."
 msgstr "{players} ваш матч был отменен."
 

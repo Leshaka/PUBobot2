@@ -11,6 +11,7 @@ class FakeMember:
 		self.nick = None
 		self.roles = []
 		self.avatar_url = "https://cdn.discordapp.com/embed/avatars/0.png"
+		self.bot = True
 
 	def __eq__(self, other):
 		return True if self.id == getattr(other, 'id', None) else False
