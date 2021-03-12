@@ -253,7 +253,9 @@ class QueueChannel:
 			commands=self._commands,
 			reset=self._reset,
 			remove_player=self._remove_player,
-			add_player=self._add_player
+			add_player=self._add_player,
+			subscribe=self._subscribe,
+			unsubscribe=self._unsubscribe
 		)
 
 	async def update_info(self):
@@ -1099,3 +1101,36 @@ class QueueChannel:
 			await self.update_expire(member)
 
 		await self.update_topic()
+
+	async def subscribe(self, member, args, unsub=False):
+		if not args:
+			roles = [self.cfg.promotion_role] if self.cfg.promotion_role else []
+		else:
+			args = args.split(" ")
+			roles = (q.cfg.promotion_role for q in self.queues if q.cfg.promotion_role and any(
+				(t == q.name.lower() or t in (a["alias"].lower() for a in q.cfg.tables.aliases) for t in args)
+			))
+
+		if unsub:
+			roles = [r for r in roles if r in member.roles]
+			if not len(roles):
+				raise bot.Exc.ValueError(self.gt("No changes to apply."))
+			await member.remove_roles(*roles, reason="subscribe command")
+			await self.success(self.gt("Removed `{count}` roles from you.").format(
+				count=len(roles)
+			))
+
+		else:
+			roles = [r for r in roles if r not in member.roles]
+			if not len(roles):
+				raise bot.Exc.ValueError(self.gt("No changes to apply."))
+			await member.add_roles(*roles, reason="subscribe command")
+			await self.success(self.gt("Added `{count}` roles from you.").format(
+				count=len(roles)
+			))
+
+	async def _subscribe(self, message, args=None):
+		await self.subscribe(message.author, args)
+
+	async def _unsubscribe(self, message, args=None):
+		await self.subscribe(message.author, args, unsub=True)

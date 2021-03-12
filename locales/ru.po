@@ -173,6 +173,15 @@ msgstr "Истекло время ожидания для матча {queue} ({i
 msgid "{players} your match has been canceled."
 msgstr "{players} ваш матч был отменен."
 
+msgid "No changes to apply."
+msgstr "Нет изменений."
+
+msgid "Removed `{count}` roles from you."
+msgstr "С Вас снято `{count}` ролей."
+
+msgid "Added `{count}` roles from you."
+msgstr "Вам добавлено `{count}` ролей."
+
 # bot/match/embeds.py
 
 msgid "__**{queue}** is now on the check-in stage!__"
