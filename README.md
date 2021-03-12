@@ -1,11 +1,11 @@
 # PUBobot2
 **PUBobot2** is a Discord bot for pickup games organisation.
 ## Requirements
-**Python 3.8+** and modules: discord.py, aiomysql, emoji, jinja2.  
+**Python 3.9** and modules: discord.py, aiomysql, emoji, jinja2, glicko2, trueskill, gettext  
 **gettext** for multilanguage support.
 ## Credits
 Developer: **Leshaka**. Contact: leshkajm@ya.ru.  
-Used libraries: [discord.py](https://github.com/Rapptz/discord.py), [aiohttp](https://github.com/aio-libs/aiohttp), [aiomysql](https://github.com/aio-libs/aiomysql), [emoji](https://github.com/carpedm20/emoji/), [jinja2](https://palletsprojects.com/p/jinja/).
+Used libraries: [discord.py](https://github.com/Rapptz/discord.py), [aiohttp](https://github.com/aio-libs/aiohttp), [aiomysql](https://github.com/aio-libs/aiomysql), [emoji](https://github.com/carpedm20/emoji/), [jinja2](https://palletsprojects.com/p/jinja/), [glicko2](https://github.com/deepy/glicko2), [TrueSkill](https://trueskill.org/).
 ## License
 Copyright (C) 2020 **Leshaka**.
 
