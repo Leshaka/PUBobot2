@@ -545,6 +545,10 @@ class QueueChannel:
 
 		is_started = False
 		for q in t_queues:
+			if q.cfg.blacklist_role and q.cfg.blacklist_role in message.author.roles:
+				raise bot.Exc.PermissionError(self.gt("You are not allowed to add to this queue."))
+			if q.cfg.whitelist_role and q.cfg.whitelist_role not in message.author.roles:
+				raise bot.Exc.PermissionError(self.gt("You are not allowed to add to this queue."))
 			if is_started := await q.add_member(message.author):
 				break
 		if not is_started:

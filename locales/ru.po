@@ -49,6 +49,9 @@ msgstr "Ошибка"
 msgid "You are not allowed to add to queues."
 msgstr "Вам не разрешено добавлятся в очереди."
 
+msgid "You are not allowed to add to this queue."
+msgstr "Вам не разрешено добавлятся в эту очередь."
+
 msgid "You are already in an active match."
 msgstr "Вы уже находитесь в активном матче."
 
