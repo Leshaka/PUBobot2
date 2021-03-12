@@ -64,7 +64,7 @@ class Match:
 		match.maps = match.random_maps(match.cfg['maps'], match.cfg['map_count'], queue.last_map)
 		match.init_captains(match.cfg['pick_captains'], match.cfg['captains_role_id'])
 		match.init_teams(match.cfg['pick_teams'])
-		if match.cfg['ranked']:
+		if match.ranked:
 			match.states.append(match.WAITING_REPORT)
 		bot.active_matches.append(match)
 
@@ -127,7 +127,7 @@ class Match:
 
 		# Set working objects
 		self.id = match_id
-		self.ranked = self.cfg['ranked']
+		self.ranked = self.cfg['ranked'] and self.cfg['pick_teams'] != 'no teams'
 		self.players = list(players)
 		self.ratings = ratings
 		self.winner = None
@@ -309,7 +309,7 @@ class Match:
 		bot.active_matches.remove(self)
 		self.queue.last_map = self.maps[0] if len(self.maps) == 1 else None
 
-		if self.cfg['ranked']:
+		if self.ranked:
 			await bot.stats.register_match_ranked(self)
 		else:
 			await bot.stats.register_match_unranked(self)
