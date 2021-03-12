@@ -518,9 +518,9 @@ class QueueChannel:
 
 	async def _add_member(self, message, args=None):
 		if self.cfg.blacklist_role and self.cfg.blacklist_role in message.author.roles:
-			raise bot.Exc.PermissionError(self.gt("You are not allowed to add to queues."))
+			raise bot.Exc.PermissionError(self.gt("You are not allowed to add to queues on this channel."))
 		if self.cfg.whitelist_role and self.cfg.whitelist_role not in message.author.roles:
-			raise bot.Exc.PermissionError(self.gt("You are not allowed to add to queues."))
+			raise bot.Exc.PermissionError(self.gt("You are not allowed to add to queues on this channel."))
 
 		if any((message.author in m.players for m in bot.active_matches)):
 			raise bot.Exc.InMatchError(self.gt("You are already in an active match."))
@@ -550,7 +550,7 @@ class QueueChannel:
 		]
 
 		if len(allowed) != len(t_queues):
-			await self.error(self.gt("You are allowed to add to {queues} queues.".format(
+			await self.error(self.gt("You are not allowed to add to {queues} queues.".format(
 				queues=join_and([f"**{q.name}**" for q in t_queues if q not in allowed])
 			)))
 
