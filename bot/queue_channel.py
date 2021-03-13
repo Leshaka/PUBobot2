@@ -320,8 +320,8 @@ class QueueChannel:
 		if bot.expire.get(self, member) is None:
 			if str(member.status) == "idle" and self.cfg.remove_afk:
 				await self.remove_members(member, reason="afk")
-			elif str(member.status) == "offline" and self.cfg.remove_offline:
-				await self.remove_members(member, reason="offline")
+		if str(member.status) == "offline" and self.cfg.remove_offline and member.id not in bot.allow_offline:
+			await self.remove_members(member, reason="offline")
 
 	async def remove_members(self, *members, reason=None):
 		affected = set()
@@ -334,6 +334,8 @@ class QueueChannel:
 					pass
 
 		if len(affected):
+			for m in affected:
+				bot.expire.cancel(self, m)
 			await self.update_topic()
 			if reason:
 				mention = join_and(['**' + get_nick(m) + '**' for m in affected])
@@ -566,16 +568,23 @@ class QueueChannel:
 	async def _remove_member(self, message, args=None):
 		targets = args.lower().split(" ") if args else []
 
-		t_queues = (q for q in self.queues if len(q.queue))
-		if len(targets):
-			t_queues = (q for q in self.queues if any(
-				(t == q.name or t in (a["alias"] for a in q.cfg.tables.aliases) for t in targets)
-			))
+		if not len(targets):
+			await self.remove_members(message.author)
+			return
+
+		t_queues = (q for q in self.queues if any(
+			(t == q.name.lower() or t in (a["alias"].lower() for a in q.cfg.tables.aliases) for t in targets)
+		))
+
 		for q in t_queues:
 			try:
 				await q.remove_member(message.author)
-			except ValueError:  # member is not added to the queue
+			except ValueError:
 				pass
+
+		if not any((q.is_added(message.author) for q in self.queues)):
+			bot.expire.cancel(self, message.author)
+
 		await self.update_topic()
 
 	async def _who(self, message, args=None):

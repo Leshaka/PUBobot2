@@ -233,6 +233,9 @@ class PickupQueue:
 
 		return False
 
+	def is_added(self, member):
+		return member in self.queue
+
 	async def remove_member(self, member):
 		if member in self.queue:
 			self.queue.remove(member)
