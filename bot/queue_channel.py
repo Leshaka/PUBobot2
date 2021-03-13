@@ -257,7 +257,8 @@ class QueueChannel:
 			subscribe=self._subscribe,
 			unsubscribe=self._unsubscribe,
 			server=self._server,
-			ip=self._server
+			ip=self._server,
+			stats=self._stats
 		)
 
 	async def update_info(self):
@@ -1172,3 +1173,23 @@ class QueueChannel:
 		await self.success(q.cfg.server, title=self.gt("Server for **{queue}**".format(
 			queue=q.name
 		)))
+
+	async def _stats(self, message, args=None):
+		if not args:
+			stats = await bot.stats.qc_stats(self.id)
+			target = f"#{self.channel.name}"
+		elif member := self.get_member(args):
+			stats = await bot.stats.user_stats(self.id, member.id)
+			target = get_nick(member)
+		else:
+			raise bot.Exc.SyntaxError(f"Usage: {self.cfg.prefix}stats [__@user__]")
+
+		embed = Embed(
+			title=self.gt("Stats for __{target}__").format(target=target),
+			colour=Colour(0x50e3c2),
+			description=self.gt("**Total matches: {count}**").format(count=stats['total'])
+		)
+		for q_name, count in stats['queues'].items():
+			embed.add_field(name=q_name, value=str(count), inline=True)
+
+		await self.channel.send(embed=embed)

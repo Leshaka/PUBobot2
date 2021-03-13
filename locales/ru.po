@@ -162,6 +162,12 @@ msgstr "Сервер для **{queue}** не указан."
 msgid "Server for **{queue}**"
 msgstr "Сервер для **{queue}**"
 
+msgid "Stats for __{target}__"
+msgstr "Статистика для __{target}__"
+
+msgid "**Total matches: {count}**"
+msgstr "**Всего матчей: {count}**"
+
 # bot/match/match.py
 
 msgid "The match must be on the waiting report stage."
