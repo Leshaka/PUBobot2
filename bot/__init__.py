@@ -12,3 +12,4 @@ from .stats import stats
 from .exceptions import Exceptions as Exc
 
 from . import events
+from . import utils
