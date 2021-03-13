@@ -319,11 +319,11 @@ class QueueChannel:
 	async def auto_remove(self, member):
 		if bot.expire.get(self, member) is None:
 			if str(member.status) == "idle" and self.cfg.remove_afk:
-				await self.remove_members(member, reason="afk")
+				await self.remove_members(member, reason="afk", highlight=True)
 		if str(member.status) == "offline" and self.cfg.remove_offline and member.id not in bot.allow_offline:
 			await self.remove_members(member, reason="offline")
 
-	async def remove_members(self, *members, reason=None):
+	async def remove_members(self, *members, reason=None, highlight=False):
 		affected = set()
 		for q in (q for q in self.queues if q.length):
 			for m in members:
@@ -338,7 +338,10 @@ class QueueChannel:
 				bot.expire.cancel(self, m)
 			await self.update_topic()
 			if reason:
-				mention = join_and(['**' + get_nick(m) + '**' for m in affected])
+				if highlight:
+					mention = join_and([m.mention for m in affected])
+				else:
+					mention = join_and(['**' + get_nick(m) + '**' for m in affected])
 				if reason == "expire":
 					reason = self.gt("expire time ran off")
 				elif reason == "offline":
