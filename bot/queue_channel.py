@@ -255,7 +255,9 @@ class QueueChannel:
 			remove_player=self._remove_player,
 			add_player=self._add_player,
 			subscribe=self._subscribe,
-			unsubscribe=self._unsubscribe
+			unsubscribe=self._unsubscribe,
+			server=self._server,
+			ip=self._server
 		)
 
 	async def update_info(self):
@@ -1157,3 +1159,16 @@ class QueueChannel:
 
 	async def _unsubscribe(self, message, args=None):
 		await self.subscribe(message.author, args, unsub=True)
+
+	async def _server(self, message, args=""):
+		if len(self.queues) == 1:
+			q = self.queues[0]
+		elif (q := find(lambda q: q.name.lower() == args.lower(), self.queues)) is None:
+			raise bot.Exc.SyntaxError(f"Usage: {self.cfg.prefix}server __queue__")
+		if not q.cfg.server:
+			raise bot.Exc.NotFoundError(self.gt("Server for **{queue}** is not set.").format(
+				queue=q.name
+			))
+		await self.success(q.cfg.server, title=self.gt("Server for **{queue}**".format(
+			queue=q.name
+		)))

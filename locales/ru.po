@@ -156,6 +156,12 @@ msgstr "Недостаточно участников для старта."
 msgid "**{queue}** pickup has started @ {channel}!"
 msgstr "**{queue}** пикап начался @ {channel}!"
 
+msgid "Server for **{queue}** is not set."
+msgstr "Сервер для **{queue}** не указан."
+
+msgid "Server for **{queue}**"
+msgstr "Сервер для **{queue}**"
+
 # bot/match/match.py
 
 msgid "The match must be on the waiting report stage."
