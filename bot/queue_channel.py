@@ -1189,7 +1189,7 @@ class QueueChannel:
 			colour=Colour(0x50e3c2),
 			description=self.gt("**Total matches: {count}**").format(count=stats['total'])
 		)
-		for q_name, count in stats['queues'].items():
+		for q_name, count in sorted(stats['queues'].items(), key=lambda i: i[1], reverse=True):
 			embed.add_field(name=q_name, value=str(count), inline=True)
 
 		await self.channel.send(embed=embed)
