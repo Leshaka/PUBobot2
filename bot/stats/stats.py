@@ -251,20 +251,38 @@ async def replace_player(channel_id, user_id1, user_id2, new_nick):
 
 async def qc_stats(channel_id):
 	data = await db.fetchall(
-		"SELECT `queue_name`, COUNT(*) FROM `qc_matches` WHERE `channel_id`=%s GROUP BY `queue_name`", (channel_id,)
+		"SELECT `queue_name`, COUNT(*) as count FROM `qc_matches` WHERE `channel_id`=%s " +
+		"GROUP BY `queue_name` ORDER BY count DESC",
+		(channel_id,)
 	)
-	stats = dict(total=sum((i['COUNT(*)'] for i in data)))
-	stats['queues'] = {i['queue_name']: i['COUNT(*)'] for i in data}
+	stats = dict(total=sum((i['count'] for i in data)))
+	stats['queues'] = data
 	return stats
 
 
 async def user_stats(channel_id, user_id):
 	data = await db.fetchall(
-		"SELECT `queue_name`, COUNT(*) FROM `qc_player_matches` " +
-		"JOIN `qc_matches` ON qc_player_matches.match_id=qc_matches.match_id " +
-		"WHERE qc_player_matches.channel_id=%s AND user_id=%s GROUP BY qc_matches.queue_name",
+		"SELECT `queue_name`, COUNT(*) as count FROM `qc_player_matches` AS pm " +
+		"JOIN `qc_matches` AS m ON pm.match_id=m.match_id " +
+		"WHERE pm.channel_id=%s AND user_id=%s " +
+		"GROUP BY m.queue_name ORDER BY count DESC",
 		(channel_id, user_id)
 	)
-	stats = dict(total=sum((i['COUNT(*)'] for i in data)))
-	stats['queues'] = {i['queue_name']: i['COUNT(*)'] for i in data}
+	stats = dict(total=sum((i['count'] for i in data)))
+	stats['queues'] = data
+	return stats
+
+
+async def top(channel_id, time_gap=None):
+	data = await db.fetchall(
+		"SELECT p.nick as nick, COUNT(*) as count FROM `qc_player_matches` AS pm " +
+		"JOIN `qc_players` AS p ON pm.user_id=p.user_id " +
+		"JOIN `qc_matches` AS m ON pm.match_id=m.match_id " +
+		"WHERE m.channel_id=%s " +
+		(f"AND m.at>{time_gap} " if time_gap else "") +
+		"GROUP BY p.user_id ORDER BY count DESC LIMIT 10",
+		(channel_id, )
+	)
+	stats = dict(total=sum((i['count'] for i in data)))
+	stats['players'] = data
 	return stats

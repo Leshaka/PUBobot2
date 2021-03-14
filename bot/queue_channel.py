@@ -258,7 +258,8 @@ class QueueChannel:
 			unsubscribe=self._unsubscribe,
 			server=self._server,
 			ip=self._server,
-			stats=self._stats
+			stats=self._stats,
+			top=self._top
 		)
 
 	async def update_info(self):
@@ -1189,7 +1190,35 @@ class QueueChannel:
 			colour=Colour(0x50e3c2),
 			description=self.gt("**Total matches: {count}**").format(count=stats['total'])
 		)
-		for q_name, count in sorted(stats['queues'].items(), key=lambda i: i[1], reverse=True):
-			embed.add_field(name=q_name, value=str(count), inline=True)
+		for q in stats['queues']:
+			embed.add_field(name=q['queue_name'], value=str(q['count']), inline=True)
 
+		await self.channel.send(embed=embed)
+
+	async def _top(self, message, args=None):
+		args = args.lower().strip() if args else None
+		if args == "daily":
+			time_gap = int(time.time()) - (60*60*24)
+		elif args == "weekly":
+			time_gap = int(time.time()) - (60*60*24*7)
+		elif args == "monthly":
+			time_gap = int(time.time()) - (60*60*24*30)
+		elif args == "yearly":
+			time_gap = int(time.time()) - (60*60*24*365)
+		elif args:
+			raise bot.Exc.SyntaxError(f"Usage: {self.cfg.prefix}top [daily/weekly/monthly/yearly]")
+		else:
+			time_gap = None
+
+		if args and not time_gap:
+			raise bot.Exc.SyntaxError(f"Usage: {self.cfg.prefix}top [daily/weekly/monthly/yearly]")
+
+		top = await bot.stats.top(self.id, time_gap=time_gap)
+		embed = Embed(
+			title=self.gt("Top for __{target}__").format(target=f"#{self.channel.name}"),
+			colour=Colour(0x50e3c2),
+			description=self.gt("**Total matches: {count}**").format(count=top['total'])
+		)
+		for p in top['players']:
+			embed.add_field(name=p['nick'], value=str(p['count']), inline=True)
 		await self.channel.send(embed=embed)
