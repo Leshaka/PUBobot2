@@ -238,6 +238,9 @@ msgstr "__**{queue}** начался!__"
 msgid "Players"
 msgstr "Участники"
 
+msgid "Captains"
+msgstr "Капитаны"
+
 msgid "Map"
 msgstr "Карта"
 

@@ -1,6 +1,6 @@
 from discord import Embed, Colour
 from core.client import dc
-from core.utils import get_nick
+from core.utils import get_nick, join_and
 
 
 class Embeds:
@@ -147,10 +147,16 @@ class Embeds:
 
 		else:  # just players list
 			embed.add_field(
-				name=self.m.qc.gt("Players"),
-				value=" \u200b " + " \u200b ".join((m.mention for m in self.m.players)) + "\n\u200b",
+				name=self.m.gt("Players"),
+				value=" \u200b " + " \u200b ".join((m.mention for m in self.m.players)),
 				inline=False
 			)
+			if len(self.m.captains) and len(self.m.players) > 2:
+				embed.add_field(
+					name=self.m.gt("Captains"),
+					value=" \u200b " + join_and([m.mention for m in self.m.captains]),
+					inline=False
+				)
 
 		if len(self.m.maps):
 			embed.add_field(
