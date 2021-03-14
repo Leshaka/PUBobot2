@@ -165,8 +165,20 @@ msgstr "Сервер для **{queue}**"
 msgid "Stats for __{target}__"
 msgstr "Статистика для __{target}__"
 
-msgid "Top players for __{target}__"
-msgstr "ТОП игроков для __{target}__"
+msgid "Top 10 players for __{target}__"
+msgstr "ТОП 10 игроков для __{target}__"
+
+msgid "day"
+msgstr "день"
+
+msgid "week"
+msgstr "неделя"
+
+msgid "month"
+msgstr "месяц"
+
+msgid "year"
+msgstr "год"
 
 msgid "**Total matches: {count}**"
 msgstr "**Всего матчей: {count}**"

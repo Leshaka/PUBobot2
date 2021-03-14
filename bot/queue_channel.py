@@ -1197,16 +1197,19 @@ class QueueChannel:
 
 	async def _top(self, message, args=None):
 		args = args.lower().strip() if args else None
-		if args == "daily":
+		if args in ["day", self.gt("day")]:
 			time_gap = int(time.time()) - (60*60*24)
-		elif args == "weekly":
+		elif args in ["week", self.gt("week")]:
 			time_gap = int(time.time()) - (60*60*24*7)
-		elif args == "monthly":
+		elif args in ["month", self.gt("month")]:
 			time_gap = int(time.time()) - (60*60*24*30)
-		elif args == "yearly":
+		elif args in ["year", self.gt("year")]:
 			time_gap = int(time.time()) - (60*60*24*365)
 		elif args:
-			raise bot.Exc.SyntaxError(f"Usage: {self.cfg.prefix}top [daily/weekly/monthly/yearly]")
+			raise bot.Exc.SyntaxError("Usage: {prefix}top [{options}]".format(
+				prefix=self.cfg.prefix,
+				options=" / ".join((self.gt(i) for i in ('day', 'week', 'month', 'year')))
+			))
 		else:
 			time_gap = None
 
@@ -1215,7 +1218,7 @@ class QueueChannel:
 
 		top = await bot.stats.top(self.id, time_gap=time_gap)
 		embed = Embed(
-			title=self.gt("Top players for __{target}__").format(target=f"#{self.channel.name}"),
+			title=self.gt("Top 10 players for __{target}__").format(target=f"#{self.channel.name}"),
 			colour=Colour(0x50e3c2),
 			description=self.gt("**Total matches: {count}**").format(count=top['total'])
 		)
