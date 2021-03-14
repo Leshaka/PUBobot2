@@ -1021,9 +1021,9 @@ class QueueChannel:
 			await db.insert('players', {'allow_dm': allow_dm, 'user_id': message.author.id})
 
 		if allow_dm:
-			await self.success(self.gt("Your DM notifications is now turned off."), reply_to=message.author)
-		else:
 			await self.success(self.gt("Your DM notifications is now turned on."), reply_to=message.author)
+		else:
+			await self.success(self.gt("Your DM notifications is now turned off."), reply_to=message.author)
 
 	async def _start(self, message, args=None):
 		self._check_perms(message.author, 1)
