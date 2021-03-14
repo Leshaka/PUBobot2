@@ -1215,7 +1215,7 @@ class QueueChannel:
 
 		top = await bot.stats.top(self.id, time_gap=time_gap)
 		embed = Embed(
-			title=self.gt("Top for __{target}__").format(target=f"#{self.channel.name}"),
+			title=self.gt("Top players for __{target}__").format(target=f"#{self.channel.name}"),
 			colour=Colour(0x50e3c2),
 			description=self.gt("**Total matches: {count}**").format(count=top['total'])
 		)

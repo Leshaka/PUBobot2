@@ -165,6 +165,9 @@ msgstr "Сервер для **{queue}**"
 msgid "Stats for __{target}__"
 msgstr "Статистика для __{target}__"
 
+msgid "Top players for __{target}__"
+msgstr "ТОП игроков для __{target}__"
+
 msgid "**Total matches: {count}**"
 msgstr "**Всего матчей: {count}**"
 
