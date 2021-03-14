@@ -310,3 +310,15 @@ msgstr "Возвращаем {queue} на стадию сбора..."
 
 msgid "{members} was not ready in time."
 msgstr "Не подтвердили участие: {members}."
+
+msgid "{member} won, its **{side}**!"
+msgstr "{member} выиграл, выпадает **{side}**!"
+
+msgid "{member} lost, its **{side}**!"
+msgstr "{member} проиграл, выпадает **{side}**!"
+
+msgid "heads"
+msgstr "орёл"
+
+msgid "tails"
+msgstr "решка"

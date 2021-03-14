@@ -4,6 +4,7 @@ import json
 import time
 import asyncio
 import traceback
+from random import randint
 from discord import Embed, Colour, Forbidden
 
 from core.config import cfg
@@ -259,7 +260,9 @@ class QueueChannel:
 			server=self._server,
 			ip=self._server,
 			stats=self._stats,
-			top=self._top
+			top=self._top,
+			cointoss=self._cointoss,
+			ct=self._cointoss
 		)
 
 	async def update_info(self):
@@ -1213,9 +1216,6 @@ class QueueChannel:
 		else:
 			time_gap = None
 
-		if args and not time_gap:
-			raise bot.Exc.SyntaxError(f"Usage: {self.cfg.prefix}top [daily/weekly/monthly/yearly]")
-
 		top = await bot.stats.top(self.id, time_gap=time_gap)
 		embed = Embed(
 			title=self.gt("Top 10 players for __{target}__").format(target=f"#{self.channel.name}"),
@@ -1225,3 +1225,24 @@ class QueueChannel:
 		for p in top['players']:
 			embed.add_field(name=p['nick'], value=str(p['count']), inline=True)
 		await self.channel.send(embed=embed)
+
+	async def _cointoss(self, message, args=None):
+		if not args or args.lower() in ["heads", self.gt("heads")]:
+			pick = 0
+		elif args.lower() in ["tails", self.gt("tails")]:
+			pick = 1
+		else:
+			raise bot.Exc.SyntaxError("Usage: {prefix}ct [{options}]".format(
+				prefix=self.cfg.prefix,
+				options=" / ".join((self.gt(i) for i in ('heads', 'tails')))
+			))
+
+		result = randint(0, 1)
+		if pick == result:
+			await self.channel.send(self.gt("{member} won, its **{side}**!").format(
+				member=message.author.mention, side=self.gt(["heads", "tails"][result])
+			))
+		else:
+			await self.channel.send(self.gt("{member} lost, its **{side}**!").format(
+				member=message.author.mention, side=self.gt(["heads", "tails"][result])
+			))
