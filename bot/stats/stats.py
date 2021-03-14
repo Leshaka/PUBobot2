@@ -251,7 +251,7 @@ async def replace_player(channel_id, user_id1, user_id2, new_nick):
 
 async def qc_stats(channel_id):
 	data = await db.fetchall(
-		"SELECT `queue_name`, COUNT(*) FROM `qc_matches` WHERE `channel_id`=%s GROUP BY `queue_id`", (channel_id,)
+		"SELECT `queue_name`, COUNT(*) FROM `qc_matches` WHERE `channel_id`=%s GROUP BY `queue_name`", (channel_id,)
 	)
 	stats = dict(total=sum((i['COUNT(*)'] for i in data)))
 	stats['queues'] = {i['queue_name']: i['COUNT(*)'] for i in data}
@@ -262,7 +262,7 @@ async def user_stats(channel_id, user_id):
 	data = await db.fetchall(
 		"SELECT `queue_name`, COUNT(*) FROM `qc_player_matches` " +
 		"JOIN `qc_matches` ON qc_player_matches.match_id=qc_matches.match_id " +
-		"WHERE qc_player_matches.channel_id=%s AND user_id=%s GROUP BY qc_matches.queue_id",
+		"WHERE qc_player_matches.channel_id=%s AND user_id=%s GROUP BY qc_matches.queue_name",
 		(channel_id, user_id)
 	)
 	stats = dict(total=sum((i['COUNT(*)'] for i in data)))
