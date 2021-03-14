@@ -602,7 +602,7 @@ class QueueChannel:
 
 		if len(targets):
 			t_queues = [q for q in self.queues if any(
-				(t == q.name or t in (a["alias"] for a in q.cfg.tables.aliases) for t in targets)
+				(t == q.name.lower() or t in (a["alias"].lower() for a in q.cfg.tables.aliases) for t in targets)
 			)]
 		else:
 			t_queues = [q for q in self.queues if len(q.queue)]
