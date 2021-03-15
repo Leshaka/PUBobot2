@@ -12,15 +12,17 @@
 | !set_cfg_queue | json     |             |       | Apply json configuration to queue   |
 
 #### Info
-| command         | var1             | description                           |
-|-----------------|------------------|---------------------------------------|
-| !who            | [queue]          | Show people in specified queue        |
-| !rank           | [@user]          | Show ranking for the specified user   |
-| !lb             | [page #]         | Show the leaderboard page specified   |
-| !expire         |                  | Show your current expire timer        |
-| !default_expire |                  | Show your default autoremove settings |
-| !matches        |                  | Show active matches on the channel    |
-| !lastgame / !lg | [queue or @user] | Show last match played                |
+| command         | var1                  | description                                               |
+|-----------------|-----------------------|-----------------------------------------------------------|
+| !who            | [queue]               | Show people in specified queue                            |
+| !rank           | [@user]               | Show ranking for the specified user                       |
+| !lb             | [page #]              | Show the leaderboard page specified                       |
+| !expire         |                       | Show your current expire timer                            |
+| !default_expire |                       | Show your default autoremove settings                     |
+| !matches        |                       | Show active matches on the channel                        |
+| !lastgame / !lg | [queue or @user]      | Show last match played                                    |
+| !stats          | [@user]               | Show games played stats on channel or for specified @user |
+| !top            | [day/week/month/year] | Show top players for matches played on the channel        |
 
 #### Actions
 | command          | var1    | description                            |
@@ -32,7 +34,6 @@
 | !promote         | [queue] | Promote a queue                        |
 | !start           | queue   | Force start a queue                    |
 | !reset           |         | Remove all players from all queues     |
-|
 
 #### Personal settings
 | command         | var1              | description                                                 |
@@ -81,6 +82,7 @@
 | !undo_match          | match ID |        |           | Undo a match                          |
 
 #### Miscellaneous
-| command       | var1  | description                            |
-|---------------|-------|----------------------------------------|
-| !server / !ip | queue | Show server string for specified queue |
+| command         | var1          | description                            |
+|-----------------|---------------|----------------------------------------|
+| !server / !ip   | queue         | Show server string for specified queue |
+| !cointoss / !ct | [heads/tails] | Flip a cointoss                        |
