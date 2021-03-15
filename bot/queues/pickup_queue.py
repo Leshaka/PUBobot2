@@ -209,8 +209,9 @@ class PickupQueue:
 
 	@property
 	def promote(self):
+		promotion_role = self.cfg.promotion_role or self.qc.cfg.promotion_role
 		return self.qc.gt("{role}Please add to **{name}** pickup, `{num}` players left!".format(
-			role=self.cfg.promotion_role.mention + " " if self.cfg.promotion_role else "",
+			role=promotion_role.mention + " " if promotion_role else "",
 			name=self.name,
 			num=self.cfg.size-self.length
 		))

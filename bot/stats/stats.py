@@ -243,6 +243,7 @@ async def reset_player(channel_id, user_id):
 
 
 async def replace_player(channel_id, user_id1, user_id2, new_nick):
+	await db.delete("qc_players", {'channel_id': channel_id, 'user_id': user_id2})
 	where = {'channel_id': channel_id, 'user_id': user_id1}
 	await db.update("qc_players", {'user_id': user_id2, 'nick': new_nick}, where)
 	await db.update("qc_rating_history", {'user_id': user_id2}, where)
@@ -275,10 +276,10 @@ async def user_stats(channel_id, user_id):
 
 async def top(channel_id, time_gap=None):
 	data = await db.fetchall(
-		"SELECT p.nick as nick, COUNT(*) as count FROM `qc_player_matches` AS pm " +
-		"JOIN `qc_players` AS p ON pm.user_id=p.user_id " +
+		"SELECT pm.nick as nick, COUNT(*) as count FROM `qc_player_matches` AS pm " +
+		"JOIN `qc_players` AS p ON pm.user_id=p.user_id AND pm.channel_id=p.channel_id " +
 		"JOIN `qc_matches` AS m ON pm.match_id=m.match_id " +
-		"WHERE m.channel_id=%s " +
+		"WHERE pm.channel_id=%s " +
 		(f"AND m.at>{time_gap} " if time_gap else "") +
 		"GROUP BY p.user_id ORDER BY count DESC LIMIT 10",
 		(channel_id, )
