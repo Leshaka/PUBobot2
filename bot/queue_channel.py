@@ -454,8 +454,8 @@ class QueueChannel:
 	async def queue_started(self, members, message=None):
 		await self.remove_members(*members)
 
-		for m in members:
-			bot.expire.cancel(self, m)
+		for m in filter(lambda m: m.id in bot.allow_offline, members):
+			bot.allow_offline.remove(m.id)
 		if message:
 			asyncio.create_task(self._dm_members(members, message))
 
