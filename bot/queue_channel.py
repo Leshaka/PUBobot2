@@ -883,10 +883,10 @@ class QueueChannel:
 	async def _allow_offline(self, message, args=None):
 		if message.author.id in bot.allow_offline:
 			bot.allow_offline.remove(message.author.id)
-			await self.success(self.gt("Your allow offline immune is gone."))
+			await self.success(self.gt("Your offline immunity is **off**."))
 		else:
 			bot.allow_offline.append(message.author.id)
-			await self.success(self.gt("You now have the allow offline immune."))
+			await self.success(self.gt("Your offline immunity is **on** until the next match."))
 
 	async def _matches(self, message, args=0):
 		try:

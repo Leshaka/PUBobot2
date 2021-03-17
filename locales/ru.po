@@ -112,11 +112,11 @@ msgstr "Ваш таймер expire будет использовать наст�
 msgid "Your default expire time is {time}."
 msgstr "Ваш expire таймер установлен на {time}."
 
-msgid "Your allow offline immune is gone."
-msgstr "Ваш иммунитет оффлайн статуса выключен."
+msgid "Your offline immunity is **off**."
+msgstr "Ваш иммунитет оффлайн статуса **выключен**."
 
-msgid "You now have the allow offline immune."
-msgstr "Теперь у вас иммунитет оффлайн статуса."
+msgid "Your offline immunity is **on** until the next match."
+msgstr "Ваш иммунитет оффлайн статуса **включен** до следующего матча."
 
 msgid "> no active matches"
 msgstr "> нет активных матчей"

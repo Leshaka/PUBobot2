@@ -66,6 +66,16 @@ class Draft:
 
 		self.m.teams[2].remove(player)
 		team.append(player)
+
+		# auto last-pick rest of the players if possible
+		# if rest of pick_order covers the unpicked list
+		if len(self.m.teams[2]) and len(self.pick_order[pick_step+1:]) >= len(self.m.teams[2]):
+			# if rest of pick_order is a single team
+			if len(set(self.pick_order[pick_step+1:])) == 1:
+				picker_team = self.m.teams[self.pick_order[pick_step+1]]
+				picker_team.extend(self.m.teams[2])
+				self.m.teams[2].clear()
+
 		await self.refresh()
 
 	async def put(self, player, team_name):
