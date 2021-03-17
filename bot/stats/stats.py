@@ -275,6 +275,11 @@ async def user_stats(channel_id, user_id):
 
 
 async def top(channel_id, time_gap=None):
+	total = await db.fetchone(
+		"SELECT COUNT(*) as count FROM `qc_matches` WHERE channel_id=%s" + (f" AND at>{time_gap} " if time_gap else ""),
+		(channel_id, )
+	)
+
 	data = await db.fetchall(
 		"SELECT pm.nick as nick, COUNT(*) as count FROM `qc_player_matches` AS pm " +
 		"JOIN `qc_players` AS p ON pm.user_id=p.user_id AND pm.channel_id=p.channel_id " +
@@ -284,6 +289,6 @@ async def top(channel_id, time_gap=None):
 		"GROUP BY p.user_id ORDER BY count DESC LIMIT 10",
 		(channel_id, )
 	)
-	stats = dict(total=sum((i['count'] for i in data)))
+	stats = dict(total=total['count'])
 	stats['players'] = data
 	return stats
