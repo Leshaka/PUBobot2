@@ -18,6 +18,11 @@ class PickupQueue:
 				display="Queue name",
 				notnull=True
 			),
+			Variables.TextVar(
+				"description",
+				display="Description",
+				description="Set an answer on !help queue_name command."
+			),
 			Variables.IntVar(
 				"size",
 				display="Queue size",

@@ -262,7 +262,8 @@ class QueueChannel:
 			stats=self._stats,
 			top=self._top,
 			cointoss=self._cointoss,
-			ct=self._cointoss
+			ct=self._cointoss,
+			help=self._help
 		)
 
 	async def update_info(self):
@@ -1246,3 +1247,8 @@ class QueueChannel:
 			await self.channel.send(self.gt("{member} lost, its **{side}**!").format(
 				member=message.author.mention, side=self.gt(["heads", "tails"][result])
 			))
+
+	async def _help(self, message, args=None):
+		if args and (queue := find(lambda q: q.name.lower() == args.lower(), self.queues)):
+			if queue.cfg.description:
+				await self.channel.send(queue.cfg.description)
