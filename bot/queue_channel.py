@@ -4,7 +4,7 @@ import json
 import time
 import asyncio
 import traceback
-from random import randint
+from random import randint, choice
 from discord import Embed, Colour, Forbidden
 
 from core.config import cfg
@@ -263,7 +263,9 @@ class QueueChannel:
 			top=self._top,
 			cointoss=self._cointoss,
 			ct=self._cointoss,
-			help=self._help
+			help=self._help,
+			maps=self._maps,
+			map=self._map
 		)
 
 	async def update_info(self):
@@ -1248,7 +1250,31 @@ class QueueChannel:
 				member=message.author.mention, side=self.gt(["heads", "tails"][result])
 			))
 
-	async def _help(self, message, args=None):
-		if args and (queue := find(lambda q: q.name.lower() == args.lower(), self.queues)):
+	async def _help(self, message, args=""):
+		if queue := find(lambda q: q.name.lower() == args.lower(), self.queues):
 			if queue.cfg.description:
 				await self.channel.send(queue.cfg.description)
+
+	async def maps(self, message, args="", random=False):
+		if len(self.queues) == 1:
+			q = self.queues[0]
+		elif (q := find(lambda q: q.name.lower() == args.lower(), self.queues)) is None:
+			raise bot.Exc.SyntaxError(f"Usage: {self.cfg.prefix}server __queue__")
+		if not len(q.cfg.tables.maps):
+			raise bot.Exc.NotFoundError(self.gt("No maps is set for **{queue}**.").format(
+				queue=q.name
+			))
+
+		if random:
+			await self.channel.send(f"`{choice(q.cfg.tables.maps)['name']}`")
+		else:
+			await self.channel.send(self.gt("Maps for **{queue}**:\n{maps}").format(
+				queue=q.name,
+				maps="\n".join((f"    `{i['name']}`" for i in q.cfg.tables.maps))
+			))
+
+	async def _maps(self, *args, **kwargs):
+		await self.maps(*args, **kwargs, random=False)
+
+	async def _map(self, *args, **kwagrs):
+		await self.maps(*args, **kwagrs, random=True)
