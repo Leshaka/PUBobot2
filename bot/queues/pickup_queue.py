@@ -21,7 +21,7 @@ class PickupQueue:
 			Variables.TextVar(
 				"description",
 				display="Description",
-				description="Set an answer on !help queue_name command."
+				description="Set an answer on '!help queue' command."
 			),
 			Variables.IntVar(
 				"size",
@@ -97,12 +97,13 @@ class PickupQueue:
 				"start_msg",
 				display="Start message",
 				verify=lambda s: len(s) < 1001,
+				description="Set additional information to be printed on a match start.",
 				verify_message="Start message is too long."
 			),
 			Variables.StrVar(
 				"server",
 				display="Server",
-				description="Print this server on match start.",
+				description="Print this server on a match start.",
 				verify=lambda s: len(s) < 101,
 				verify_message="Server string is too long."
 			),
@@ -110,6 +111,11 @@ class PickupQueue:
 				"promotion_role",
 				display="Promotion role",
 				description="Set a role to highlight on !promote and !sub commands."
+			),
+			Variables.TextVar(
+				"promotion_msg",
+				display="Promotion message",
+				description="Replace default promotion message. You can use {name}, {role} and {left} placeholders in the text."
 			),
 			Variables.RoleVar(
 				"captains_role",
@@ -215,11 +221,12 @@ class PickupQueue:
 	@property
 	def promote(self):
 		promotion_role = self.cfg.promotion_role or self.qc.cfg.promotion_role
-		return self.qc.gt("{role}Please add to **{name}** pickup, `{num}` players left!".format(
-			role=promotion_role.mention + " " if promotion_role else "",
+		promotion_msg = self.cfg.promotion_msg or self.qc.gt("{role} Please add to **{name}** pickup, `{left}` players left!")
+		return promotion_msg.format(
+			role=promotion_role.mention if promotion_role else "",
 			name=self.name,
-			num=self.cfg.size-self.length
-		))
+			left=self.cfg.size-self.length
+		)
 
 	async def reset(self):
 		self.queue = []

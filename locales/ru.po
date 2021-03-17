@@ -147,8 +147,8 @@ msgstr "Нет результатов"
 
 # bot/queues/pickup_queue.py
 
-msgid "{role}Please add to **{name}** pickup, `{num}` players left!"
-msgstr "{role}Добавляйтесь в **{name}** пикап, `{num}` мест осталось!"
+msgid "{role} Please add to **{name}** pickup, `{left}` players left!"
+msgstr "{role} Добавляйтесь в **{name}** пикап, осталось `{left}` игроков!"
 
 msgid "Not enough players to start the queue."
 msgstr "Недостаточно участников для старта."
