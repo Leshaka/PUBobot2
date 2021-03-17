@@ -127,7 +127,7 @@ msgstr "Нет цели для promote."
 msgid "Specified queue not found."
 msgstr "Указанная очередь не найдена."
 
-msgid "You promote to fast, `{delay}` until next promote."
+msgid "You're promoting too often, please wait `{delay}` until next promote."
 msgstr "Слишком часто, подождите `{delay}` до следующего раза."
 
 msgid "Done."

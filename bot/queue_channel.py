@@ -949,7 +949,7 @@ class QueueChannel:
 
 		now = int(time.time())
 		if self.cfg.promotion_delay and self.cfg.promotion_delay+self.last_promote > now:
-			raise bot.Exc.PermissionError(self.gt("You promote to fast, `{delay}` until next promote.".format(
+			raise bot.Exc.PermissionError(self.gt("You're promoting too often, please wait `{delay}` until next promote.".format(
 				delay=seconds_to_str((self.cfg.promotion_delay+self.last_promote)-now)
 			)))
 
