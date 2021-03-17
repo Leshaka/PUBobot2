@@ -327,10 +327,12 @@ class QueueChannel:
 			await self.channel.send(self.topic)
 
 	async def auto_remove(self, member):
+		if member.id in bot.allow_offline:
+			return
 		if bot.expire.get(self, member) is None:
 			if str(member.status) == "idle" and self.cfg.remove_afk:
 				await self.remove_members(member, reason="afk", highlight=True)
-		if str(member.status) == "offline" and self.cfg.remove_offline and member.id not in bot.allow_offline:
+		if str(member.status) == "offline" and self.cfg.remove_offline:
 			await self.remove_members(member, reason="offline")
 
 	async def remove_members(self, *members, reason=None, highlight=False):
