@@ -10,8 +10,6 @@
 > `@user` - guild member mention or member nick(or name) or `name@id` mask.  
 > `duration` - duration time in format: '3h 2m 1s' or '03:02:01'.  
 
-<br>
-
 #### Configuration
 | command        | var1     | var2        | var3  | Description                         |
 |----------------|----------|-------------|-------|-------------------------------------|
@@ -34,7 +32,7 @@
 | !default_expire |                       | Show your default autoremove settings                     |
 | !matches        |                       | Show active matches on the channel                        |
 | !lastgame / !lg | [`queue` / `@user`]         | Show last match played                                    |
-| !stats          | [`@user`]               | Show games played stats on channel or for specified @user |
+| !stats          | [`@user`]               | Show games played stats for channel or for specified @user |
 | !top            | [day / week / month / year] | Show top players for matches played on the channel        |
 
 #### Actions
