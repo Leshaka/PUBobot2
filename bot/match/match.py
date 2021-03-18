@@ -196,7 +196,7 @@ class Match:
 				[p for p in self.players if p not in best_team][:self.cfg['team_size']]
 			))
 		elif pick_teams == "random teams":
-			self.teams[0].set(random.sample(self.players, self.cfg['team_size']))
+			self.teams[0].set(random.sample(self.players, min(len(self.players)//2, self.cfg['team_size'])))
 			self.teams[1].set([p for p in self.players if p not in self.teams[0]][:self.cfg['team_size']])
 
 	async def think(self, frame_time):
