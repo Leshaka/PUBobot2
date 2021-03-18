@@ -1,4 +1,15 @@
-## Avaible commands:
+# Avaible Commands
+
+<br>
+
+> #### The following typographical conventions are used to describe command arguments:
+> normal text - static argument (not to be replaced).  
+> `text inside block` - variable argument (to be replaced with actual value).  
+> [text in brackets] - optional argument.  
+> choice-1 / choice-2 - signifies either choice-1 or choice-2.  
+> `@user` - guild member mention or member nick(or name) or `name@id` mask.  
+> `duration` - duration time in format: '3h 2m 1s' or '03:02:01'.  
+
 #### Configuration
 | command        | var1     | var2        | var3  | Description                         |
 |----------------|----------|-------------|-------|-------------------------------------|
@@ -20,9 +31,9 @@
 | !expire         |                       | Show your current expire timer                            |
 | !default_expire |                       | Show your default autoremove settings                     |
 | !matches        |                       | Show active matches on the channel                        |
-| !lastgame / !lg | [`queue` or `@user`]      | Show last match played                                    |
-| !stats          | [`@user`]               | Show games played stats on channel or for specified @user |
-| !top            | [day/week/month/year] | Show top players for matches played on the channel        |
+| !lastgame / !lg | [`queue` / `@user`]         | Show last match played                                    |
+| !stats          | [`@user`]               | Show games played stats for channel or for specified @user |
+| !top            | [day / week / month / year] | Show top players for matches played on the channel        |
 
 #### Actions
 | command          | var1    | description                            |
@@ -45,7 +56,7 @@
 | command         | var1              | description                                                 |
 |-----------------|-------------------|-------------------------------------------------------------|
 | !expire         | `duration`          | Sets your expire timer                                      |
-| !default_expire | `duration`/AFK/none | Sets your default expire timer                              |
+| !default_expire | `duration` / AFK / none | Sets your default expire timer                              |
 | !ao             |                   | Switch offline immunity for active queues                   |
 | !switch_dms     |                   | Toggles DMs on queue start                                  |
 | !subscribe      | [`queues`]          | Subscribe to channel or specified queues promotion role     |
@@ -58,21 +69,21 @@
 | !nr / !notready | Discard check-in |
 
 #### Draft
-| command    | var1      | var2                  | description                     |
-|------------|-----------|-----------------------|---------------------------------|
-| !capfor    | `team name` |                       | Become team captain             |
-| !pick / !p | `@user`     |                       | Pick a player                   |
-| !subme     |           |                       | Request a sub                   |
-| !subfor    | `@user`     |                       | Sub a user                      |
-| !put       | `@user`     | `team name` or unpicked | Place a user in a team as admin |
+| command    | var1      | var2               | description                     |
+|------------|-----------|--------------------|---------------------------------|
+| !capfor    | `team name` |                    | Become team captain             |
+| !pick / !p | `@user`     |                    | Pick a player                   |
+| !subme     |           |                    | Request a sub                   |
+| !subfor    | `@user`     |                    | Sub a user                      |
+| !put       | `@user`     | `team name` / unpicked | Place a user in a team as admin |
 
 #### Report match
-| command       | var1     | var2              | description                    |
-|---------------|----------|-------------------|--------------------------------|
-| !rl           |          |                   | Report a loss on current match |
-| !rd           |          |                   | Report a draw on current match |
-| !rw           | `match ID` | `team name` or draw | Report a win/draw as moderator |
-| !cancel_match | `match ID` |                   | Cancel a match                 |
+| command       | var1     | var2           | description                    |
+|---------------|----------|----------------|--------------------------------|
+| !rl           |          |                | Report a loss on current match |
+| !rd           |          |                | Report a draw on current match |
+| !rw           | `match ID` | `team name` / draw | Report a win/draw as moderator |
+| !cancel_match | `match ID` |                | Cancel a match                 |
 
 #### Stats and Ratings managment
 | command              | var1     | var2   | var3      | description                           |
@@ -88,10 +99,10 @@
 | !undo_match          | `match ID` |        |           | Undo a match                          |
 
 #### Miscellaneous
-| command         | var1             | description                            |
-|-----------------|------------------|----------------------------------------|
-| !server / !ip   | `queue`            | Show server string for specified queue |
-| !cointoss / !ct | [heads or tails] | Flip a cointoss                        |
-| !maps           | `queue`            | Show list of maps for specified queue  |
-| !map            | `queue`            | Show a random map for specified queue  |
-| !help           | `queue`            | Show queue description                 |
+| command         | var1          | description                            |
+|-----------------|---------------|----------------------------------------|
+| !server / !ip   | `queue`         | Show server string for specified queue |
+| !cointoss / !ct | [heads / tails] | Flip a cointoss                        |
+| !maps           | `queue`         | Show list of maps for specified queue  |
+| !map            | `queue`         | Show a random map for specified queue  |
+| !help           | `queue`         | Show queue description                 |
