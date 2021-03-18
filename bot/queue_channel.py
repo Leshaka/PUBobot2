@@ -1261,19 +1261,19 @@ class QueueChannel:
 		if len(self.queues) == 1:
 			q = self.queues[0]
 		elif (q := find(lambda q: q.name.lower() == args.lower(), self.queues)) is None:
-			raise bot.Exc.SyntaxError(f"Usage: {self.cfg.prefix}server __queue__")
+			raise bot.Exc.SyntaxError(f"Usage: {self.cfg.prefix}map(s) __queue__")
 		if not len(q.cfg.tables.maps):
 			raise bot.Exc.NotFoundError(self.gt("No maps is set for **{queue}**.").format(
 				queue=q.name
 			))
 
 		if random:
-			await self.channel.send(f"`{choice(q.cfg.tables.maps)['name']}`")
+			await self.success(f"`{choice(q.cfg.tables.maps)['name']}`")
 		else:
-			await self.channel.send(self.gt("Maps for **{queue}**:\n{maps}").format(
-				queue=q.name,
-				maps="\n".join((f"    `{i['name']}`" for i in q.cfg.tables.maps))
-			))
+			await self.success(
+				", ".join((f"`{i['name']}`" for i in q.cfg.tables.maps)),
+				title=self.gt("Maps for **{queue}**").format(queue=q.name)
+			)
 
 	async def _maps(self, *args, **kwargs):
 		await self.maps(*args, **kwargs, random=False)

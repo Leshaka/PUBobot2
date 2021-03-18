@@ -162,8 +162,8 @@ msgstr "Сервер для **{queue}** не указан."
 msgid "Server for **{queue}**"
 msgstr "Сервер для **{queue}**"
 
-msgid "Maps for **{queue}**:\n{maps}"
-msgstr "Карты для **{queue}**:\n{maps}"
+msgid "Maps for **{queue}**"
+msgstr "Карты для **{queue}**"
 
 msgid "Stats for __{target}__"
 msgstr "Статистика для __{target}__"
