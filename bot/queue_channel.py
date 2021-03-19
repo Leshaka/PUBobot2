@@ -1299,7 +1299,7 @@ class QueueChannel:
 		s += "\n----------------------------------------\n"
 		if len(noadds):
 			s += "\n".join((
-				f"{i['id']} | {i['name']} | {seconds_to_str(max(0,(i['at']+i['duration'])-now))} | {i['reason'] or '-'}"
+				f" {i['id']} | {i['name']} | {seconds_to_str(max(0,(i['at']+i['duration'])-now))} | {i['reason'] or '-'}"
 				for i in noadds
 			))
 		else:
