@@ -11,7 +11,7 @@
 > `duration` - duration time in format: '3h 2m 1s' or '03:02:01'.  
 
 #### Configuration
-| command        | var1     | var2        | var3  | Description                         |
+| command        | arg1     | arg2        | arg3  | Description                         |
 |----------------|----------|-------------|-------|-------------------------------------|
 | !create_pickup | `name`     | `max_players` |       | Create a pickup                     |
 | !queues        |          |             |       | List pickup queues on the channel   |
@@ -23,7 +23,7 @@
 | !set_cfg_queue | `json`     |             |       | Apply json configuration to queue   |
 
 #### Info
-| command         | var1                  | description                                               |
+| command         | arg1                  | description                                               |
 |-----------------|-----------------------|-----------------------------------------------------------|
 | !who            | [`queue`]               | Show people in specified queue                            |
 | !rank           | [`@user`]               | Show ranking for the specified user                       |
@@ -36,7 +36,7 @@
 | !top            | [day / week / month / year] | Show top players for matches played on the channel        |
 
 #### Actions
-| command          | var1    | description                            |
+| command          | arg1    | description                            |
 |------------------|---------|----------------------------------------|
 | +queue / !add    | `queues`  | Add to specified queues                |
 | ++ / !add        |         | Add to active queues                   |
@@ -46,14 +46,14 @@
 | !start           | `queue`   | Force start a queue                    |
 
 #### Moderator Actions
-| command          | var1  | var2  | description                            |
+| command          | arg1  | arg2  | description                            |
 |------------------|-------|-------|----------------------------------------|
 | !reset           |       |       | Remove all players from all queues     |
 | !remove_player   | `@user` |       | Remove specified user from all queues  |
 | !add_player      | `queue` | `@user` | Add specified user to queue            |
 
 #### Personal settings
-| command         | var1              | description                                                 |
+| command         | arg1              | description                                                 |
 |-----------------|-------------------|-------------------------------------------------------------|
 | !expire         | `duration`          | Sets your expire timer                                      |
 | !default_expire | `duration` / AFK / none | Sets your default expire timer                              |
@@ -69,7 +69,7 @@
 | !nr / !notready | Discard check-in |
 
 #### Draft
-| command    | var1      | var2               | description                     |
+| command    | arg1      | arg2               | description                     |
 |------------|-----------|--------------------|---------------------------------|
 | !capfor    | `team name` |                    | Become team captain             |
 | !pick / !p | `@user`     |                    | Pick a player                   |
@@ -78,7 +78,7 @@
 | !put       | `@user`     | `team name` / unpicked | Place a user in a team as admin |
 
 #### Report match
-| command       | var1     | var2           | description                    |
+| command       | arg1     | arg2           | description                    |
 |---------------|----------|----------------|--------------------------------|
 | !rl           |          |                | Report a loss on current match |
 | !rd           |          |                | Report a draw on current match |
@@ -86,7 +86,7 @@
 | !cancel_match | `match ID` |                | Cancel a match                 |
 
 #### Stats and Ratings managment
-| command              | var1     | var2   | var3      | description                           |
+| command              | arg1     | arg2   | arg3      | description                           |
 |----------------------|----------|--------|-----------|---------------------------------------|
 | !rating_set/!seed    | `@user`    | `rating` | [`deviation`] | Set a player's rating                 |
 | !rating_hide         | `@user`    |        |           | Hide a users rating                   |
@@ -97,6 +97,15 @@
 | !stats_reset_player  | `@user`    |        |           | Reset all stats for @user             |
 | !stats_replace_player| `@user1`   | `@user2` |           | Replace @user1 with @user2 in database|
 | !undo_match          | `match ID` |        |           | Undo a match                          |
+
+#### Bans and Phrases
+| command        | arg1      | arg2       | arg3       | description                                             |
+|----------------|-----------|------------|------------|---------------------------------------------------------|
+| !noadd         | `@user`   | `duration` | [`reason`] | Ban user                                                |
+| !forgive       | `@user`   |            |            | Unban user                                              |
+| !noadds        |           |            |            | Show active bans                                        |
+| !phrases_add   | `@user`   | `phrase`   |            | Add a custom phrase to pick from on user !add command   |
+| !phrases_clear | [`@user`] |            |            | Clear all phrases on the channel or for specified @user |
 
 #### Miscellaneous
 | command         | var1          | description                            |
