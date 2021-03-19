@@ -207,10 +207,13 @@ class Match:
 			await self.check_in.think(frame_time)
 
 		elif frame_time > self.lifetime + self.start_time:
-			await self.qc.error(self.gt("Match {queue} ({id}) has timed out.").format(
-				queue=self.queue.name,
-				id=self.id
-			))
+			try:
+				await self.qc.error(self.gt("Match {queue} ({id}) has timed out.").format(
+					queue=self.queue.name,
+					id=self.id
+				))
+			except DiscordException:
+				pass
 			await self.cancel()
 
 	async def next_state(self):
@@ -320,7 +323,10 @@ class Match:
 	async def cancel(self):
 		if self.check_in.message and self.check_in.message.id in bot.waiting_reactions.keys():
 			bot.waiting_reactions.pop(self.check_in.message.id)
-		await self.qc.channel.send(
-			self.gt("{players} your match has been canceled.").format(players=join_and([p.mention for p in self.players]))
-		)
+		try:
+			await self.qc.channel.send(
+				self.gt("{players} your match has been canceled.").format(players=join_and([p.mention for p in self.players]))
+			)
+		except DiscordException:
+			pass
 		bot.active_matches.remove(self)
