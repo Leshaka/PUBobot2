@@ -145,6 +145,21 @@ msgstr "Таблица лидеров пуста"
 msgid "Nothing found"
 msgstr "Нет результатов"
 
+msgid "Banned **{member}** for `{duration}`."
+msgstr "Забанил **{member}** на `{duration}`."
+
+msgid "Specified member is not banned."
+msgstr "Указаный пользователь не забанен."
+
+msgid " ID | Prisoner | Left | Reason"
+msgstr " ID | Заключенный | Осталось | Основание"
+
+msgid "You have been banned, `{duration}` left."
+msgstr "Вы забанены, осталось `{duration}`."
+
+msgid "Noadds are empty."
+msgstr "Список пуст."
+
 # bot/queues/pickup_queue.py
 
 msgid "{role} Please add to **{name}** pickup, `{left}` players left!"

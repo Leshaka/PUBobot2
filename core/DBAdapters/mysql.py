@@ -118,7 +118,7 @@ class Adapter:
 			action="REPLACE" if on_dublicate == 'replace' else "INSERT",
 			ignore=" IGNORE" if on_dublicate == 'ignore' else "",
 			table=table,
-			columns=", ".join(columns),
+			columns=", ".join((f"`{i}`" for i in columns)),
 			values=", ".join(('%s' for i in range(len(columns))))
 		)
 
@@ -126,8 +126,8 @@ class Adapter:
 	def _mysql_update(table, columns, keys):
 		return "UPDATE {table} SET {columns} WHERE {keys}".format(
 			table=table,
-			columns=",".join(["{}=%s".format(i) for i in columns]),
-			keys=" AND ".join(["{}=%s".format(i) for i in keys])
+			columns=",".join(["`{}`=%s".format(i) for i in columns]),
+			keys=" AND ".join(["`{}`=%s".format(i) for i in keys])
 		)
 
 	async def create_table(self, table):

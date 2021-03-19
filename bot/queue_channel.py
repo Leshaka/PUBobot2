@@ -265,7 +265,12 @@ class QueueChannel:
 			ct=self._cointoss,
 			help=self._help,
 			maps=self._maps,
-			map=self._map
+			map=self._map,
+			noadds=self._noadds,
+			noadd=self._noadd,
+			forgive=self._forgive,
+			phrases_add=self._phrases_add,
+			phrases_clear=self._phrases_clear
 		)
 
 	async def update_info(self):
@@ -314,7 +319,7 @@ class QueueChannel:
 		self.queues.append(q_obj)
 		return q_obj
 
-	async def update_topic(self, force_announce=False):
+	async def update_topic(self, force_announce=False, phrase=None):
 		populated = [q for q in self.queues if len(q.queue)]
 		if not len(populated):
 			new_topic = f"> {self.gt('no players')}"
@@ -324,7 +329,10 @@ class QueueChannel:
 			new_topic = "> [" + " | ".join([f"**{q.name}** ({q.status})" for q in populated]) + "]"
 		if new_topic != self.topic or force_announce:
 			self.topic = new_topic
-			await self.channel.send(self.topic)
+			if phrase:
+				await self.channel.send(phrase + "\n" + self.topic)
+			else:
+				await self.channel.send(self.topic)
 
 	async def auto_remove(self, member):
 		if member.id in bot.allow_offline:
@@ -539,6 +547,12 @@ class QueueChannel:
 		if self.cfg.whitelist_role and self.cfg.whitelist_role not in message.author.roles:
 			raise bot.Exc.PermissionError(self.gt("You are not allowed to add to queues on this channel."))
 
+		ban_left, phrase = await bot.noadds.get_user(self, message.author)
+		if ban_left:
+			raise bot.Exc.PermissionError(self.gt("You have been banned, `{duration}` left.").format(
+				duration=seconds_to_str(ban_left)
+			))
+
 		if any((message.author in m.players for m in bot.active_matches)):
 			raise bot.Exc.InMatchError(self.gt("You are already in an active match."))
 
@@ -560,25 +574,21 @@ class QueueChannel:
 			if not len(t_queues):
 				t_queues = [q for q in self.queues if q.cfg.is_default]
 
-		allowed = [
-			q for q in t_queues if
-			(not q.cfg.blacklist_role or q.cfg.blacklist_role not in message.author.roles) and
-			(not q.cfg.whitelist_role or q.cfg.whitelist_role in message.author.roles)
-		]
+		qr = dict()  # get queue responses
+		for q in t_queues:
+			qr[q] = await q.add_member(message.author)
+			if qr[q] == bot.Qr.QueueStarted:
+				await self.update_topic()
+				return
 
-		if len(allowed) != len(t_queues):
+		if len(not_allowed := [q for q in qr.keys() if qr[q] == bot.Qr.NotAllowed]):
 			await self.error(self.gt("You are not allowed to add to {queues} queues.".format(
-				queues=join_and([f"**{q.name}**" for q in t_queues if q not in allowed])
+				queues=join_and([f"**{q.name}**" for q in not_allowed])
 			)))
 
-		is_started = False
-		for q in allowed:
-			if is_started := await q.add_member(message.author):
-				break
-		if not is_started:
+		if bot.Qr.Success in qr.values():
 			await self.update_expire(message.author)
-
-		await self.update_topic()
+			await self.update_topic(phrase=f"{message.author.mention}, {phrase}" if phrase else None)
 
 	async def _remove_member(self, message, args=None):
 		targets = args.lower().split(" ") if args else []
@@ -1131,8 +1141,8 @@ class QueueChannel:
 		elif (member := self.get_member(args[1])) is None:
 			raise bot.Exc.SyntaxError(f"Usage: {self.cfg.prefix}add_player __queue__ __@user__")
 
-		is_started = await queue.add_member(member)
-		if not is_started:
+		resp = await queue.add_member(member)
+		if resp == bot.Qr.Success:
 			await self.update_expire(member)
 
 		await self.update_topic()
@@ -1280,3 +1290,68 @@ class QueueChannel:
 
 	async def _map(self, *args, **kwagrs):
 		await self.maps(*args, **kwagrs, random=True)
+
+	async def _noadds(self, message, args=None):
+		noadds = await bot.noadds.get_noadds(self)
+		now = int(time.time())
+		s = "```markdown\n"
+		s += self.gt(" ID | Prisoner | Left | Reason")
+		s += "\n----------------------------------------\n"
+		if len(noadds):
+			s += "\n".join((
+				f"{i['id']} | {i['name']} | {seconds_to_str(max(0,(i['at']+i['duration'])-now))} | {i['reason'] or '-'}"
+				for i in noadds
+			))
+		else:
+			s += self.gt("Noadds are empty.")
+		await self.channel.send(s+"\n```")
+
+	async def _noadd(self, message, args=""):
+		self._check_perms(message.author, 1)
+		if len(args := args.split(" ", maxsplit=2)) < 2:
+			raise bot.Exc.SyntaxError(f"Usage: {self.cfg.prefix}noadd __@user__ __duration__ [__reason__]")
+		elif (member := self.get_member(args.pop(0))) is None:
+			raise bot.Exc.SyntaxError(self.gt("Specified user not found."))
+
+		try:
+			secs = parse_duration(args.pop(0))
+		except ValueError:
+			raise bot.Exc.SyntaxError(self.gt("Invalid duration format. Syntax: 3h2m1s or 03:02:01."))
+
+		reason = args.pop(0) if len(args) else None
+		await bot.noadds.noadd(self, member, secs, message.author, reason=reason)
+		await self.success(self.gt("Banned **{member}** for `{duration}`.").format(
+			member=get_nick(member),
+			duration=seconds_to_str(secs)
+		))
+
+	async def _forgive(self, message, args=None):
+		self._check_perms(message.author, 1)
+		if not args:
+			raise bot.Exc.SyntaxError(f"Usage: {self.cfg.prefix}forgive __@user__")
+		elif (member := self.get_member(args)) is None:
+			raise bot.Exc.SyntaxError(self.gt("Specified user not found."))
+
+		if await bot.noadds.forgive(self, member, message.author):
+			await self.success(self.gt("Done."))
+		else:
+			raise bot.Exc.NotFoundError(self.gt("Specified member is not banned."))
+
+	async def _phrases_add(self, message, args=""):
+		self._check_perms(message.author, 1)
+		if len(args := args.split(" ", maxsplit=1)) != 2:
+			raise bot.Exc.SyntaxError(f"Usage: {self.cfg.prefix}phrases_add __@user__ __phrase__")
+		elif (member := self.get_member(args.pop(0))) is None:
+			raise bot.Exc.SyntaxError(self.gt("Specified user not found."))
+
+		await bot.noadds.phrases_add(self, member, args.pop(0))
+		await self.success(self.gt("Done."))
+
+	async def _phrases_clear(self, message, args=None):
+		self._check_perms(message.author, 1)
+		if args is None:
+			member = None
+		elif (member := self.get_member(args)) is None:
+			raise bot.Exc.SyntaxError(self.gt("Specified user not found."))
+		await bot.noadds.phrases_clear(self, member=member)
+		await self.success(self.gt("Done."))

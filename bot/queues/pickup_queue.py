@@ -234,6 +234,12 @@ class PickupQueue:
 			bot.active_queues.remove(self)
 
 	async def add_member(self, member):
+		if (
+			self.cfg.blacklist_role and self.cfg.blacklist_role in member.roles
+			or self.cfg.whitelist_role and self.cfg.whitelist_role not in member.roles
+		):
+			return bot.Qr.NotAllowed
+
 		if member not in self.queue:
 			self.queue.append(member)
 
@@ -242,9 +248,11 @@ class PickupQueue:
 
 			if len(self.queue) == self.cfg.size and self.cfg.autostart:
 				await self.start()
-				return True
+				return bot.Qr.QueueStarted
 
-		return False
+			return bot.Qr.Success
+		else:
+			return bot.Qr.Duplicate
 
 	def is_added(self, member):
 		return member in self.queue

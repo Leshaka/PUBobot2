@@ -11,6 +11,7 @@ async def on_think(frame_time):
 	for match in bot.active_matches:
 		await match.think(frame_time)
 	await bot.expire.think(frame_time)
+	await bot.noadds.think(frame_time)
 
 
 @dc.event
