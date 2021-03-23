@@ -225,6 +225,7 @@ class QueueChannel:
 			put=self._put,
 			subme=self._sub_me,
 			subfor=self._sub_for,
+			subforce=self._sub_force,
 			rank=self._rank,
 			lb=self._leaderboard,
 			leaderboard=self._leaderboard,
@@ -755,12 +756,27 @@ class QueueChannel:
 		if self.get_match(message.author) is not None:
 			raise bot.Exc.InMatchError(self.gt("You are already in an active match."))
 		if not args:
-			raise bot.Exc.SyntaxError(f"Usage: {self.cfg.prefix}sub_for __player__")
+			raise bot.Exc.SyntaxError(f"Usage: {self.cfg.prefix}sub_for __@player__")
 		elif (member := self.get_member(args)) is None:
 			raise bot.Exc.SyntaxError(self.gt("Specified user not found."))
 		elif (match := self.get_match(member)) is None:
 			raise bot.Exc.NotInMatchError(self.gt("Specified user is not in a match."))
-		await match.draft.sub_for(message.author, member)
+		await match.draft.sub_for(member, message.author)
+
+	async def _sub_force(self, message, args=""):
+		self._check_perms(message.author, 1)
+		if len(args := args.split(" ")) != 2:
+			raise bot.Exc.SyntaxError(f"Usage: {self.cfg.prefix}sub_force __@player1__ __@player2__")
+		elif (member1 := self.get_member(args[0])) is None:
+			raise bot.Exc.SyntaxError(self.gt("Specified user not found."))
+		elif (member2 := self.get_member(args[1])) is None:
+			raise bot.Exc.SyntaxError(self.gt("Specified user not found."))
+		elif (match1 := self.get_match(member1)) is None:
+			raise bot.Exc.NotInMatchError(self.gt("Specified user is not in a match."))
+		elif self.get_match(member2) is not None:
+			raise bot.Exc.InMatchError(self.gt("Specified user is in an active match."))
+
+		await match1.draft.sub_for(member1, member2, force=True)
 
 	async def _rank(self, message, args=None):
 		if args:

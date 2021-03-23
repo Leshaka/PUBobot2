@@ -64,6 +64,9 @@ msgstr "Указанный пользователь не найден."
 msgid "Specified user is not in a match."
 msgstr "Указанный пользователь не находится в матче."
 
+msgid "Specified user is in an active match."
+msgstr "Указанный пользователь уже находится в матче."
+
 msgid "Matches"
 msgstr "Матчей"
 

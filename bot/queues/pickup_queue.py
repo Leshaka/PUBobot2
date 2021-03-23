@@ -298,7 +298,10 @@ class PickupQueue:
 		if len(self.queue) == self.cfg.size:
 			await self.start()
 			self.queue = list(old_players)
-		await self.qc.update_topic(force_announce=True)
+		else:
+			for p in ready:
+				await self.qc.update_expire(p)
 
+		await self.qc.update_topic(force_announce=True)
 		if self not in bot.active_queues and self.length:
 			bot.active_queues.append(self)
