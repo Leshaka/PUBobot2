@@ -347,12 +347,7 @@ class QueueChannel:
 	async def remove_members(self, *members, reason=None, highlight=False):
 		affected = set()
 		for q in (q for q in self.queues if q.length):
-			for m in members:
-				try:
-					await q.remove_member(m)
-					affected.add(m)
-				except ValueError:
-					pass
+			affected.update(q.pop_members(*members))
 
 		if len(affected):
 			for m in affected:
@@ -470,6 +465,8 @@ class QueueChannel:
 		if message:
 			asyncio.create_task(self._dm_members(members, message))
 
+		await bot.remove_players(*members, reason="pickup started")
+
 	async def _dm_members(self, members, *args, **kwargs):
 		for m in members:
 			if not m.bot and not await db.select_one(("user_id", ), "players", where={'user_id': m.id, 'allow_dm': 0}):
@@ -579,7 +576,6 @@ class QueueChannel:
 		for q in t_queues:
 			qr[q] = await q.add_member(message.author)
 			if qr[q] == bot.Qr.QueueStarted:
-				await self.update_topic()
 				return
 
 		if len(not_allowed := [q for q in qr.keys() if qr[q] == bot.Qr.NotAllowed]):
@@ -603,10 +599,7 @@ class QueueChannel:
 		))
 
 		for q in t_queues:
-			try:
-				await q.remove_member(message.author)
-			except ValueError:
-				pass
+			q.pop_members(message.author)
 
 		if not any((q.is_added(message.author) for q in self.queues)):
 			bot.expire.cancel(self, message.author)
@@ -1160,8 +1153,7 @@ class QueueChannel:
 		resp = await queue.add_member(member)
 		if resp == bot.Qr.Success:
 			await self.update_expire(member)
-
-		await self.update_topic()
+			await self.update_topic()
 
 	async def subscribe(self, member, args, unsub=False):
 		if not args:

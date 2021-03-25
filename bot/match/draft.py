@@ -44,10 +44,13 @@ class Draft:
 			raise bot.Exc.PermissionError(self.m.gt("You must possess the captain's role."))
 		elif (team := find(lambda t: t.name.lower() == team_name.lower(), self.m.teams[:2])) is None:
 			raise bot.Exc.SyntaxError(self.m.gt("Specified team name not found."))
-		elif len(team):
-			raise bot.Exc.PermissionError(self.m.gt("Team {name} already have a captain.".format(name=f"**{team.name}**")))
+
+		if len(team):
+			# raise bot.Exc.PermissionError(self.m.gt("Team {name} already have a captain.".format(name=f"**{team.name}**")))
+			self.m.teams[2].append(team.pop(0))
+
 		find(lambda t: author in t, self.m.teams).remove(author)
-		team.append(author)
+		team.insert(0, author)
 		await self.print()
 
 	async def pick(self, author, player):

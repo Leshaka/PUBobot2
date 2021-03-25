@@ -265,6 +265,13 @@ class PickupQueue:
 		else:
 			raise ValueError("Specified Member is not added to the queue.")
 
+	def pop_members(self, *members):
+		ids = [m.id for m in members]
+		members = [member for member in self.queue if member.id in ids]
+		for m in members:
+			self.queue.remove(m)
+		return members
+
 	async def start(self):
 		if len(self.queue) < 2:
 			raise bot.Exc.PubobotException(self.qc.gt("Not enough players to start the queue."))
@@ -288,7 +295,6 @@ class PickupQueue:
 				channel=self.qc.channel.mention
 			)
 		)
-		await bot.remove_players(*players, reason="pickup started")
 
 	async def revert(self, not_ready, ready):
 		old_players = list(self.queue)

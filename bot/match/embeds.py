@@ -144,6 +144,12 @@ class Embeds:
 			team_players[1] += "\n\u200b"  # Extra empty line
 			embed.add_field(name=teams_names[0], value=team_players[0], inline=False)
 			embed.add_field(name=teams_names[1], value=team_players[1], inline=False)
+			if self.m.ranked or self.m.cfg['pick_captains']:
+				embed.add_field(
+					name=self.m.gt("Captains"),
+					value=" \u200b " + join_and([self.m.teams[0][0].mention, self.m.teams[1][0].mention]),
+					inline=False
+				)
 
 		else:  # just players list
 			embed.add_field(
