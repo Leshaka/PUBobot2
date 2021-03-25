@@ -46,11 +46,12 @@
 | !start           | `queue`   | Force start a queue                    |
 
 #### Moderator Actions
-| command          | arg1  | arg2  | description                            |
-|------------------|-------|-------|----------------------------------------|
-| !reset           |       |       | Remove all players from all queues     |
-| !remove_player   | `@user` |       | Remove specified user from all queues  |
-| !add_player      | `queue` | `@user` | Add specified user to queue            |
+| command          | arg1     | arg2     | description                            |
+|------------------|----------|----------|----------------------------------------|
+| !reset           |          |          | Remove all players from all queues     |
+| !remove_player   | `@user`  |          | Remove specified user from all queues  |
+| !add_player      | `queue`  | `@user`  | Add specified user to queue            |
+| !subforce        | `@user1` | `@user2` | Substitute user1 with user2 in an active match. |
 
 #### Personal settings
 | command         | arg1              | description                                                 |
@@ -69,13 +70,13 @@
 | !nr / !notready | Discard check-in |
 
 #### Draft
-| command    | arg1      | arg2               | description                     |
-|------------|-----------|--------------------|---------------------------------|
-| !capfor    | `team name` |                    | Become team captain             |
-| !pick / !p | `@user`     |                    | Pick a player                   |
-| !subme     |           |                    | Request a sub                   |
-| !subfor    | `@user`     |                    | Sub a user                      |
-| !put       | `@user`     | `team name` / unpicked | Place a user in a team as admin |
+| command    | arg1        | arg2             | description                     |
+|------------|-------------|------------------|---------------------------------|
+| !capfor    | `team name` |                  | Become team captain             |
+| !pick / !p | `@user`     |                  | Pick a player                   |
+| !subme     |             |                  | Request a sub                   |
+| !subfor    | `@user`     |                  | Sub a user                      |
+| !put       | `@user`     | `team name` / unpicked | Place a user in a team as a moderator |
 
 #### Report match
 | command       | arg1     | arg2           | description                    |
