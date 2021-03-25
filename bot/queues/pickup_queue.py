@@ -276,8 +276,17 @@ class PickupQueue:
 		if len(self.queue) < 2:
 			raise bot.Exc.PubobotException(self.qc.gt("Not enough players to start the queue."))
 
+		players = list(self.queue)
+		await self.qc.queue_started(
+			members=players,
+			message=self.qc.gt("**{queue}** pickup has started @ {channel}!").format(
+				queue=self.name,
+				channel=self.qc.channel.mention
+			)
+		)
+
 		await bot.Match.new(
-			self, self.qc, list(self.queue),
+			self, self.qc, players,
 			team_names=self.cfg.team_names.split(" ") if self.cfg.team_names else None,
 			team_emojis=self.cfg.team_emojis.split(" ") if self.cfg.team_emojis else None,
 			ranked=self.cfg.ranked, team_size=int(self.cfg.size/2), pick_captains=self.cfg.pick_captains,
@@ -286,14 +295,6 @@ class PickupQueue:
 			maps=[i['name'] for i in self.cfg.tables.maps], vote_maps=self.cfg.vote_maps,
 			map_count=self.cfg.map_count, check_in_timeout=self.cfg.check_in_timeout,
 			start_msg=self.cfg.start_msg, server=self.cfg.server
-		)
-		players = list(self.queue)
-		await self.qc.queue_started(
-			members=players,
-			message=self.qc.gt("**{queue}** pickup has started @ {channel}!").format(
-				queue=self.name,
-				channel=self.qc.channel.mention
-			)
 		)
 
 	async def revert(self, not_ready, ready):
