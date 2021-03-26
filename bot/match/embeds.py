@@ -113,7 +113,7 @@ class Embeds:
 		show_ranks = bool(self.m.ranked and not self.m.qc.cfg.rating_nicks)
 		embed = Embed(
 			colour=Colour(0x27b75e),
-			title=self.m.qc.gt("__**{queue}** is started!__").format(
+			title=self.m.qc.gt("__**{queue}** has started!__").format(
 				queue=self.m.queue.name[0].upper()+self.m.queue.name[1:]
 			)
 		)

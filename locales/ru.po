@@ -268,7 +268,7 @@ msgstr "Черёд выбирать {member}!"
 msgid "Type {cmd} to become a captain and start picking teams."
 msgstr "Используйте {cmd} чтобы стать капитаном и начать выбирать игроков."
 
-msgid "__**{queue}** is started!__"
+msgid "__**{queue}** has started!__"
 msgstr "__**{queue}** начался!__"
 
 msgid "Players"
