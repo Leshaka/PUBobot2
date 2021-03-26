@@ -142,12 +142,13 @@ class Config:
 			vo.verify(table_objects[key])
 
 		# Update useful objects and push to database
+		on_change_triggers = set()
 		if len(data):
 			for key, value in data.items():
 				vo = self._factory.variables[key]
 				setattr(self, key, objects[key])
 				if vo.on_change:
-					vo.on_change(self)
+					on_change_triggers.add(vo.on_change)
 			await db.update(self._factory.table, data, {self._factory.p_key: self.p_key})
 
 		for key, value in tables.items():
@@ -156,6 +157,11 @@ class Config:
 			await db.delete(vo.table, where={self._factory.p_key: self.p_key})
 			for row in value:
 				await db.insert(vo.table, {self._factory.p_key: self.p_key, **row})
+			if vo.on_change:
+				on_change_triggers.add(vo.on_change)
+
+		for f in on_change_triggers:
+			f(self)
 
 	def to_json(self):
 		data = {key: value.readable(getattr(self, key)) for key, value in self._factory.variables.items()}

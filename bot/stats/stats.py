@@ -123,10 +123,11 @@ async def register_match_ranked(m):
 		at=int(time.time()), ranked=1, winner=m.winner, maps="\n".join(m.maps)
 	))
 
-	await db.insert_many('qc_players', (
-		dict(channel_id=m.qc.channel.id, user_id=p.id)
-		for p in m.players
-	), on_dublicate="ignore")
+	for channel_id in {m.qc.id, m.qc.rating.channel_id}:
+		await db.insert_many('qc_players', (
+			dict(channel_id=channel_id, user_id=p.id, nick=get_nick(p))
+			for p in m.players
+		), on_dublicate="ignore")
 
 	before = [
 		await m.qc.rating.get_players((p.id for p in m.teams[0])),
@@ -163,7 +164,7 @@ async def register_match_ranked(m):
 				losses=after[p.id]['losses'],
 				draws=after[p.id]['draws']
 			),
-			keys=dict(channel_id=m.qc.channel.id, user_id=p.id)
+			keys=dict(channel_id=m.qc.rating.channel_id, user_id=p.id)
 		)
 
 		await db.insert(
@@ -171,7 +172,7 @@ async def register_match_ranked(m):
 			dict(match_id=m.id, channel_id=m.qc.channel.id, user_id=p.id, nick=nick, team=team)
 		)
 		await db.insert('qc_rating_history', dict(
-			channel_id=m.qc.channel.id,
+			channel_id=m.qc.rating.channel_id,
 			user_id=p.id,
 			at=int(time.time()),
 			rating_before=before[p.id]['rating'],
@@ -217,7 +218,7 @@ async def undo_match(match_id, qc):
 			new['rating'] = max((new['rating']-changes['rating_change'], 0))
 			new['deviation'] = max((new['deviation']-changes['deviation_change'], 0))
 
-			await db.update("qc_players", new, keys=dict(channel_id=qc.channel.id, user_id=p['user_id']))
+			await db.update("qc_players", new, keys=dict(channel_id=qc.rating.channel_id, user_id=p['user_id']))
 		await db.delete("qc_rating_history", where=dict(match_id=match_id))
 		members = (qc.channel.guild.get_member(p['user_id']) for p in p_matches)
 		await qc.update_rating_roles(*(m for m in members if m is not None))

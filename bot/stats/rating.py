@@ -12,6 +12,7 @@ class BaseRating:
 	table = "qc_players"
 
 	def __init__(self, channel_id, init_rp=1500, init_deviation=300, scale=32):
+		print(f"New Rating system: {channel_id}")
 		self.channel_id = channel_id
 		self.init_rp = init_rp
 		self.init_deviation = init_deviation

@@ -111,6 +111,12 @@ class QueueChannel:
 				notnull=True,
 				on_change=bot.update_rating_system
 			),
+			Variables.TextChanVar(
+				"rating_channel",
+				display="Rating host channel",
+				description="Use rating data from another channel.",
+				on_change=bot.update_rating_system
+			),
 			Variables.IntVar(
 				"rating_initial",
 				display="Initial rating",
@@ -189,7 +195,7 @@ class QueueChannel:
 		self.id = text_channel.id
 		self.gt = locales[self.cfg.lang]
 		self.rating = self.rating_names[self.cfg.rating_system](
-			channel_id=text_channel.id,
+			channel_id=(self.cfg.rating_channel or text_channel).id,
 			init_rp=self.cfg.rating_initial,
 			init_deviation=self.cfg.rating_deviation,
 			scale=self.cfg.rating_scale
@@ -286,7 +292,7 @@ class QueueChannel:
 
 	def update_rating_system(self):
 		self.rating = self.rating_names[self.cfg.rating_system](
-			channel_id=self.channel.id,
+			channel_id=(self.cfg.rating_channel or self.channel).id,
 			init_rp=self.cfg.rating_initial,
 			init_deviation=self.cfg.rating_deviation,
 			scale=self.cfg.rating_scale
@@ -308,6 +314,13 @@ class QueueChannel:
 				raise bot.Exc.PermissionError(self.gt("You must possess admin permissions."))
 			else:
 				raise bot.Exc.PermissionError(self.gt("You must possess moderator permissions."))
+
+	@property
+	def _ranks_table(self):
+		if self.cfg.rating_channel:
+			return (bot.queue_channels.get(self.cfg.rating_channel.id) or self).cfg.tables.ranks
+		else:
+			return self.cfg.tables.ranks
 
 	async def new_queue(self, name, size, kind):
 		kind.validate_name(name)
@@ -414,8 +427,9 @@ class QueueChannel:
 			)
 
 	def rating_rank(self, rating):
+		table = self._ranks_table
 		below = sorted(
-			(rank for rank in self.cfg.tables.ranks if rank['rating'] < rating),
+			(rank for rank in table if rank['rating'] <= rating),
 			key=lambda r: r['rating'], reverse=True
 		)
 		if not len(below):
@@ -435,10 +449,11 @@ class QueueChannel:
 			bot.expire.set(self, member, self.cfg.expire_time)
 
 	async def _update_rating_roles(self, *members):
+		table = self._ranks_table
 		data = await self.rating.get_players((i.id for i in members))
 		roles = {i['user_id']: self.rating_rank(i['rating'])['role'] for i in data}
 		ratings = {i['user_id']: i['rating'] for i in data}
-		all_roles = [i['role'] for i in self.cfg.tables.ranks if i is not None]
+		all_roles = [i['role'] for i in table if i is not None]
 
 		for member in members:
 			to_delete = [role for role in all_roles if role != roles[member.id] and role in member.roles]
@@ -780,7 +795,7 @@ class QueueChannel:
 
 		data = await db.select(
 			['user_id', 'rating', 'deviation', 'channel_id', 'wins', 'losses', 'draws', 'is_hidden'], "qc_players",
-			where={'channel_id': self.channel.id}, order_by="rating"
+			where={'channel_id': self.rating.channel_id}, order_by="rating"
 		)
 		data = [i for i in data if not i['is_hidden'] and i['rating']]
 		if p := find(lambda i: i['user_id'] == member.id, data):
@@ -802,7 +817,7 @@ class QueueChannel:
 
 			changes = await db.select(
 				('at', 'rating_change', 'match_id', 'reason'),
-				'qc_rating_history', where=dict(user_id=member.id, channel_id=self.channel.id),
+				'qc_rating_history', where=dict(user_id=member.id, channel_id=self.rating.channel_id),
 				order_by='id', limit=3
 			)
 			if len(changes):
@@ -932,7 +947,7 @@ class QueueChannel:
 
 		data = await db.select(
 			['nick', 'rating', 'deviation', 'wins', 'losses', 'draws'], 'qc_players',
-			where={'channel_id': self.channel.id, 'is_hidden': 0}, order_by="rating"
+			where={'channel_id': self.rating.channel_id, 'is_hidden': 0}, order_by="rating"
 		)
 		data = [i for i in data if i['rating'] is not None][page*10:(page+1)*10]
 
