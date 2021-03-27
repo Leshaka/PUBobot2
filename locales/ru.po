@@ -230,7 +230,7 @@ msgstr "Нет изменений."
 msgid "Removed `{count}` roles from you."
 msgstr "С Вас снято `{count}` ролей."
 
-msgid "Added `{count}` roles from you."
+msgid "Added `{count}` roles to you."
 msgstr "Вам добавлено `{count}` ролей."
 
 # bot/match/embeds.py

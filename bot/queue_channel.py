@@ -1208,7 +1208,7 @@ class QueueChannel:
 			if not len(roles):
 				raise bot.Exc.ValueError(self.gt("No changes to apply."))
 			await member.add_roles(*roles, reason="subscribe command")
-			await self.success(self.gt("Added `{count}` roles from you.").format(
+			await self.success(self.gt("Added `{count}` roles to you.").format(
 				count=len(roles)
 			))
 
