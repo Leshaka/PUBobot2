@@ -131,7 +131,7 @@ class QueueChannel:
 				"rating_deviation",
 				display="Rating deviation",
 				description="Set initial rating deviation.",
-				default=300,
+				default=200,
 				verify=lambda x: 0 <= x <= 3000,
 				verify_message="Rating deviation must be between 0 and 3000",
 				notnull=True,
@@ -141,10 +141,24 @@ class QueueChannel:
 				"rating_scale",
 				display="Rating scale",
 				description="Set rating scale.",
-				verify=lambda x: 4 <= x <= 256,
-				verify_message="Rating scale must be between 4 and 256",
+				verify=lambda x: 0 <= x <= 1000,
+				verify_message="Scale all rating changes, default 100 (100%).",
 				notnull=True,
-				default=32
+				default=100,
+				on_change=bot.update_rating_system
+			),
+			Variables.IntVar(
+				"rating_reduction_scale",
+				display="Rating reduction scale",
+				description="\n".join([
+					"Scale all negative rating changes, default 100 (100%).",
+					"Warning: changing this will break ratings balance."
+				]),
+				verify=lambda x: 0 <= x <= 1000,
+				verify_message="Rating reduction scale must be between 0 and 1000",
+				notnull=True,
+				default=100,
+				on_change=bot.update_rating_system
 			),
 			Variables.BoolVar(
 				"rating_nicks",
@@ -198,7 +212,8 @@ class QueueChannel:
 			channel_id=(self.cfg.rating_channel or text_channel).id,
 			init_rp=self.cfg.rating_initial,
 			init_deviation=self.cfg.rating_deviation,
-			scale=self.cfg.rating_scale
+			scale=self.cfg.rating_scale,
+			reduction_scale=self.cfg.rating_reduction_scale
 		)
 		self.queues = []
 		self.channel = text_channel

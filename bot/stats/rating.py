@@ -11,12 +11,24 @@ class BaseRating:
 
 	table = "qc_players"
 
-	def __init__(self, channel_id, init_rp=1500, init_deviation=300, scale=32):
+	def __init__(self, channel_id, init_rp=1500, init_deviation=300, scale=100, reduction_scale=100):
 		print(f"New Rating system: {channel_id}")
 		self.channel_id = channel_id
 		self.init_rp = init_rp
 		self.init_deviation = init_deviation
-		self.scale = scale
+		self.scale = scale/100
+		self.reduction_scale = reduction_scale/100
+
+	def _scale_changes(self, player, r_change, d_change):
+		p = player.copy()
+		print(r_change)
+		print(self.reduction_scale, self.scale)
+		r_change = (r_change * self.scale) * self.reduction_scale if r_change < 0 else r_change * self.scale
+		print(r_change)
+		print('-----------')
+		p['rating'] = max(0, int(p['rating'] + r_change))
+		p['deviation'] = max(0, int(p['deviation'] + d_change))
+		return p
 
 	async def get_players(self, user_ids):
 		""" Return rating or initial rating for each member """
@@ -105,22 +117,19 @@ class FlatRating(BaseRating):
 
 	def __init__(self, **kwargs):
 		super().__init__(**kwargs)
-		self.scale = int(self.scale/2)
 
 	def rate(self, winners, losers, draw=False):
 		if not draw:
 			results = []
 			for p in winners:
-				new = p.copy()
-				new['rating'] += self.scale
+				new = self._scale_changes(p, 10, 0)
 				results.append(new)
 
 			for p in losers:
-				new = p.copy()
-				new['rating'] = max((new['rating']-self.scale, 0))
+				new = new = self._scale_changes(p, -10, 0)
 				results.append(new)
 		else:
-			results = [p.copy() for p in (*winners, *losers)]
+			results = [self._scale_changes(p, 0, 0) for p in (*winners, *losers)]
 
 		return results
 
@@ -129,7 +138,6 @@ class Glicko2Rating(BaseRating):
 
 	def __init__(self, **kwargs):
 		super().__init__(**kwargs)
-		self.scale = round(self.scale/32, 2)
 
 	def rate(self, winners, losers, draw=False):
 		score_w = 0.5 if draw else 1
@@ -154,16 +162,14 @@ class Glicko2Rating(BaseRating):
 			po.setRating(p['rating'])
 			po.setRd(p['deviation'])
 			po.update_player(*avg_l)
-			new = p.copy()
-			new.update({'rating': int(po.getRating()), 'deviation': int(po.getRd())})
+			new = self._scale_changes(p, po.getRating() - p['rating'], po.getRd() - p['deviation'])
 			results.append(new)
 
 		for p in losers:
 			po.setRating(p['rating'])
 			po.setRd(p['deviation'])
 			po.update_player(*avg_w)
-			new = p.copy()
-			new.update({'rating': int(po.getRating()), 'deviation': int(po.getRd())})
+			new = self._scale_changes(p, po.getRating() - p['rating'], po.getRd() - p['deviation'])
 			results.append(new)
 
 		return results
@@ -173,10 +179,9 @@ class TrueSkillRating(BaseRating):
 
 	def __init__(self, **kwargs):
 		super().__init__(**kwargs)
-		self.scale = (self.init_rp/6)/32*self.scale
 		self.ts = trueskill.TrueSkill(
 			mu=self.init_rp, sigma=self.init_deviation,
-			beta=self.scale, tau=self.init_deviation/100
+			beta=int(self.init_deviation/2), tau=int(self.init_deviation/100)
 		)
 
 	def rate(self, winners, losers, draw=False):
@@ -189,14 +194,12 @@ class TrueSkillRating(BaseRating):
 		results = []
 		for p in winners:
 			res = g1.pop(0)
-			new = p.copy()
-			new.update({'rating': int(int(res.mu)), 'deviation': int(res.sigma)})
+			new = self._scale_changes(p, res.mu - p['rating'], res.sigma - p['deviation'])
 			results.append(new)
 
 		for p in losers:
 			res = g2.pop(0)
-			new = p.copy()
-			new.update({'rating': int(int(res.mu)), 'deviation': int(res.sigma)})
+			new = self._scale_changes(p, res.mu - p['rating'], res.sigma - p['deviation'])
 			results.append(new)
 
 		return results
