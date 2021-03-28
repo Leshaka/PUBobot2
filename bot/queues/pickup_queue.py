@@ -33,7 +33,7 @@ class PickupQueue:
 				"is_default",
 				display="is default",
 				default=1,
-				description="Users can add to this queue without specifying its name.",
+				description="Set if users can add to this queue without specifying its name.",
 				notnull=True
 			),
 			Variables.BoolVar(
@@ -62,6 +62,13 @@ class PickupQueue:
 				display="Pick teams",
 				options=["draft", "matchmaking", "random teams", "no teams"],
 				default="draft",
+				description="\n".join([
+					"Set how teams should be picked:",
+					"  draft - host a draft stage where captains will have to pick players",
+					"  matchmaking - form teams automatically based on players ratings",
+					"  random teams - form teams randomly",
+					"  no teams - do not form teams, only print the players list"
+				]),
 				notnull=True
 			),
 			Variables.OptionVar(
@@ -69,6 +76,13 @@ class PickupQueue:
 				display="Pick captains",
 				options=["by role and rating", "fair pairs", "random", "no captains"],
 				default="by role and rating",
+				description="\n".join([
+					"Set how captains should be picked (for 'draft' or 'no teams' above):",
+					"  by role and rating - sort by captain role and rating and pick the best",
+					"  fair pairs - pick random pair of players with closest ratings to each other",
+					"  random - pick captains randomly",
+					"  no captains - do not pick captains automatically"
+				]),
 				notnull=True
 			),
 			Variables.StrVar(
