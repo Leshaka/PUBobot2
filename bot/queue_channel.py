@@ -130,7 +130,7 @@ class QueueChannel:
 			Variables.IntVar(
 				"rating_deviation",
 				display="Rating deviation",
-				description="Set initial rating deviation.",
+				description="Set player's initial rating deviation.",
 				default=200,
 				verify=lambda x: 0 <= x <= 3000,
 				verify_message="Rating deviation must be between 0 and 3000",
@@ -140,9 +140,8 @@ class QueueChannel:
 			Variables.IntVar(
 				"rating_scale",
 				display="Rating scale",
-				description="Set rating scale.",
 				verify=lambda x: 0 <= x <= 1000,
-				verify_message="Scale all rating changes, default 100 (100%).",
+				description="Scale all rating changes, default 100 (100%).",
 				notnull=True,
 				default=100,
 				on_change=bot.update_rating_system
@@ -159,6 +158,11 @@ class QueueChannel:
 				notnull=True,
 				default=100,
 				on_change=bot.update_rating_system
+			),
+			Variables.IntVar(
+				"lb_min_matches",
+				display="Leaderboard min matches",
+				description="set a minimum amount of played matches required for a player to be shown in the !leaderboard."
 			),
 			Variables.BoolVar(
 				"rating_nicks",
@@ -452,6 +456,18 @@ class QueueChannel:
 		if not len(below):
 			return {'rank': '〈?〉', 'rating': 0, 'role': None}
 		return below[0]
+
+	async def get_lb(self):
+		data = await db.select(
+			['user_id', 'nick', 'rating', 'deviation', 'wins', 'losses', 'draws', 'is_hidden'], 'qc_players',
+			where={'channel_id': self.rating.channel_id}, order_by="rating"
+		)
+		return [
+			i for i in data
+			if i['rating'] is not None
+			and not i['is_hidden']
+			and not (self.cfg.lb_min_matches and self.cfg.lb_min_matches > sum((i['wins'], i['losses'], i['draws'])))
+		]
 
 	async def update_rating_roles(self, *members):
 		asyncio.create_task(self._update_rating_roles(*members))
@@ -810,14 +826,20 @@ class QueueChannel:
 		else:
 			member = message.author
 
-		data = await db.select(
-			['user_id', 'rating', 'deviation', 'channel_id', 'wins', 'losses', 'draws', 'is_hidden'], "qc_players",
-			where={'channel_id': self.rating.channel_id}, order_by="rating"
-		)
-		data = [i for i in data if not i['is_hidden'] and i['rating']]
+		data = await self.get_lb()
 		if p := find(lambda i: i['user_id'] == member.id, data):
+			place = data.index(p)+1
+		else:
+			data = await db.select(
+				['user_id', 'rating', 'deviation', 'channel_id', 'wins', 'losses', 'draws', 'is_hidden'], "qc_players",
+				where={'channel_id': self.rating.channel_id}, order_by="rating"
+			)
+			p = find(lambda i: i['user_id'] == member.id, data)
+			place = "?"
+
+		if p:
 			embed = Embed(title=f"__{get_nick(member)}__", colour=Colour(0x7289DA))
-			embed.add_field(name="№", value=f"**{data.index(p)+1}**", inline=True)
+			embed.add_field(name="№", value=f"**{place}**", inline=True)
 			embed.add_field(name=self.gt("Matches"), value=f"**{(p['wins']+p['losses']+p['draws'])}**", inline=True)
 			if p['rating']:
 				embed.add_field(name=self.gt("Rank"), value=f"**{self.rating_rank(p['rating'])['rank']}**", inline=True)
@@ -962,11 +984,7 @@ class QueueChannel:
 		except ValueError:
 			raise bot.Exc.SyntaxError(f"Usage: {self.cfg.prefix}lb [page]")
 
-		data = await db.select(
-			['nick', 'rating', 'deviation', 'wins', 'losses', 'draws'], 'qc_players',
-			where={'channel_id': self.rating.channel_id, 'is_hidden': 0}, order_by="rating"
-		)
-		data = [i for i in data if i['rating'] is not None][page*10:(page+1)*10]
+		data = (await self.get_lb())[page*10:(page+1)*10]
 
 		if len(data):
 			lines = ["{0:^3}|{1:^11}|{2:^25.25}|{3:^9}| {4}".format(

@@ -86,10 +86,25 @@ class BaseRating:
 		ranks = [i['rating'] for i in ranks_table if i['rating'] != 0]
 		lowest = min(ranks)
 		data = await db.select(('*',), self.table, where=dict(channel_id=self.channel_id))
-		for row in (row for row in data if row['rating'] is not None):
-			row['rating'] = max([i for i in ranks if i <= row['rating']] + [lowest])
+		history = []
+		now = int(time.time())
+		for p in (p for p in data if p['rating'] is not None):
+			new_rating = max([i for i in ranks if i <= p['rating']] + [lowest])
+			history.append(dict(
+				user_id=p['user_id'],
+				channel_id=self.channel_id,
+				at=now,
+				rating_before=p['rating'],
+				rating_change=new_rating - p['rating'],
+				deviation_before=p['deviation'],
+				deviation_change=0,
+				match_id=None,
+				reason="ratings snap"
+			))
+			p['rating'] = new_rating
 		await db.delete(self.table, where={'channel_id': self.channel_id})
 		await db.insert_many(self.table, data)
+		await db.insert_many('qc_rating_history', history)
 
 	async def reset(self):
 		data = await db.select(('user_id', 'rating', 'deviation'), self.table, where=dict(channel_id=self.channel_id))
