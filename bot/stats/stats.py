@@ -79,6 +79,14 @@ db.ensure_table(dict(
 	primary_keys=["match_id", "user_id"]
 ))
 
+db.ensure_table(dict(
+	tname="disabled_guilds",
+	columns=[
+		dict(cname="guild_id", ctype=db.types.int)
+	],
+	primary_keys=["guild_id"]
+))
+
 
 async def last_match_id():
 	m = await db.select_one(('match_id',), 'qc_matches', order_by='match_id', limit=1)
@@ -301,7 +309,7 @@ async def top(channel_id, time_gap=None):
 class StatsJobs:
 
 	def __init__(self):
-		self.next_decay = int(self.next_monday().timestamp())
+		self.next_decay_at = int(self.next_monday().timestamp())
 
 	@staticmethod
 	def next_monday():
@@ -311,9 +319,15 @@ class StatsJobs:
 			d += datetime.timedelta(days=1)
 		return d
 
+	@staticmethod
+	def tomorrow():
+		d = datetime.datetime.today().replace(hour=0, minute=0, second=0, microsecond=0)
+		d += datetime.timedelta(days=1)
+		return d
+
 	async def think(self, frame_time):
-		if frame_time > self.next_decay:
-			self.next_decay = int(self.next_monday().timestamp())
+		if frame_time > self.next_decay_at:
+			self.next_decay_at = int(self.next_monday().timestamp())
 			log.info("--- Applying weekly deviation decays ---")
 			for qc in bot.queue_channels.values():
 				await qc.apply_rating_decay()

@@ -555,6 +555,11 @@ class QueueChannel:
 
 		# normal commands starting with prefix
 		elif self.cfg.prefix == cmd[0]:
+			if await db.select_one(['guild_id'], 'disabled_guilds', where={'guild_id': self.channel.guild.id}):
+				await self.error(
+					f"This guild is disabled.\nPlease check {cfg.WS_ROOT_URL}/main/{self.channel.guild.id}/_billing"
+				)
+				return
 			f, args = self.commands.get(cmd[1:]), message.content.split(' ', 1)[1:]
 		else:
 			return

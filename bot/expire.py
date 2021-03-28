@@ -58,8 +58,8 @@ class ExpireTimer:
 
 	async def think(self, frame_time):
 		if self.next and frame_time >= self.next.at:
-			await self.next.qc.remove_members(self.next.member, reason="expire", highlight=True)
-			self.tasks.pop(self.next.hash)
+			task = self.tasks.pop(self.next.hash)
+			await task.qc.remove_members(task.member, reason="expire", highlight=True)
 			self._define_next()
 
 
