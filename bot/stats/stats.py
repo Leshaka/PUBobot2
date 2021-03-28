@@ -1,5 +1,8 @@
 # -*- coding: utf-8 -*-
 import time
+import datetime
+import bot
+from core.console import log
 from core.database import db
 from core.utils import iter_to_dict, find, get_nick
 
@@ -293,3 +296,27 @@ async def top(channel_id, time_gap=None):
 	stats = dict(total=total['count'])
 	stats['players'] = data
 	return stats
+
+
+class StatsJobs:
+
+	def __init__(self):
+		self.next_decay = int(self.next_monday().timestamp())
+
+	@staticmethod
+	def next_monday():
+		d = datetime.datetime.today().replace(hour=0, minute=0, second=0, microsecond=0)
+		d += datetime.timedelta(days=1)
+		while d.weekday() != 0:  # 0 for monday
+			d += datetime.timedelta(days=1)
+		return d
+
+	async def think(self, frame_time):
+		if frame_time > self.next_decay:
+			self.next_decay = int(self.next_monday().timestamp())
+			log.info("--- Applying weekly deviation decays ---")
+			for qc in bot.queue_channels.values():
+				await qc.apply_rating_decay()
+
+
+jobs = StatsJobs()

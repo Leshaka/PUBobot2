@@ -138,6 +138,15 @@ class QueueChannel:
 				on_change=bot.update_rating_system
 			),
 			Variables.IntVar(
+				"rating_deviation_decay",
+				display="Rating deviation decay",
+				description="Set weekly rating deviation decay until initial deviation is met.",
+				default=15,
+				verify=lambda x: 0 <= x <= 500,
+				verify_message="Rating deviation decay must be between 0 and 500",
+				on_change=bot.update_rating_system
+			),
+			Variables.IntVar(
 				"rating_scale",
 				display="Rating scale",
 				verify=lambda x: 0 <= x <= 1000,
@@ -318,6 +327,10 @@ class QueueChannel:
 			scale=self.cfg.rating_scale,
 			reduction_scale=self.cfg.rating_reduction_scale
 		)
+
+	async def apply_rating_decay(self):
+		if self.id == self.rating.channel_id and self.cfg.rating_deviation_decay:
+			await self.rating.apply_decay(self.cfg.rating_deviation_decay)
 
 	def access_level(self, member):
 		if (self.cfg.admin_role in member.roles or

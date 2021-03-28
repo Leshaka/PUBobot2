@@ -102,9 +102,16 @@ class BaseRating:
 				reason="ratings snap"
 			))
 			p['rating'] = new_rating
-		await db.delete(self.table, where={'channel_id': self.channel_id})
-		await db.insert_many(self.table, data)
+		await db.insert_many(self.table, data, on_dublicate='replace')
 		await db.insert_many('qc_rating_history', history)
+
+	async def apply_decay(self, decay):
+		data = await db.select(('*',), self.table, where=dict(channel_id=self.channel_id))
+		data = [p for p in data if p['deviation']]
+		for p in data:
+			print(decay, p['deviation'])
+			p['deviation'] = min((self.init_deviation, p['deviation']+decay))
+		await db.insert_many(self.table, data, on_dublicate='replace')
 
 	async def reset(self):
 		data = await db.select(('user_id', 'rating', 'deviation'), self.table, where=dict(channel_id=self.channel_id))
