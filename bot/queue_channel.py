@@ -264,6 +264,7 @@ class QueueChannel:
 			rating_hide=self._rating_hide,
 			rating_unhide=self._rating_unhide,
 			rating_reset=self._rating_reset,
+			rating_snap=self._rating_snap,
 			cancel_match=self._cancel_match,
 			undo_match=self._undo_match,
 			switch_dms=self._switch_dms,
@@ -310,7 +311,8 @@ class QueueChannel:
 			channel_id=(self.cfg.rating_channel or self.channel).id,
 			init_rp=self.cfg.rating_initial,
 			init_deviation=self.cfg.rating_deviation,
-			scale=self.cfg.rating_scale
+			scale=self.cfg.rating_scale,
+			reduction_scale=self.cfg.rating_reduction_scale
 		)
 
 	def access_level(self, member):
@@ -1042,6 +1044,11 @@ class QueueChannel:
 	async def _rating_reset(self, message, args=None):
 		self._check_perms(message.author, 2)
 		await self.rating.reset()
+		await self.success(self.gt("Done."))
+
+	async def _rating_snap(self, message, args=None):
+		self._check_perms(message.author, 2)
+		await self.rating.snap_ratings(self._ranks_table)
 		await self.success(self.gt("Done."))
 
 	async def _cancel_match(self, message, args=""):

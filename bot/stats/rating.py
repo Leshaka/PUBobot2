@@ -12,7 +12,6 @@ class BaseRating:
 	table = "qc_players"
 
 	def __init__(self, channel_id, init_rp=1500, init_deviation=300, scale=100, reduction_scale=100):
-		print(f"New Rating system: {channel_id}")
 		self.channel_id = channel_id
 		self.init_rp = init_rp
 		self.init_deviation = init_deviation
@@ -21,11 +20,7 @@ class BaseRating:
 
 	def _scale_changes(self, player, r_change, d_change):
 		p = player.copy()
-		print(r_change)
-		print(self.reduction_scale, self.scale)
 		r_change = (r_change * self.scale) * self.reduction_scale if r_change < 0 else r_change * self.scale
-		print(r_change)
-		print('-----------')
 		p['rating'] = max(0, int(p['rating'] + r_change))
 		p['deviation'] = max(0, int(p['deviation'] + d_change))
 		return p
@@ -86,6 +81,15 @@ class BaseRating:
 
 	async def hide_player(self, user_id, hide=True):
 		await db.update(self.table, dict(is_hidden=hide), keys=dict(channel_id=self.channel_id, user_id=user_id))
+
+	async def snap_ratings(self, ranks_table):
+		ranks = [i['rating'] for i in ranks_table if i['rating'] != 0]
+		lowest = min(ranks)
+		data = await db.select(('*',), self.table, where=dict(channel_id=self.channel_id))
+		for row in (row for row in data if row['rating'] is not None):
+			row['rating'] = max([i for i in ranks if i <= row['rating']] + [lowest])
+		await db.delete(self.table, where={'channel_id': self.channel_id})
+		await db.insert_many(self.table, data)
 
 	async def reset(self):
 		data = await db.select(('user_id', 'rating', 'deviation'), self.table, where=dict(channel_id=self.channel_id))
