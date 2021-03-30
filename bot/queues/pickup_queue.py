@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+from discord import Forbidden
+
 from core.console import log
 from core.cfg_factory import CfgFactory, Variables, VariableTable
 from core.utils import get_nick
@@ -232,15 +234,26 @@ class PickupQueue:
 	def length(self):
 		return len(self.queue)
 
-	@property
-	def promote(self):
+	async def promote(self):
 		promotion_role = self.cfg.promotion_role or self.qc.cfg.promotion_role
 		promotion_msg = self.cfg.promotion_msg or self.qc.gt("{role} Please add to **{name}** pickup, `{left}` players left!")
-		return promotion_msg.format(
+		promotion_msg = promotion_msg.format(
 			role=promotion_role.mention if promotion_role else "",
 			name=self.name,
 			left=self.cfg.size-self.length
 		)
+
+		if not promotion_role.mentionable:
+			try:
+				await promotion_role.edit(reason="Promote command", mentionable=True)
+			except Forbidden:
+				raise bot.Exc.PermissionError("Insufficient permissions to set the promotion role mentionable.")
+			else:
+				await self.qc.channel.send(promotion_msg)
+				await promotion_role.edit(reason="Promote command", mentionable=False)
+				return
+		else:
+			await self.qc.channel.send(promotion_msg)
 
 	async def reset(self):
 		self.queue = []

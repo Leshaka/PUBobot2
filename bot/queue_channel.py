@@ -1042,7 +1042,7 @@ class QueueChannel:
 				delay=seconds_to_str((self.cfg.promotion_delay+self.last_promote)-now)
 			)))
 
-		await self.channel.send(queue.promote)
+		await queue.promote()
 		self.last_promote = now
 
 	async def _rating_set(self, message, args=None):
