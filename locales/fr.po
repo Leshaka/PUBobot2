@@ -1,0 +1,348 @@
+msgid ""
+msgstr ""
+"Content-Type: text/plain; charset=UTF-8\n"
+
+msgid "_lang"
+msgstr "fr"
+
+# bot/queue_channel.py
+
+msgid "no players"
+msgstr "pas de joueurs"
+
+msgid "You must possess admin permissions."
+msgstr "Vous devez posséder les permissions d'admin."
+
+msgid "You must possess moderator permissions."
+msgstr "Vous devez posséder les permissions de modérateur."
+
+msgid "expire time ran off"
+msgstr "le temps d'expiration touche à sa fin"
+
+msgid "member offline"
+msgstr "membre hors ligne"
+
+msgid "member AFK"
+msgstr "membre AFK"
+
+msgid "member left the guild"
+msgstr "ce membre a quitté le serveur"
+
+msgid "queue started on another channel"
+msgstr "une queue a commencé sur un autre channel"
+
+msgid "removed by a moderator"
+msgstr "retiré par un modérateur"
+
+msgid "{member} were removed from all queues ({reason})."
+msgstr "{member} a été retiré de toutes les queues ({reason})."
+
+msgid "{members} were removed from all queues ({reason})."
+msgstr "{members} a été retiré de toutes les queues ({reason})."
+
+msgid "Success"
+msgstr "Réaliser avec succès"
+
+msgid "Error"
+msgstr "Erreur"
+
+msgid "You are not allowed to add to queues on this channel."
+msgstr "Vous n'avez pas la permission d'ajouter de queue sur ce channel."
+
+msgid "You are not allowed to add to {queues} queues."
+msgstr "Vous n'avez pas l'autorisation d'ajouter {queues} dans les queues."
+
+msgid "You are already in an active match."
+msgstr "Vous êtes déjà dans un match qui n'est pas encore terminé."
+
+msgid "You are not in an active match."
+msgstr "Vous n'êtes actuellement pas dans un match."
+
+msgid "Specified user not found."
+msgstr "L'utilisateur que vous avez spécifié est introuvable."
+
+msgid "Specified user is not in a match."
+msgstr "L'utilisateur que vous nous avez spécifié ne se trouve pas dans un match."
+
+msgid "Specified user is in an active match."
+msgstr "L'utilisateur que vous nous avez spécifié se trouve dans un match qui n'est pas encore terminé."
+
+msgid "Matches"
+msgstr "Matchs"
+
+msgid "Rank"
+msgstr "Rank"
+
+msgid "Rating"
+msgstr "Points"
+
+msgid "Winrate"
+msgstr "Pourcentage de victoire"
+
+msgid "Last changes:"
+msgstr "Derniers changements:"
+
+msgid "No rating data found."
+msgstr "Aucune donnée d'évalutation n'a été trouvé."
+
+msgid "Could not find match with specified id. Check `{prefix}matches`."
+msgstr "Aucun match n'a été trouvé avec l'id de match que vous m'avez donné. Regardez-le dans `{prefix}matches`."
+
+msgid "You have {duration} expire time left."
+msgstr "Il te reste {duration} avant de te faire exclure de la queue."
+
+msgid "You don't have an expire timer set right now."
+msgstr "Aucune expiration de temps ne t'a été attribué."
+
+msgid "Invalid duration format. Syntax: 3h2m1s or 03:02:01."
+msgstr "Format de durée invalide. Veuillez suivre cette syntaxe: 3h2m1s ou 03:02:01."
+
+msgid "Expire time must be less than {time}."
+msgstr "Le temps d'expiration doit être inférieur à {time}."
+
+msgid "Set your expire time to {duration}."
+msgstr "J'ai réglé votre temps d'expiration pour {duration}."
+
+msgid "Invalid duration format. Syntax: 3h2m1s or 03:02:01 or AFK."
+msgstr "Format de durée invalide. Veuillez suivre cette syntaxe: 3h2m1s ou 03:02:01 ou AFK."
+
+msgid "You will be removed from queues on AFK status by default."
+msgstr "Vous allez être retiré des queues avec le statut d'AFK par défault."
+
+msgid "Your expire time value will fallback to guild's settings."
+msgstr "La valeur de votre temps d'expiration va se retirer pour le cadre du serveur."
+
+msgid "Your default expire time is {time}."
+msgstr "Votre temps d'expiration par défaut est de {time}."
+
+msgid "Your offline immunity is **off**."
+msgstr "Votre immunité pour le statut Hors-Ligne est **inactif**."
+
+msgid "Your offline immunity is **on** until the next match."
+msgstr "Votre immunité pour le statut Hors Ligne est **actif** jusqu'au prochain match."
+
+msgid "> no active matches"
+msgstr "> Pas de match actif"
+
+msgid "Nothing to promote."
+msgstr "Il n'y a rien à promouvoir."
+
+msgid "Specified queue not found."
+msgstr "La queue spécifiée est introuvable."
+
+msgid "You're promoting too often, please wait `{delay}` until next promote."
+msgstr "Vous faîtes de la promotion trop souvent, veuillez attendre `{delay}` avant de promouvoir à nouveau."
+
+msgid "Done."
+msgstr "C'est fait."
+
+msgid "Your DM notifications is now turned off."
+msgstr "Les notifications par MP sont désormais désactivés."
+
+msgid "Your DM notifications is now turned on."
+msgstr "Les notifications par MP sont désormais activés."
+# Lynxer : DM = MP in french that means "Message Privé"
+
+msgid "Leaderboard is empty"
+msgstr "Le leaderboard a été vidé"
+
+msgid "Nothing found"
+msgstr "Aucune donnée n'a été trouvée"
+
+msgid "Banned **{member}** for `{duration}`."
+msgstr "**{member}** est désormais banni pour une durée de `{duration}`."
+
+msgid "Specified member is not banned."
+msgstr "le membre spécifié n'est actuellement pas banni."
+
+msgid " ID | Prisoner | Left | Reason"
+msgstr " ID | Prisonnier | Reste | Raison"
+
+msgid "You have been banned, `{duration}` left."
+msgstr "Vous avez été banni, il vous reste `{duration}` avant votre débanissement."
+
+msgid "Noadds are empty."
+msgstr "La liste des Noadds a été vidé."
+# Lynxer : Noadds is a simple word that every french can understand. There is not a real word to translate it except "La liste noire a été vidé." which means "The blacklist is empty.". So it's better to use what i wrote under this.
+
+# bot/queues/pickup_queue.py
+
+msgid "{role} Please add to **{name}** pickup, `{left}` players left!"
+msgstr "{role} Rejoignez le pickup **{name}**, il nous manque `{left}` joueurs !"
+
+msgid "Not enough players to start the queue."
+msgstr "Il n'y a pas assez de joueurs pour lancer la queue."
+
+msgid "**{queue}** pickup has started @ {channel}!"
+msgstr "Le pickup **{queue}** vient tout juste de commencer sur le channel @ {channel}!"
+
+msgid "Server for **{queue}** is not set."
+msgstr "Le serveur n'a pas été réglé pour **{queue}**."
+
+msgid "Server for **{queue}**"
+msgstr "Le serveur pour **{queue}**"
+
+msgid "Maps for **{queue}**"
+msgstr "Les maps pour **{queue}**"
+
+msgid "Stats for __{target}__"
+msgstr "Les stats pour __{target}__"
+
+msgid "Top 10 players for __{target}__"
+msgstr "Le top 10 des joueurs pour __{target}__"
+
+msgid "day"
+msgstr "jour"
+
+msgid "week"
+msgstr "semaine"
+
+msgid "month"
+msgstr "mois"
+
+msgid "year"
+msgstr "ans"
+
+msgid "**Total matches: {count}**"
+msgstr "**Nombre total de matchs: {count}**"
+
+# bot/match/match.py
+
+msgid "The match must be on the waiting report stage."
+msgstr "Le match doit être à un stade d'attente de rapport de match."
+
+msgid "You must be a team captain to report a loss or draw."
+msgstr "Vous devez être le capitaine d'une équipe pour rapporter une défaite ou une victoire."
+
+msgid "{self} is calling a draw, waiting for {enemy} to type `{prefix}rd`."
+msgstr "{self} rapporte une égalité, en attente de {enemy} pour confirmer avec la commande `{prefix}rd`."
+
+msgid "Specified team name not found."
+msgstr "Le nom d'équipe que vous avez spécifié est introuvable."
+
+msgid "Match {queue} ({id}) has timed out."
+msgstr "Le match numéro ({id}) pour le {queue} a durée trop longtemps sans recevoir de rapport de match."
+
+msgid "{players} your match has been canceled."
+msgstr "{players} votre match a été annulé."
+
+msgid "No changes to apply."
+msgstr "Aucun changement à appliquer."
+
+msgid "Removed `{count}` roles from you."
+msgstr "J'ai retiré le rôle `{count}` pour vous."
+
+msgid "Added `{count}` roles to you."
+msgstr "J'ai ajouté le rôle `{count}` pour vous."
+
+# bot/match/embeds.py
+
+msgid "__**{queue}** is now on the check-in stage!__"
+msgstr "__**{queue}** est désormais au stade de vérification de présence!__"
+
+msgid "Waiting on:"
+msgstr "En attente de:"
+
+msgid "Please react with {ready_emoji} to **check-in** or {not_ready_emoji} to **abort**!"
+msgstr "Veuillez réagir avec {ready_emoji} pour **valider votre présence** ou {not_ready_emoji} pour **se retirer**."
+
+msgid "Please react with {ready_emoji} or vote for a map to **check-in**."
+msgstr "Veuillez réagir avec {ready_emoji} ou voter une map pour **valider votre présence**"
+
+msgid "React with {not_ready_emoji} to **abort**!"
+msgstr "Réagit avec {not_ready_emoji} pour **te retirer**!"
+
+msgid "__**{queue}** is now on the draft stage!__"
+msgstr "__**{queue}** est au stade de création des équipes__"
+
+msgid "empty"
+msgstr "vider"
+
+msgid "Unpicked:"
+msgstr "Joueurs restants à choisir:"
+
+msgid "Pick players with `{self.m.qc.cfg.prefix}pick @player` command."
+msgstr "Choisit ton joueur avec la commande `{self.m.qc.cfg.prefix}pick @joueur`."
+
+msgid "{member}'s turn to pick!"
+msgstr "C'est au tour de {member} de choisir son joueur!"
+
+msgid "Type {cmd} to become a captain and start picking teams."
+msgstr "Veuillez écrire la commande {cmd} pour devenir un capitaine et ainsi composer vos équipes."
+
+msgid "__**{queue}** has started!__"
+msgstr "__**{queue} peut désormais commencer!** __"
+
+msgid "Players"
+msgstr "Joueurs"
+
+msgid "Captains"
+msgstr "Capitaines"
+
+msgid "Map"
+msgstr "Map"
+# Lynxer : In France, the official translation is "carte", but we all use the english word, so i'll stay with "Map".
+
+msgid "Maps"
+msgstr "Maps"
+
+msgid "Server"
+msgstr "Serveur"
+
+# bot/match/draft.py
+
+msgid "The match is not on the draft stage."
+msgstr "Le match n'est pas au stade de composition d'équipe."
+
+msgid "You must possess the captain's role."
+msgstr "Vous devez avoir le rôle assigné à celui de capitaine."
+
+msgid "Team {name} already have a captain."
+msgstr "L'équipe {name} possède déjà un capitaine."
+
+msgid "You are not a captain."
+msgstr "Vous n'êtes pas un capitaine."
+
+msgid "Not your turn to pick."
+msgstr "Ce n'est pas à votre tour de choisir un joueur."
+
+msgid "Specified player not in the unpicked list."
+msgstr "Le joueur identifié ne se trouve pas dans la liste des joueurs à choisir."
+
+msgid "The match must be on the draft or waiting report stage."
+msgstr "Le match doit être à un stade de composition d'équipe ou en attente d'un résultat."
+
+msgid "You have stopped looking for a substitute."
+msgstr "Vous avez cessé de chercher un remplaçant."
+
+msgid "You are now looking for a substitute."
+msgstr "Vousrecherchez désormais un remplaçant."
+
+msgid "Specified player is not looking for a substitute."
+msgstr "Le joueur identifié n'est pas à la recherche de remplaçant."
+
+# bot/match/check_in.py
+
+msgid "The match is not on the check-in stage."
+msgstr "Le match n'est pas au stade de vérification de présence."
+
+msgid "{member} has aborted the check-in."
+msgstr "{member} n'a pas confirmé sa présence."
+
+msgid "Reverting {queue} to the gathering stage..."
+msgstr "Remets en place {queue} au système de rassemblement."
+
+msgid "{members} was not ready in time."
+msgstr "{members} n'a pas pu être prêt dans les temps."
+
+msgid "{member} won, its **{side}**!"
+msgstr "{member} a gagné, donc c'est **{side}**!"
+
+msgid "{member} lost, its **{side}**!"
+msgstr "{member} a perdu, donc c'est **{side}**!"
+
+msgid "heads"
+msgstr "Pile"
+# Lynxer: I used the official french translation that all of us use.
+msgid "tails"
+msgstr "Face"
