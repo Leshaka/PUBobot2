@@ -340,6 +340,6 @@ msgstr "{member} a perdu, donc c'est **{side}**!"
 
 msgid "heads"
 msgstr "Pile"
-                // I used the official french translation that all of us use.
+# Lynxer: I used the official french translation that all of us use.
 msgid "tails"
 msgstr "Face"
