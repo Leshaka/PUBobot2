@@ -141,6 +141,7 @@ msgstr "Les notifications par MP sont désormais désactivés."
 
 msgid "Your DM notifications is now turned on."
 msgstr "Les notifications par MP sont désormais activés."
+# Lynxer : DM = MP in french that means "Message Privé"
 
 msgid "Leaderboard is empty"
 msgstr "Le leaderboard a été vidé"
@@ -162,6 +163,7 @@ msgstr "Vous avez été banni, il vous reste `{duration}` avant votre débanisse
 
 msgid "Noadds are empty."
 msgstr "La liste des Noadds a été vidé."
+# Lynxer : Noadds is a simple word that every french can understand. There is not a real word to translate it except "La liste noire a été vidé." which means "The blacklist is empty.". So it's better to use what i wrote under this.
 
 # bot/queues/pickup_queue.py
 
@@ -278,7 +280,8 @@ msgid "Captains"
 msgstr "Capitaines"
 
 msgid "Map"
-msgstr "Map" // In France, the official translation is "carte". But we all use the english word, so i'll stay with "Map".
+msgstr "Map"
+# Lynxer : In France, the official translation is "carte", but we all use the english word, so i'll stay with "Map".
 
 msgid "Maps"
 msgstr "Maps"
@@ -330,7 +333,7 @@ msgid "Reverting {queue} to the gathering stage..."
 msgstr "Remets en place {queue} au système de rassemblement."
 
 msgid "{members} was not ready in time."
-msgstr "Н{members} n'a pas pu être prêt dans les temps."
+msgstr "{members} n'a pas pu être prêt dans les temps."
 
 msgid "{member} won, its **{side}**!"
 msgstr "{member} a gagné, donc c'est **{side}**!"
