@@ -18,7 +18,9 @@ class PickupQueue:
 			Variables.StrVar(
 				"name",
 				display="Queue name",
-				notnull=True
+				notnull=True,
+				verify=lambda name: len(name) and not any((c in name for c in "+-: \t\n")),
+				verify_message="Invalid queue name. A queue name should be one word without +-: characters."
 			),
 			Variables.TextVar(
 				"description",
