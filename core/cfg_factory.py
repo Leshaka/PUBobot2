@@ -12,7 +12,7 @@ from core.console import log
 
 class CfgFactory:
 
-	def __init__(self, name, p_key, f_key=None, variables=[], tables=[], display=None, icon='star.png'):
+	def __init__(self, name, p_key, f_key=None, variables=[], tables=[], display=None, icon='star.png', sections=[]):
 		self.p_key = p_key
 		self.f_key = f_key
 		self.keys = [dict(cname=p_key, ctype=db.types.int, notnull=True)]
@@ -21,6 +21,7 @@ class CfgFactory:
 		self.name = name
 		self.display = display or name
 		self.icon = icon
+		self.sections = sections
 		self.table = name
 		self.variables = {v.name: v for v in variables}
 		self.tables = {t.name: t for t in tables}
@@ -185,7 +186,7 @@ class Variable:
 
 	def __init__(
 			self, name, default=None, display=None, description=None,
-			notnull=False, on_change=None, verify=None, verify_message=None
+			notnull=False, on_change=None, verify=None, verify_message=None, section=None
 	):
 		self.name = name
 		self.default = default
@@ -195,6 +196,7 @@ class Variable:
 		self.on_change = on_change
 		self.verify_f = verify or (lambda x: True)
 		self.verify_message = verify_message
+		self.section = section
 
 	async def validate(self, string, guild):
 		""" Validate and return database-friendly object from received string """
@@ -468,7 +470,9 @@ class DurationVar(Variable):
 
 class VariableTable:
 
-	def __init__(self, name, variables=[], display=None, blank=None, default=[], description=None, on_change=None):
+	def __init__(
+			self, name, variables=[], display=None, blank=None,
+			default=[], description=None, on_change=None, section=None):
 		self.name = name
 		self.table = 'variable_' + name
 		self.variables = {v.name: v for v in variables}
@@ -477,6 +481,7 @@ class VariableTable:
 		self.default = default
 		self.description = description
 		self.on_change = on_change
+		self.section = section
 
 	async def validate(self, data, guild):
 		if type(data) != list:

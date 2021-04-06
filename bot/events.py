@@ -1,4 +1,4 @@
-from discord import ChannelType
+from discord import ChannelType, Activity, ActivityType
 
 from core.client import dc
 from core.console import log
@@ -49,6 +49,7 @@ async def on_reaction_remove(reaction, user):  # FIXME: this event does not get 
 
 @dc.event
 async def on_ready():
+	await dc.change_presence(activity=Activity(type=ActivityType.watching, name=cfg.STATUS))
 	bot.last_match_id = await bot.stats.last_match_id()
 	log.info(f"Logged in discord as '{dc.user.name}#{dc.user.discriminator}'.")
 	log.info("Loading queue channels...")

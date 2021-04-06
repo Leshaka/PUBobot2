@@ -33,10 +33,12 @@ class QueueChannel:
 	cfg_factory = CfgFactory(
 		"qc_configs",
 		p_key="channel_id",
+		sections=["General", "Auto-remove", "Rating"],
 		variables=[
 			Variables.StrVar(
 				"prefix",
 				display="Command prefix",
+				section="General",
 				description="Set the prefix before for the bot`s commands",
 				verify=lambda x: len(x) == 1,
 				verify_message="Command prefix must be exactly one symbol.",
@@ -46,6 +48,7 @@ class QueueChannel:
 			Variables.OptionVar(
 				"lang",
 				display="Language",
+				section="General",
 				description="Select bot translation language",
 				options=locales.keys(),
 				default="en",
@@ -55,21 +58,25 @@ class QueueChannel:
 			Variables.RoleVar(
 				"admin_role",
 				display="Admin role",
+				section="General",
 				description="Members with this role will be able to change the bot`s settings and use moderation commands."
 			),
 			Variables.RoleVar(
 				"moderator_role",
 				display="Moderator role",
+				section="General",
 				description="Members with this role will be able to use the bot`s moderation commands."
 			),
 			Variables.RoleVar(
 				"promotion_role",
 				display="Promotion role",
+				section="General",
 				description="Set a role to highlight on !promote and !sub commands.",
 			),
 			Variables.DurationVar(
 				"promotion_delay",
 				display="Promotion delay",
+				section="General",
 				description="Set time delay between players can promote queues.",
 				verify=lambda x: 0 <= MAX_PROMOTION_DELAY,
 				verify_message=f"Promotion delay time must be less than {seconds_to_str(MAX_EXPIRE_TIME)}"
@@ -77,34 +84,40 @@ class QueueChannel:
 			Variables.BoolVar(
 				"remove_afk",
 				display="Auto remove on AFK status",
+				section="Auto-remove",
 				default=1,
 				notnull=True
 			),
 			Variables.BoolVar(
 				"remove_offline",
 				display="Auto remove on offline status",
+				section="Auto-remove",
 				default=1,
 				notnull=True
 			),
 			Variables.DurationVar(
 				"expire_time",
 				display="Auto remove on timer after last !add command",
+				section="Auto-remove",
 				verify=lambda x: 0 < x <= MAX_EXPIRE_TIME,
 				verify_message=f"Expire time must be less than {seconds_to_str(MAX_EXPIRE_TIME)}"
 			),
 			Variables.RoleVar(
 				"blacklist_role",
 				display="Blacklist role",
+				section="General",
 				description="Players with this role wont be able to add to queues.",
 			),
 			Variables.RoleVar(
 				"whitelist_role",
 				display="Whitelist role",
+				section="General",
 				description="If set, only players with this role will be able to add to queues."
 			),
 			Variables.OptionVar(
 				"rating_system",
 				display="Rating system",
+				section="Rating",
 				description="Set player's rating calculation method.",
 				options=rating_names.keys(),
 				default="TrueSkill",
@@ -114,12 +127,14 @@ class QueueChannel:
 			Variables.TextChanVar(
 				"rating_channel",
 				display="Rating host channel",
+				section="Rating",
 				description="Use rating data from another channel.",
 				on_change=bot.update_rating_system
 			),
 			Variables.IntVar(
 				"rating_initial",
 				display="Initial rating",
+				section="Rating",
 				description="Set player's initial rating.",
 				default=1500,
 				verify=lambda x: 0 <= x <= 10000,
@@ -130,6 +145,7 @@ class QueueChannel:
 			Variables.IntVar(
 				"rating_deviation",
 				display="Rating deviation",
+				section="Rating",
 				description="Set player's initial rating deviation.",
 				default=200,
 				verify=lambda x: 0 <= x <= 3000,
@@ -140,6 +156,7 @@ class QueueChannel:
 			Variables.IntVar(
 				"rating_deviation_decay",
 				display="Rating deviation decay",
+				section="Rating",
 				description="Set weekly rating deviation decay until initial deviation is met.",
 				default=15,
 				verify=lambda x: 0 <= x <= 500,
@@ -149,6 +166,7 @@ class QueueChannel:
 			Variables.IntVar(
 				"rating_scale",
 				display="Rating scale",
+				section="Rating",
 				verify=lambda x: 0 <= x <= 1000,
 				description="Scale all rating changes, default 100 (100%).",
 				notnull=True,
@@ -158,6 +176,7 @@ class QueueChannel:
 			Variables.IntVar(
 				"rating_reduction_scale",
 				display="Rating reduction scale",
+				section="Rating",
 				description="\n".join([
 					"Scale all negative rating changes, default 100 (100%).",
 					"Warning: changing this will break ratings balance."
@@ -171,18 +190,21 @@ class QueueChannel:
 			Variables.IntVar(
 				"lb_min_matches",
 				display="Leaderboard min matches",
-				description="set a minimum amount of played matches required for a player to be shown in the !leaderboard."
+				section="Rating",
+				description="Set a minimum amount of played matches required for a player to be shown in the !leaderboard."
 			),
 			Variables.BoolVar(
 				"rating_nicks",
 				display="Set ratings to nicks",
+				section="Rating",
+				description="Add [rating] prefix to guild members nicknames.",
 				default=0,
 				notnull=True
 			)
 		],
 		tables=[
 			VariableTable(
-				'ranks', display="Rating ranks",
+				'ranks', display="Rating ranks", section="Rating",
 				variables=[
 					Variables.StrVar("rank", default="〈E〉"),
 					Variables.IntVar("rating", default=1200),
@@ -850,7 +872,7 @@ class QueueChannel:
 		else:
 			data = await db.select(
 				['user_id', 'rating', 'deviation', 'channel_id', 'wins', 'losses', 'draws', 'is_hidden'], "qc_players",
-				where={'channel_id': self.rating.channel_id}, order_by="rating"
+				where={'channel_id': self.rating.channel_id}
 			)
 			p = find(lambda i: i['user_id'] == member.id, data)
 			place = "?"

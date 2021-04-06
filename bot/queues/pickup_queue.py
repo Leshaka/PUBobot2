@@ -14,10 +14,13 @@ class PickupQueue:
 		"pq_configs",
 		p_key="pq_id",
 		f_key="channel_id",
+		icon="pq.png",
+		sections=["General", "Teams", "Appearance"],
 		variables=[
 			Variables.StrVar(
 				"name",
 				display="Queue name",
+				section="General",
 				notnull=True,
 				verify=lambda name: len(name) and not any((c in name for c in "+-: \t\n")),
 				verify_message="Invalid queue name. A queue name should be one word without +-: characters."
@@ -25,17 +28,20 @@ class PickupQueue:
 			Variables.TextVar(
 				"description",
 				display="Description",
+				section="Appearance",
 				description="Set an answer on '!help queue' command."
 			),
 			Variables.IntVar(
 				"size",
 				display="Queue size",
+				section="General",
 				verify=lambda i: 0 < i < 1001,
 				notnull=True
 			),
 			Variables.BoolVar(
 				"is_default",
 				display="is default",
+				section="General",
 				default=1,
 				description="Set if users can add to this queue without specifying its name.",
 				notnull=True
@@ -43,6 +49,7 @@ class PickupQueue:
 			Variables.BoolVar(
 				"ranked",
 				display="is ranked",
+				section="General",
 				default=0,
 				description="Enable rating features on this queue.",
 				notnull=True
@@ -50,12 +57,14 @@ class PickupQueue:
 			Variables.BoolVar(
 				"autostart",
 				display="Start when full",
+				section="General",
 				default=1,
 				notnull=True
 			),
 			Variables.DurationVar(
 				"check_in_timeout",
 				display="Require check-in",
+				section="General",
 				verify=lambda i: 0 < i < 3601,
 				default=60*5,
 				verify_message="Check in timeout must be less than a hour.",
@@ -64,6 +73,7 @@ class PickupQueue:
 			Variables.OptionVar(
 				"pick_teams",
 				display="Pick teams",
+				section="Teams",
 				options=["draft", "matchmaking", "random teams", "no teams"],
 				default="draft",
 				description="\n".join([
@@ -78,6 +88,7 @@ class PickupQueue:
 			Variables.OptionVar(
 				"pick_captains",
 				display="Pick captains",
+				section="Teams",
 				options=["by role and rating", "fair pairs", "random", "no captains"],
 				default="by role and rating",
 				description="\n".join([
@@ -92,6 +103,7 @@ class PickupQueue:
 			Variables.StrVar(
 				"pick_order",
 				display="Teams picking order",
+				section="Teams",
 				verify=lambda s: set(s) == set("ab"),
 				default="abababba",
 				verify_message="Pick order can only contain a and b characters.",
@@ -100,6 +112,7 @@ class PickupQueue:
 			Variables.StrVar(
 				"team_names",
 				display="Team names",
+				section="Teams",
 				verify=lambda s: len(s.split()) == 2,
 				verify_message="Team names must be exactly two words separated by space.",
 				description="Team names separated by space, example: Alpha Beta"
@@ -107,6 +120,7 @@ class PickupQueue:
 			Variables.StrVar(
 				"team_emojis",
 				display="Team emojis",
+				section="Teams",
 				verify=lambda s: len(s.split()) == 2,
 				verify_message="Team emojis must be exactly two emojis separated by space.",
 				description="Team emojis separated by space."
@@ -114,6 +128,7 @@ class PickupQueue:
 			Variables.TextVar(
 				"start_msg",
 				display="Start message",
+				section="Appearance",
 				verify=lambda s: len(s) < 1001,
 				description="Set additional information to be printed on a match start.",
 				verify_message="Start message is too long."
@@ -121,6 +136,7 @@ class PickupQueue:
 			Variables.StrVar(
 				"server",
 				display="Server",
+				section="Appearance",
 				description="Print this server on a match start.",
 				verify=lambda s: len(s) < 101,
 				verify_message="Server string is too long."
@@ -128,31 +144,37 @@ class PickupQueue:
 			Variables.RoleVar(
 				"promotion_role",
 				display="Promotion role",
+				section="General",
 				description="Set a role to highlight on !promote and !sub commands."
 			),
 			Variables.TextVar(
 				"promotion_msg",
 				display="Promotion message",
+				section="Appearance",
 				description="Replace default promotion message. You can use {name}, {role} and {left} placeholders in the text."
 			),
 			Variables.RoleVar(
 				"captains_role",
 				display="Captains role",
+				section="Teams",
 				description="Users with this role may have preference in captains choosing process."
 			),
 			Variables.RoleVar(
 				"blacklist_role",
 				display="Blacklist role",
+				section="General",
 				description="Users with this role wont be able to add to this queue."
 			),
 			Variables.RoleVar(
 				"whitelist_role",
 				display="Whitelist role",
+				section="General",
 				description="Only users with this role will be able to add to this queue."
 			),
 			Variables.IntVar(
 				"map_count",
 				display="Map count",
+				section="Appearance",
 				default=1,
 				verify=lambda n: 0 <= n <= 5,
 				verify_message="Maps number must be between 0 and 5.",
@@ -161,6 +183,7 @@ class PickupQueue:
 			Variables.IntVar(
 				"vote_maps",
 				display="Vote poll map count",
+				section="Appearance",
 				default=None,
 				verify=lambda n: 2 <= n <= 5,
 				verify_message="Vote maps number must be between 2 and 5.",
@@ -169,14 +192,14 @@ class PickupQueue:
 		],
 		tables=[
 			VariableTable(
-				"aliases", display="Aliases",
+				"aliases", display="Aliases", section="General",
 				description="Other names for this queue, you can also group queues by giving them a same alias.",
 				variables=[
 					Variables.StrVar("alias", notnull=True)
 				]
 			),
 			VariableTable(
-				"maps", display="Maps",
+				"maps", display="Maps", section="Appearance",
 				description="List of maps to choose from.",
 				variables=[
 					Variables.StrVar("name", notnull=True)
