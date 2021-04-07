@@ -114,6 +114,12 @@ class QueueChannel:
 				section="General",
 				description="If set, only players with this role will be able to add to queues."
 			),
+			Variables.TextVar(
+				"description",
+				display="Description",
+				section="General",
+				description="Set an answer on '!help' command."
+			),
 			Variables.OptionVar(
 				"rating_system",
 				display="Rating system",
@@ -144,7 +150,7 @@ class QueueChannel:
 			),
 			Variables.IntVar(
 				"rating_deviation",
-				display="Rating deviation",
+				display="Initial deviation",
 				section="Rating",
 				description="Set player's initial rating deviation.",
 				default=200,
@@ -1365,8 +1371,11 @@ class QueueChannel:
 				member=message.author.mention, side=self.gt(["heads", "tails"][result])
 			))
 
-	async def _help(self, message, args=""):
-		if queue := find(lambda q: q.name.lower() == args.lower(), self.queues):
+	async def _help(self, message, args=None):
+		if args is None:
+			if self.cfg.description:
+				await self.channel.send(self.cfg.description)
+		elif queue := find(lambda q: q.name.lower() == args.lower(), self.queues):
 			if queue.cfg.description:
 				await self.channel.send(queue.cfg.description)
 
