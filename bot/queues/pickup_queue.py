@@ -321,14 +321,6 @@ class PickupQueue:
 	def is_added(self, member):
 		return member in self.queue
 
-	async def remove_member(self, member):
-		if member in self.queue:
-			self.queue.remove(member)
-			if not self.length:
-				bot.active_queues.remove(self)
-		else:
-			raise ValueError("Specified Member is not added to the queue.")
-
 	def pop_members(self, *members):
 		ids = [m.id for m in members]
 		members = [member for member in self.queue if member.id in ids]

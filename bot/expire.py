@@ -1,6 +1,8 @@
 import time
 import bot
 
+from core.console import log
+
 
 class ExpireTimer:
 
@@ -23,7 +25,7 @@ class ExpireTimer:
 			self.qc = qc
 			self.member = member
 			self.at = at
-			self.hash = str(self.qc.channel.id) + str(self.member.id)
+			self.hash = str(self.qc.channel.id) + "_" + str(self.member.id)
 
 		def serialize(self):
 			return {'channel_id': self.qc.channel.id, 'member': self.member.id, 'at': self.at}
@@ -38,27 +40,31 @@ class ExpireTimer:
 	def set(self, qc, member, delay):
 		new_task = self.ExpireTask(qc, member, int(time.time()+delay))
 		self.tasks[new_task.hash] = new_task
+		log.debug(f"EXPIRE TIMER SET > {member.name} ({qc.id}/{member.id}) to {delay}")
 		self._define_next()
 
 	def get(self, qc, member):
-		return self.tasks.get(str(qc.channel.id) + str(member.id))
+		return self.tasks.get(str(qc.channel.id) + "_" + str(member.id))
 
 	def _define_next(self):
 		if len(self.tasks):
 			self.next = sorted(self.tasks.values(), key=lambda task: task.at)[0]
+			log.debug(f"EXPIRE TIMER NEXT > {self.next.member.name} ({self.next.qc.id}/{self.next.member.id})")
 		else:
 			self.next = None
 
 	def cancel(self, qc, member):
-		key = str(qc.channel.id) + str(member.id)
+		key = str(qc.channel.id) + "_" + str(member.id)
 		if key in self.tasks.keys():
-			self.tasks.pop(key)
+			task = self.tasks.pop(key)
+			log.debug(f"EXPIRE TIMER CANCEL > {task.member.name} ({task.qc.id}/{task.member.id})")
 			if self.next and self.next.hash == key:
 				self._define_next()
 
 	async def think(self, frame_time):
 		if self.next and frame_time >= self.next.at:
 			task = self.tasks.pop(self.next.hash)
+			log.debug(f"EXPIRE TIMER TRIGGER > {task.member.name} ({task.qc.id}/{task.member.id})")
 			await task.qc.remove_members(task.member, reason="expire", highlight=True)
 			self._define_next()
 

@@ -17,8 +17,6 @@ async def on_think(frame_time):
 
 @dc.event
 async def on_message(message):
-	log.chat('{}: {}'.format(message.author, message.content))
-
 	if message.channel.type == ChannelType.private and message.author.id != dc.user.id:
 		await message.channel.send(cfg.HELP)
 

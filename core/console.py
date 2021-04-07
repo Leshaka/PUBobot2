@@ -53,13 +53,13 @@ class Log:
 	def close(self):
 		self.file.close()
 
-	def debug(self, data):
-		if self.loglevel == 0:
-			self.log(data, 'DEBUG')
-
 	def chat(self, data):
-		if self.loglevel <= 1:
+		if self.loglevel <= 0:
 			self.log(data, 'CHAT')
+
+	def debug(self, data):
+		if self.loglevel == 1:
+			self.log(data, 'DEBUG')
 
 	def command(self, data):
 		if self.loglevel <= 2:

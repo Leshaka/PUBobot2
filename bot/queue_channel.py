@@ -593,6 +593,9 @@ class QueueChannel:
 			return
 
 		if f:
+			log.command("{} | #{} | {}: {}".format(
+				self.channel.guild.name, self.channel.name, get_nick(message.author), message.content
+			))
 			try:
 				await f(message, *args)
 			except bot.Exc.PubobotException as e:
