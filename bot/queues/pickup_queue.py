@@ -133,6 +133,18 @@ class PickupQueue:
 				description="Set additional information to be printed on a match start.",
 				verify_message="Start message is too long."
 			),
+			Variables.TextVar(
+				"start_direct_msg",
+				display="Start direct message",
+				section="Appearance",
+				verify=lambda s: len(s) < 1001,
+				description="\n".join([
+					"Set the content of a direct message sent to players when the queue starts.",
+					"You can use this aliases in text: {queue}, {channel}, {server}.",
+					"If not set, default translated message is used."
+				]),
+				verify_message="Start direct message is too long."
+			),
 			Variables.StrVar(
 				"server",
 				display="Server",
@@ -329,11 +341,13 @@ class PickupQueue:
 			raise bot.Exc.PubobotException(self.qc.gt("Not enough players to start the queue."))
 
 		players = list(self.queue)
+		dm_text = self.cfg.start_direct_msg or self.qc.gt("**{queue}** pickup has started @ {channel}!")
 		await self.qc.queue_started(
 			members=players,
-			message=self.qc.gt("**{queue}** pickup has started @ {channel}!").format(
+			message=dm_text.format(
 				queue=self.name,
-				channel=self.qc.channel.mention
+				channel=self.qc.channel.mention,
+				server=self.cfg.server
 			)
 		)
 
