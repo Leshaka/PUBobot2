@@ -213,8 +213,8 @@ class QueueChannel:
 				'ranks', display="Rating ranks", section="Rating",
 				variables=[
 					Variables.StrVar("rank", default="〈E〉"),
-					Variables.IntVar("rating", default=1200),
-					Variables.RoleVar("role")
+					Variables.IntVar("rating", default=1200, description="The rank will be given on this rating or higher."),
+					Variables.RoleVar("role", description="Assign a guild role to the rank owners.")
 				],
 				default=[
 					dict(rank="〈G〉", rating=0, role=None),
