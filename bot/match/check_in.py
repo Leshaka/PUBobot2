@@ -36,8 +36,12 @@ class CheckIn:
 	async def start(self):
 		text = f"!spawn message {self.m.id}"
 		self.message = await self.m.send(text)
-		for emoji in [self.READY_EMOJI, '🔸', self.NOT_READY_EMOJI] + [self.INT_EMOJIS[n] for n in range(len(self.maps))]:
-			await self.message.add_reaction(emoji)
+
+		try:
+			for emoji in [self.READY_EMOJI, '🔸', self.NOT_READY_EMOJI] + [self.INT_EMOJIS[n] for n in range(len(self.maps))]:
+				await self.message.add_reaction(emoji)
+		except DiscordException:
+			pass
 		bot.waiting_reactions[self.message.id] = self.process_reaction
 		await self.refresh()
 
