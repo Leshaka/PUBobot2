@@ -87,17 +87,18 @@
 | !cancel_match | `match ID` |                | Cancel a match                 |
 
 #### Stats and Ratings managment
-| command              | arg1     | arg2   | arg3      | description                           |
-|----------------------|----------|--------|-----------|---------------------------------------|
+| command              | arg1       | arg2   | arg3      | description                                 |
+|----------------------|------------|--------|-----------|---------------------------------------------|
 | !rating_set/!seed    | `@user`    | `rating` | [`deviation`] | Set a player's rating                 |
-| !rating_hide         | `@user`    |        |           | Hide a users rating                   |
-| !rating_unhide       | `@user`    |        |           | Show a users rating                   |
-| !rating_reset        |          |        |           | Reset the rating of all players       |
-| !undo_match          | `match ID` |        |           | Undo a match                          |
-| !stats_reset         |          |        |           | Reset all channel statistics          |
-| !stats_reset_player  | `@user`    |        |           | Reset all stats for @user             |
-| !stats_replace_player| `@user1`   | `@user2` |           | Replace @user1 with @user2 in database|
-| !undo_match          | `match ID` |        |           | Undo a match                          |
+| !rating_hide         | `@user`    |          |               | Hide a users rating                   |
+| !rating_unhide       | `@user`    |          |               | Show a users rating                   |
+| !rating_snap         |            |          |               | Decrease all players ratings until their nearest rank |
+| !rating_reset        |            |          |               | Reset the rating of all players       |
+| !undo_match          | `match ID` |          |               | Undo a match                          |
+| !stats_reset         |            |          |               | Reset all channel statistics          |
+| !stats_reset_player  | `@user`    |          |               | Reset all stats for @user             |
+| !stats_replace_player| `@user1`   | `@user2` |               | Replace @user1 with @user2 in database|
+| !undo_match          | `match ID` |          |               | Undo a match                          |
 
 #### Bans and Phrases
 | command        | arg1      | arg2       | arg3       | description                                             |
