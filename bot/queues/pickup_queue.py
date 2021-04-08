@@ -280,7 +280,7 @@ class PickupQueue:
 			left=self.cfg.size-self.length
 		)
 
-		if not promotion_role.mentionable:
+		if promotion_role and not promotion_role.mentionable:
 			try:
 				await promotion_role.edit(reason="Promote command", mentionable=True)
 			except Forbidden:
