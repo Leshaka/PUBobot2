@@ -19,13 +19,13 @@ msgstr "Необходимы права модератора."
 msgid "expire time ran off"
 msgstr "время expire истекло"
 
-msgid "member offline"
+msgid "miembro offline"
 msgstr "пользователь оффлайн"
 
 msgid "member AFK"
-msgstr "пользователь AFK"
+msgstr "miembro AFK"
 
-msgid "member left the guild"
+msgid "miembro salió"
 msgstr "пользователь покинул гильдию"
 
 msgid "queue started on another channel"
