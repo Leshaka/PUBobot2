@@ -20,7 +20,7 @@ msgid "expire time ran off"
 msgstr "el tiempo de espera ha expirado"
 
 msgid "member offline"
-msgstr "miembro offline"
+msgstr "miembro desconectado"
 
 msgid "member AFK"
 msgstr "miembro AFK"
@@ -29,10 +29,10 @@ msgid "member left the guild"
 msgstr "пользователь покинул гильдию"
 
 msgid "queue started on another channel"
-msgstr "начался пикап на другом канале"
+msgstr "una queue empezó en otro canal"
 
 msgid "removed by a moderator"
-msgstr "удалён модератором"
+msgstr "has sido eliminado por un moderador"
 
 msgid "{member} were removed from all queues ({reason})."
 msgstr "{member} был удален из всех очередей ({reason})."
