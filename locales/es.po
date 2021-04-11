@@ -17,7 +17,7 @@ msgid "You must possess moderator permissions."
 msgstr "Debes tener permisos de moderador."
 
 msgid "expire time ran off"
-msgstr "время expire истекло"
+msgstr "el tiempo de espera ha expirado"
 
 msgid "member offline"
 msgstr "miembro offline"
