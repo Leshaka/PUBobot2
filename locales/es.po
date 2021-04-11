@@ -1,1 +1,345 @@
+msgid ""
+msgstr ""
+"Content-Type: text/plain; charset=UTF-8\n"
 
+msgid "_lang"
+msgstr "es"
+
+# bot/queue_channel.py
+
+msgid "no players"
+msgstr "no hay jugadores"
+
+msgid "Debes tener permisos de administrador."
+msgstr "Необходимы права администратора."
+
+msgid "Debes tener permisos de moderador."
+msgstr "Необходимы права модератора."
+
+msgid "expire time ran off"
+msgstr "время expire истекло"
+
+msgid "member offline"
+msgstr "пользователь оффлайн"
+
+msgid "member AFK"
+msgstr "пользователь AFK"
+
+msgid "member left the guild"
+msgstr "пользователь покинул гильдию"
+
+msgid "queue started on another channel"
+msgstr "начался пикап на другом канале"
+
+msgid "removed by a moderator"
+msgstr "удалён модератором"
+
+msgid "{member} were removed from all queues ({reason})."
+msgstr "{member} был удален из всех очередей ({reason})."
+
+msgid "{members} were removed from all queues ({reason})."
+msgstr "{members} были удалены из всех очередей ({reason})."
+
+msgid "Success"
+msgstr "Успешно"
+
+msgid "Error"
+msgstr "Ошибка"
+
+msgid "You are not allowed to add to queues on this channel."
+msgstr "Вам не разрешено добавлятся в очереди на этом канале."
+
+msgid "You are not allowed to add to {queues} queues."
+msgstr "Вам не разрешено добавлятся в очереди {queues}."
+
+msgid "You are already in an active match."
+msgstr "Вы уже находитесь в активном матче."
+
+msgid "You are not in an active match."
+msgstr "Вы не в активном матче."
+
+msgid "Specified user not found."
+msgstr "Указанный пользователь не найден."
+
+msgid "Specified user is not in a match."
+msgstr "Указанный пользователь не находится в матче."
+
+msgid "Specified user is in an active match."
+msgstr "Указанный пользователь уже находится в матче."
+
+msgid "Matches"
+msgstr "Матчей"
+
+msgid "Rank"
+msgstr "Ранг"
+
+msgid "Rating"
+msgstr "Рейтинг"
+
+msgid "Winrate"
+msgstr "Винрейт"
+
+msgid "Last changes:"
+msgstr "Последние изменения:"
+
+msgid "No rating data found."
+msgstr "Нет данных рейтинга."
+
+msgid "Could not find match with specified id. Check `{prefix}matches`."
+msgstr "Матч с указаным id не найден. Проверьте `{prefix}matches`."
+
+msgid "You have {duration} expire time left."
+msgstr "У вас осталось {duration} времени expire."
+
+msgid "You don't have an expire timer set right now."
+msgstr "У вас не установлен таймер expire."
+
+msgid "Invalid duration format. Syntax: 3h2m1s or 03:02:01."
+msgstr "Неверный формат времени. Пример: 3h2m1s или 03:02:01."
+
+msgid "Expire time must be less than {time}."
+msgstr "Время expire должно быть меньше {time}."
+
+msgid "Set your expire time to {duration}."
+msgstr "Ваш таймер expire сработает через {duration}."
+
+msgid "Invalid duration format. Syntax: 3h2m1s or 03:02:01 or AFK."
+msgstr "Неверный формат времени. Пример: 3h2m1s или 03:02:01 или AFK."
+
+msgid "You will be removed from queues on AFK status by default."
+msgstr "Вас будет удалять из очередей по AFK статусу."
+
+msgid "Your expire time value will fallback to guild's settings."
+msgstr "Ваш таймер expire будет использовать настройки гильдии."
+
+msgid "Your default expire time is {time}."
+msgstr "Ваш expire таймер установлен на {time}."
+
+msgid "Your offline immunity is **off**."
+msgstr "Ваш иммунитет оффлайн статуса **выключен**."
+
+msgid "Your offline immunity is **on** until the next match."
+msgstr "Ваш иммунитет оффлайн статуса **включен** до следующего матча."
+
+msgid "> no active matches"
+msgstr "> нет активных матчей"
+
+msgid "Nothing to promote."
+msgstr "Нет цели для promote."
+
+msgid "Specified queue not found."
+msgstr "Указанная очередь не найдена."
+
+msgid "You're promoting too often, please wait `{delay}` until next promote."
+msgstr "Слишком часто, подождите `{delay}` до следующего раза."
+
+msgid "Done."
+msgstr "Готово."
+
+msgid "Your DM notifications is now turned off."
+msgstr "Ваши DM оповещения выключены."
+
+msgid "Your DM notifications is now turned on."
+msgstr "Ваши DM оповещения включены."
+
+msgid "Leaderboard is empty"
+msgstr "Таблица лидеров пуста"
+
+msgid "Nothing found"
+msgstr "Нет результатов"
+
+msgid "Banned **{member}** for `{duration}`."
+msgstr "Забанил **{member}** на `{duration}`."
+
+msgid "Specified member is not banned."
+msgstr "Указаный пользователь не забанен."
+
+msgid " ID | Prisoner | Left | Reason"
+msgstr " ID | Заключенный | Осталось | Основание"
+
+msgid "You have been banned, `{duration}` left."
+msgstr "Вы забанены, осталось `{duration}`."
+
+msgid "Noadds are empty."
+msgstr "Список пуст."
+
+# bot/queues/pickup_queue.py
+
+msgid "{role} Please add to **{name}** pickup, `{left}` players left!"
+msgstr "{role} Добавляйтесь в **{name}** пикап, осталось `{left}` игроков!"
+
+msgid "Not enough players to start the queue."
+msgstr "Недостаточно участников для старта."
+
+msgid "**{queue}** pickup has started @ {channel}!"
+msgstr "**{queue}** пикап начался @ {channel}!"
+
+msgid "Server for **{queue}** is not set."
+msgstr "Сервер для **{queue}** не указан."
+
+msgid "Server for **{queue}**"
+msgstr "Сервер для **{queue}**"
+
+msgid "Maps for **{queue}**"
+msgstr "Карты для **{queue}**"
+
+msgid "Stats for __{target}__"
+msgstr "Статистика для __{target}__"
+
+msgid "Top 10 players for __{target}__"
+msgstr "ТОП 10 игроков для __{target}__"
+
+msgid "day"
+msgstr "день"
+
+msgid "week"
+msgstr "неделя"
+
+msgid "month"
+msgstr "месяц"
+
+msgid "year"
+msgstr "год"
+
+msgid "**Total matches: {count}**"
+msgstr "**Всего матчей: {count}**"
+
+# bot/match/match.py
+
+msgid "The match must be on the waiting report stage."
+msgstr "Матч должен быть на стадии ожидания результата."
+
+msgid "You must be a team captain to report a loss or draw."
+msgstr "Необходимо быть капитаном команды."
+
+msgid "{self} is calling a draw, waiting for {enemy} to type `{prefix}rd`."
+msgstr "{self} предлагает ничью, ожидаем `{prefix}rd` от {enemy}."
+
+msgid "Specified team name not found."
+msgstr "Указанная команда не найдена."
+
+msgid "Match {queue} ({id}) has timed out."
+msgstr "Истекло время ожидания для матча {queue} ({id})."
+
+msgid "{players} your match has been canceled."
+msgstr "{players} ваш матч был отменен."
+
+msgid "No changes to apply."
+msgstr "Нет изменений."
+
+msgid "Removed `{count}` roles from you."
+msgstr "С Вас снято `{count}` ролей."
+
+msgid "Added `{count}` roles to you."
+msgstr "Вам добавлено `{count}` ролей."
+
+# bot/match/embeds.py
+
+msgid "__**{queue}** is now on the check-in stage!__"
+msgstr "__**{queue}** на стадии подтверждения участников!__"
+
+msgid "Waiting on:"
+msgstr "Ожидаем:"
+
+msgid "Please react with {ready_emoji} to **check-in** or {not_ready_emoji} to **abort**!"
+msgstr "Нажмите {ready_emoji} чтобы **подтвердить** или {not_ready_emoji} чтобы **отменить** участие!"
+
+msgid "Please react with {ready_emoji} or vote for a map to **check-in**."
+msgstr "Нажмите {ready_emoji} или проголосуйте за карту чтобы **подтвердить** участие."
+
+msgid "React with {not_ready_emoji} to **abort**!"
+msgstr "Нажмите {not_ready_emoji} чтобы **abort** участие!"
+
+msgid "__**{queue}** is now on the draft stage!__"
+msgstr "__**{queue}** на стадии драфта!__"
+
+msgid "empty"
+msgstr "пусто"
+
+msgid "Unpicked:"
+msgstr "Кандидаты:"
+
+msgid "Pick players with `{self.m.qc.cfg.prefix}pick @player` command."
+msgstr "Выбирайте участников с помощью `{self.m.qc.cfg.prefix}pick @player`."
+
+msgid "{member}'s turn to pick!"
+msgstr "Черёд выбирать {member}!"
+
+msgid "Type {cmd} to become a captain and start picking teams."
+msgstr "Используйте {cmd} чтобы стать капитаном и начать выбирать игроков."
+
+msgid "__**{queue}** has started!__"
+msgstr "__**{queue}** начался!__"
+
+msgid "Players"
+msgstr "Участники"
+
+msgid "Captains"
+msgstr "Капитаны"
+
+msgid "Map"
+msgstr "Карта"
+
+msgid "Maps"
+msgstr "Карты"
+
+msgid "Server"
+msgstr "Сервер"
+
+# bot/match/draft.py
+
+msgid "The match is not on the draft stage."
+msgstr "Матч не на стадии драфта."
+
+msgid "You must possess the captain's role."
+msgstr "Необходимо иметь роль капитана."
+
+msgid "Team {name} already have a captain."
+msgstr "Команда {name} уже имеет капитана."
+
+msgid "You are not a captain."
+msgstr "Вы не являетесь капитаном команды."
+
+msgid "Not your turn to pick."
+msgstr "Не ваша очередь выбирать."
+
+msgid "Specified player not in the unpicked list."
+msgstr "Указанный участник не в списке кандидатов."
+
+msgid "The match must be on the draft or waiting report stage."
+msgstr "Матч должен быть на стадии драфта или ожидания результата."
+
+msgid "You have stopped looking for a substitute."
+msgstr "Вы больше не ищете замену."
+
+msgid "You are now looking for a substitute."
+msgstr "Вы ищете замену."
+
+msgid "Specified player is not looking for a substitute."
+msgstr "Указаный участник не ищет замену."
+
+# bot/match/check_in.py
+
+msgid "The match is not on the check-in stage."
+msgstr "Матч не на стадии подтверждения участников."
+
+msgid "{member} has aborted the check-in."
+msgstr "{member} отменил свое участие."
+
+msgid "Reverting {queue} to the gathering stage..."
+msgstr "Возвращаем {queue} на стадию сбора..."
+
+msgid "{members} was not ready in time."
+msgstr "Не подтвердили участие: {members}."
+
+msgid "{member} won, its **{side}**!"
+msgstr "{member} выиграл, выпадает **{side}**!"
+
+msgid "{member} lost, its **{side}**!"
+msgstr "{member} проиграл, выпадает **{side}**!"
+
+msgid "heads"
+msgstr "орёл"
+
+msgid "tails"
+msgstr "решка"
