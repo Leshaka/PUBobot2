@@ -28,10 +28,10 @@ msgstr "miembro AFK"
 msgid "miembro salió"
 msgstr "пользователь покинул гильдию"
 
-msgid "queue started on another channel"
+msgid "queue empezó en otro canal"
 msgstr "начался пикап на другом канале"
 
-msgid "removed by a moderator"
+msgid "eliminado por un moderador"
 msgstr "удалён модератором"
 
 msgid "{member} were removed from all queues ({reason})."
