@@ -3,27 +3,27 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 
 msgid "_lang"
-msgstr "ru"
+msgstr "es"
 
 # bot/queue_channel.py
 
 msgid "no players"
-msgstr "нет игроков"
+msgstr "no hay jugadores"
 
 msgid "You must possess admin permissions."
-msgstr "Необходимы права администратора."
+msgstr "Debes tener permisos de administrador."
 
 msgid "You must possess moderator permissions."
-msgstr "Необходимы права модератора."
+msgstr "Debes tener permisos de moderador."
 
 msgid "expire time ran off"
 msgstr "время expire истекло"
 
 msgid "member offline"
-msgstr "пользователь оффлайн"
+msgstr "miembro offline"
 
 msgid "member AFK"
-msgstr "пользователь AFK"
+msgstr "miembro AFK"
 
 msgid "member left the guild"
 msgstr "пользователь покинул гильдию"
