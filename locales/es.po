@@ -254,37 +254,37 @@ msgid "__**{queue}** is now on the draft stage!__"
 msgstr "__**{queue}** на стадии драфта!__"
 
 msgid "empty"
-msgstr "пусто"
+msgstr "vacío"
 
 msgid "Unpicked:"
-msgstr "Кандидаты:"
+msgstr "Jugador no elegido:"
 
 msgid "Pick players with `{self.m.qc.cfg.prefix}pick @player` command."
-msgstr "Выбирайте участников с помощью `{self.m.qc.cfg.prefix}pick @player`."
+msgstr "Elige jugadores con el comando `{self.m.qc.cfg.prefix}pick @jugador`."
 
 msgid "{member}'s turn to pick!"
 msgstr "Черёд выбирать {member}!"
 
 msgid "Type {cmd} to become a captain and start picking teams."
-msgstr "Используйте {cmd} чтобы стать капитаном и начать выбирать игроков."
+msgstr "Escribe el comando {cmd} para convertirte en capitán y formar equipos."
 
 msgid "__**{queue}** has started!__"
-msgstr "__**{queue}** начался!__"
+msgstr "__**{queue}** ha empezado!__"
 
 msgid "Players"
-msgstr "Участники"
+msgstr "Jugadores"
 
 msgid "Captains"
-msgstr "Капитаны"
+msgstr "Capitanes"
 
 msgid "Map"
-msgstr "Карта"
+msgstr "Mapa"
 
 msgid "Maps"
-msgstr "Карты"
+msgstr "Mapas"
 
 msgid "Server"
-msgstr "Сервер"
+msgstr "Servidor"
 
 # bot/match/draft.py
 
