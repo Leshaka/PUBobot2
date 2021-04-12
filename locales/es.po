@@ -59,31 +59,31 @@ msgid "You are not in an active match."
 msgstr "No estás en un partido activo."
 
 msgid "Specified user not found."
-msgstr "No se encuetra al usuario especificado."
+msgstr "El usuario especificado no se encuentra."
 
 msgid "Specified user is not in a match."
-msgstr "Указанный пользователь не находится в матче."
+msgstr "El usuario especificado no está en un partido."
 
 msgid "Specified user is in an active match."
-msgstr "Указанный пользователь уже находится в матче."
+msgstr "El usuario especificado está en un partido."
 
 msgid "Matches"
-msgstr "Матчей"
+msgstr "Partidos"
 
 msgid "Rank"
-msgstr "Ранг"
+msgstr "Rango"
 
 msgid "Rating"
-msgstr "Рейтинг"
+msgstr "Puntos"
 
 msgid "Winrate"
-msgstr "Винрейт"
+msgstr "Porcentaje de victorias"
 
 msgid "Last changes:"
-msgstr "Последние изменения:"
+msgstr "Últimos cambios:"
 
 msgid "No rating data found."
-msgstr "Нет данных рейтинга."
+msgstr "No se han encontrado datos de puntos."
 
 msgid "Could not find match with specified id. Check `{prefix}matches`."
 msgstr "Матч с указаным id не найден. Проверьте `{prefix}matches`."
