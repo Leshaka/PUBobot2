@@ -35,31 +35,31 @@ msgid "removed by a moderator"
 msgstr "has sido eliminado por un moderador"
 
 msgid "{member} were removed from all queues ({reason})."
-msgstr "{member} был удален из всех очередей ({reason})."
+msgstr "{member} fueron eliminados de todas las queues ({reason})."
 
 msgid "{members} were removed from all queues ({reason})."
-msgstr "{members} были удалены из всех очередей ({reason})."
+msgstr "{members} fueron eliminados de todas las queues ({reason})."
 
 msgid "Success"
 msgstr "Успешно"
 
 msgid "Error"
-msgstr "Ошибка"
+msgstr "Error"
 
 msgid "You are not allowed to add to queues on this channel."
-msgstr "Вам не разрешено добавлятся в очереди на этом канале."
+msgstr "No tienes permiso para añadir queues en este canal."
 
 msgid "You are not allowed to add to {queues} queues."
-msgstr "Вам не разрешено добавлятся в очереди {queues}."
+msgstr "No tienes permiso para añadir {queues}."
 
 msgid "You are already in an active match."
-msgstr "Вы уже находитесь в активном матче."
+msgstr "Ya estás en un partido activo."
 
 msgid "You are not in an active match."
-msgstr "Вы не в активном матче."
+msgstr "No estás en un partido activo."
 
 msgid "Specified user not found."
-msgstr "Указанный пользователь не найден."
+msgstr "No se encuetra al usuario especificado."
 
 msgid "Specified user is not in a match."
 msgstr "Указанный пользователь не находится в матче."
