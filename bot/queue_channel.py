@@ -11,7 +11,7 @@ from core.config import cfg
 from core.console import log
 from core.cfg_factory import CfgFactory, Variables, VariableTable
 from core.locales import locales
-from core.utils import error_embed, ok_embed, find, get, join_and, seconds_to_str, parse_duration, get_nick
+from core.utils import error_embed, ok_embed, find, get, join_and, seconds_to_str, parse_duration, get_nick, discord_table
 from core.database import db
 from core.client import FakeMember
 
@@ -1036,24 +1036,23 @@ class QueueChannel:
 		data = (await self.get_lb())[page*10:(page+1)*10]
 
 		if len(data):
-			lines = ["{0:^3}|{1:^11}|{2:^25.25}|{3:^9}| {4}".format(
-				(page*10)+(n+1),
-				str(data[n]['rating']) + self.rating_rank(data[n]['rating'])['rank'],
-				data[n]['nick'],
-				int(data[n]['wins']+data[n]['losses']+data[n]['draws']),
-				"{0}/{1}/{2} ({3}%)".format(
-					data[n]['wins'],
-					data[n]['losses'],
-					data[n]['draws'],
-					int(data[n]['wins']*100/((data[n]['wins']+data[n]['losses']) or 1))
+			await self.channel.send(
+				discord_table(
+					["№", "Rating〈Ξ〉", "Nickname", "Matches", "W/L/D"],
+					[[
+						(page * 10) + (n + 1),
+						str(data[n]['rating']) + self.rating_rank(data[n]['rating'])['rank'],
+						data[n]['nick'].strip(),
+						int(data[n]['wins'] + data[n]['losses'] + data[n]['draws']),
+						"{0}/{1}/{2} ({3}%)".format(
+							data[n]['wins'],
+							data[n]['losses'],
+							data[n]['draws'],
+							int(data[n]['wins'] * 100 / ((data[n]['wins'] + data[n]['losses']) or 1))
+						)
+					] for n in range(len(data))]
 				)
-			) for n in range(len(data))]
-
-			text = "```markdown\n № | Rating〈Ξ〉 |         Nickname        | Matches |  W/L/D\n{0}\n{1}```".format(
-				"-"*60,
-				"\n".join(lines)
 			)
-			await self.channel.send(text)
 		else:
 			raise bot.Exc.NotFoundError(self.gt("Leaderboard is empty."))
 

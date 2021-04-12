@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import random
 import re
+from prettytable import PrettyTable, MARKDOWN
 from discord import Embed
 from discord.utils import get, find, escape_markdown
 from datetime import timedelta
@@ -130,3 +131,16 @@ def get_nick(user):
 	if x := re.match(r"^\[\d+\] (.+)", string):
 		string = x.group(1)
 	return escape_cb(string)
+
+
+def discord_table(header, rows):
+	t = PrettyTable()
+	t.set_style(MARKDOWN)
+	t.header = False
+	t.add_row(header)
+	t.add_rows(rows)
+	content = t.get_string().split("\n")
+	text = "```markdown\n" + content[0].strip("|")
+	text += "\n" + "-" * len(content[0]) + "\n"
+	text += "\n".join(line.strip("|") for line in content[1:]) + "\n```"
+	return text
