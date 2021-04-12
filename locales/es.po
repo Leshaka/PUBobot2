@@ -86,13 +86,13 @@ msgid "No rating data found."
 msgstr "No se han encontrado datos de puntos."
 
 msgid "Could not find match with specified id. Check `{prefix}matches`."
-msgstr "Матч с указаным id не найден. Проверьте `{prefix}matches`."
+msgstr "No se ha podido encontrar una id específica. Comprueba `{prefix}matches`."
 
 msgid "You have {duration} expire time left."
-msgstr "У вас осталось {duration} времени expire."
+msgstr "Te queda {duration} antes de ser expulsado de la queue."
 
 msgid "You don't have an expire timer set right now."
-msgstr "У вас не установлен таймер expire."
+msgstr "No tienes un contador de tiempo de expiración establecido en este momento."
 
 msgid "Invalid duration format. Syntax: 3h2m1s or 03:02:01."
 msgstr "Неверный формат времени. Пример: 3h2m1s или 03:02:01."
