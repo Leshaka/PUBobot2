@@ -32,7 +32,7 @@ msgid "queue started on another channel"
 msgstr "una queue empezó en otro canal"
 
 msgid "removed by a moderator"
-msgstr "has sido eliminado por un moderador"
+msgstr "has sido expulsado por un moderador"
 
 msgid "{member} were removed from all queues ({reason})."
 msgstr "{member} ha sido expulsado de todas las queues ({reason})."
@@ -53,10 +53,10 @@ msgid "You are not allowed to add to {queues} queues."
 msgstr "No tienes permiso para añadir {queues}."
 
 msgid "You are already in an active match."
-msgstr "Ya estás en un partido activo."
+msgstr "Ya estás en una partida activa."
 
 msgid "You are not in an active match."
-msgstr "No estás en un partido activo."
+msgstr "No estás en una partida activa."
 
 msgid "Specified user not found."
 msgstr "El usuario especificado no se encuentra."
