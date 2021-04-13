@@ -166,13 +166,13 @@ msgstr "La lista de Noadds está vacía."
 # bot/queues/pickup_queue.py
 
 msgid "{role} Please add to **{name}** pickup, `{left}` players left!"
-msgstr "{role} Добавляйтесь в **{name}** пикап, осталось `{left}` игроков!"
+msgstr "{role} Únete a la pickup **{name}**, ¡nos faltan `{left}` jugadores!"
 
 msgid "Not enough players to start the queue."
-msgstr "Недостаточно участников для старта."
+msgstr "No hay suficientes jugadores para empezar la queue."
 
 msgid "**{queue}** pickup has started @ {channel}!"
-msgstr "**{queue}** пикап начался @ {channel}!"
+msgstr "¡La pickup **{queue}** ha empezado en el canal @ {channel}!"
 
 msgid "Server for **{queue}** is not set."
 msgstr "Сервер для **{queue}** не указан."
