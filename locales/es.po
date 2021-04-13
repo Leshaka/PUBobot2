@@ -35,10 +35,10 @@ msgid "removed by a moderator"
 msgstr "expulsado por un moderador"
 
 msgid "{member} were removed from all queues ({reason})."
-msgstr "{member} ha sido expulsado de todas las queues ({reason})."
+msgstr "{member} fue expulsado de todas las queues ({reason})."
 
 msgid "{members} were removed from all queues ({reason})."
-msgstr "{members} han sido expulsados de todas las queues ({reason})."
+msgstr "{members} fueron expulsados de todas las queues ({reason})."
 
 msgid "Success"
 msgstr "Conseguido"
