@@ -98,58 +98,58 @@ msgid "Invalid duration format. Syntax: 3h2m1s or 03:02:01."
 msgstr "Неверный формат времени. Пример: 3h2m1s или 03:02:01."
 
 msgid "Expire time must be less than {time}."
-msgstr "Время expire должно быть меньше {time}."
+msgstr "El tiempo de espera debe ser inferior a {time}."
 
 msgid "Set your expire time to {duration}."
-msgstr "Ваш таймер expire сработает через {duration}."
+msgstr "Configura el tiempo de caducidad en {duration}."
 
 msgid "Invalid duration format. Syntax: 3h2m1s or 03:02:01 or AFK."
-msgstr "Неверный формат времени. Пример: 3h2m1s или 03:02:01 или AFK."
+msgstr "Formato de duración no válido. Siga esta sintaxis: 3h2m1s o 03:02:01 o AFK."
 
 msgid "You will be removed from queues on AFK status by default."
-msgstr "Вас будет удалять из очередей по AFK статусу."
+msgstr "Serás eliminado de las queues en estado AFK por defecto."
 
 msgid "Your expire time value will fallback to guild's settings."
-msgstr "Ваш таймер expire будет использовать настройки гильдии."
+msgstr "Tu tiempo de expiración volverá a la configuración del gremio."
 
 msgid "Your default expire time is {time}."
-msgstr "Ваш expire таймер установлен на {time}."
+msgstr "Tu tiempo de expiración por defecto es {time}."
 
 msgid "Your offline immunity is **off**."
-msgstr "Ваш иммунитет оффлайн статуса **выключен**."
+msgstr "Tu inmunidad fuera de línea es *desconectado**."
 
 msgid "Your offline immunity is **on** until the next match."
-msgstr "Ваш иммунитет оффлайн статуса **включен** до следующего матча."
+msgstr "Tu inmunidad fuera de línea está **activa** hasta la próxima partida."
 
 msgid "> no active matches"
-msgstr "> нет активных матчей"
+msgstr "> no hay partidas activas"
 
 msgid "Nothing to promote."
-msgstr "Нет цели для promote."
+msgstr "No hay nada para promover."
 
 msgid "Specified queue not found."
-msgstr "Указанная очередь не найдена."
+msgstr "No se puede encontrar la queue espedificada."
 
 msgid "You're promoting too often, please wait `{delay}` until next promote."
-msgstr "Слишком часто, подождите `{delay}` до следующего раза."
+msgstr "Estás promoviendo con demasiada frecuencia, por favor espera `{delay}` antes de volver a promocionar."
 
 msgid "Done."
-msgstr "Готово."
+msgstr "Hecho."
 
 msgid "Your DM notifications is now turned off."
-msgstr "Ваши DM оповещения выключены."
+msgstr "Las notificaciones por MP están ahora desactivadas."
 
 msgid "Your DM notifications is now turned on."
-msgstr "Ваши DM оповещения включены."
+msgstr "Las notificaciones por MP están ahora activadas."
 
 msgid "Leaderboard is empty"
-msgstr "Таблица лидеров пуста"
+msgstr "La tabla de clasificación está vacía"
 
 msgid "Nothing found"
-msgstr "Нет результатов"
+msgstr "No se ha encontrado nada"
 
 msgid "Banned **{member}** for `{duration}`."
-msgstr "Забанил **{member}** на `{duration}`."
+msgstr **{member}** está baneado por un tiempo de `{duration}`."
 
 msgid "Specified member is not banned."
 msgstr "Указаный пользователь не забанен."
