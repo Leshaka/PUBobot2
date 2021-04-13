@@ -68,7 +68,7 @@ msgid "Specified user is in an active match."
 msgstr "El usuario especificado está en un partido."
 
 msgid "Matches"
-msgstr "Partidos"
+msgstr "Partidas"
 
 msgid "Rank"
 msgstr "Rango"
@@ -95,7 +95,7 @@ msgid "You don't have an expire timer set right now."
 msgstr "No tienes un contador de tiempo de expiración establecido en este momento."
 
 msgid "Invalid duration format. Syntax: 3h2m1s or 03:02:01."
-msgstr "Неверный формат времени. Пример: 3h2m1s или 03:02:01."
+msgstr "Formato de duración inválido. Por favor, siga esta sintaxis: 3h2m1s или 03:02:01."
 
 msgid "Expire time must be less than {time}."
 msgstr "El tiempo de espera debe ser inferior a {time}."
@@ -128,7 +128,7 @@ msgid "Nothing to promote."
 msgstr "No hay nada para promover."
 
 msgid "Specified queue not found."
-msgstr "No se puede encontrar la queue espedificada."
+msgstr "No se puede encontrar la queue especificada."
 
 msgid "You're promoting too often, please wait `{delay}` until next promote."
 msgstr "Estás promoviendo con demasiada frecuencia, por favor espera `{delay}` antes de volver a promocionar."
@@ -137,10 +137,10 @@ msgid "Done."
 msgstr "Hecho."
 
 msgid "Your DM notifications is now turned off."
-msgstr "Las notificaciones por MP están ahora desactivadas."
+msgstr "Tus notificaciones por MP están ahora desactivadas."
 
 msgid "Your DM notifications is now turned on."
-msgstr "Las notificaciones por MP están ahora activadas."
+msgstr "Tus notificaciones por MP están ahora activadas."
 
 msgid "Leaderboard is empty"
 msgstr "La tabla de clasificación está vacía"
