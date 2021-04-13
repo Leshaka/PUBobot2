@@ -116,10 +116,10 @@ msgid "Your default expire time is {time}."
 msgstr "Tu tiempo de expiración por defecto es {time}."
 
 msgid "Your offline immunity is **off**."
-msgstr "Tu inmunidad fuera de línea es *desconectado**."
+msgstr "Tu inmunidad en desconectado está *desactivada**."
 
 msgid "Your offline immunity is **on** until the next match."
-msgstr "Tu inmunidad fuera de línea está **activa** hasta la próxima partida."
+msgstr "Tu inmunidad en desconectado está **activada** hasta la próxima partida."
 
 msgid "> no active matches"
 msgstr "> no hay partidas activas"
