@@ -32,7 +32,7 @@ msgid "queue started on another channel"
 msgstr "una queue empezó en otro canal"
 
 msgid "removed by a moderator"
-msgstr "has sido expulsado por un moderador"
+msgstr "expulsado por un moderador"
 
 msgid "{member} were removed from all queues ({reason})."
 msgstr "{member} ha sido expulsado de todas las queues ({reason})."
