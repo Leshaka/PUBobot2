@@ -190,19 +190,19 @@ msgid "Top 10 players for __{target}__"
 msgstr "ТОП 10 игроков для __{target}__"
 
 msgid "day"
-msgstr "день"
+msgstr "día"
 
 msgid "week"
-msgstr "неделя"
+msgstr "semana"
 
 msgid "month"
-msgstr "месяц"
+msgstr "mes"
 
 msgid "year"
-msgstr "год"
+msgstr "año"
 
 msgid "**Total matches: {count}**"
-msgstr "**Всего матчей: {count}**"
+msgstr "**Partidas totales: {count}**"
 
 # bot/match/match.py
 
@@ -210,10 +210,10 @@ msgid "The match must be on the waiting report stage."
 msgstr "Матч должен быть на стадии ожидания результата."
 
 msgid "You must be a team captain to report a loss or draw."
-msgstr "Необходимо быть капитаном команды."
+msgstr "Debes ser capitán de un equipo para reportar una partida perdida o empate."
 
 msgid "{self} is calling a draw, waiting for {enemy} to type `{prefix}rd`."
-msgstr "{self} предлагает ничью, ожидаем `{prefix}rd` от {enemy}."
+msgstr "{self} informa de un empate, esperando que {enemy} confirme con el comando `{prefix}rd`."
 
 msgid "Specified team name not found."
 msgstr "Указанная команда не найдена."
