@@ -26,7 +26,7 @@ msgid "member AFK"
 msgstr "miembro AFK"
 
 msgid "member left the guild"
-msgstr "пользователь покинул гильдию"
+msgstr "Un miembro saló del servidor"
 
 msgid "queue started on another channel"
 msgstr "una queue empezó en otro canal"
@@ -35,13 +35,13 @@ msgid "removed by a moderator"
 msgstr "has sido eliminado por un moderador"
 
 msgid "{member} were removed from all queues ({reason})."
-msgstr "{member} fueron eliminados de todas las queues ({reason})."
+msgstr "{member} ha sido expulsado de todas las queues ({reason})."
 
 msgid "{members} were removed from all queues ({reason})."
-msgstr "{members} fueron eliminados de todas las queues ({reason})."
+msgstr "{members} han sido expulsados de todas las queues ({reason})."
 
 msgid "Success"
-msgstr "Успешно"
+msgstr "Conseguido"
 
 msgid "Error"
 msgstr "Error"
