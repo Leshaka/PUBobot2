@@ -101,10 +101,10 @@ msgid "Expire time must be less than {time}."
 msgstr "El tiempo de espera debe ser inferior a {time}."
 
 msgid "Set your expire time to {duration}."
-msgstr "Configura el tiempo de caducidad en {duration}."
+msgstr "Configura el tiempo de expiración a {duration}."
 
 msgid "Invalid duration format. Syntax: 3h2m1s or 03:02:01 or AFK."
-msgstr "Formato de duración no válido. Siga esta sintaxis: 3h2m1s o 03:02:01 o AFK."
+msgstr "Formato de duración inválido. Siga esta sintaxis: 3h2m1s o 03:02:01 o AFK."
 
 msgid "You will be removed from queues on AFK status by default."
 msgstr "Serás eliminado de las queues en estado AFK por defecto."
