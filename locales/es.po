@@ -26,7 +26,7 @@ msgid "member AFK"
 msgstr "miembro AFK"
 
 msgid "member left the guild"
-msgstr "Un miembro saló del servidor"
+msgstr "Un miembro salió del servidor"
 
 msgid "queue started on another channel"
 msgstr "una queue empezó en otro canal"
@@ -110,7 +110,7 @@ msgid "You will be removed from queues on AFK status by default."
 msgstr "Serás eliminado de las queues en estado AFK por defecto."
 
 msgid "Your expire time value will fallback to guild's settings."
-msgstr "Tu tiempo de expiración volverá a la configuración del gremio."
+msgstr "Tu tiempo de expiración volverá a la configuración del servidor."
 
 msgid "Your default expire time is {time}."
 msgstr "Tu tiempo de expiración por defecto es {time}."
@@ -131,7 +131,7 @@ msgid "Specified queue not found."
 msgstr "No se puede encontrar la queue especificada."
 
 msgid "You're promoting too often, please wait `{delay}` until next promote."
-msgstr "Estás promoviendo con demasiada frecuencia, por favor espera `{delay}` antes de volver a promocionar."
+msgstr "Estás promoviendo con demasiada frecuencia, por favor espera `{delay}` antes de volver a promover."
 
 msgid "Done."
 msgstr "Hecho."
