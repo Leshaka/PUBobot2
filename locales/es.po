@@ -65,7 +65,7 @@ msgid "Specified user is not in a match."
 msgstr "El usuario especificado no está en un partido."
 
 msgid "Specified user is in an active match."
-msgstr "El usuario especificado está en un partido."
+msgstr "El usuario especificado está en una partida."
 
 msgid "Matches"
 msgstr "Partidas"
@@ -155,7 +155,7 @@ msgid "Specified member is not banned."
 msgstr "El miembro especificado no está baneado."
 
 msgid " ID | Prisoner | Left | Reason"
-msgstr " ID | Заключенный | Осталось | Razón"
+msgstr " ID | Prisionero | Le queda | Razón"
 
 msgid "You have been banned, `{duration}` left."
 msgstr "Tu has sido baneado, te queda `{duration}`."
