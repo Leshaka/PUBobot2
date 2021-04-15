@@ -6,6 +6,8 @@ import time
 from core.database import db
 from core.utils import find, get_nick
 
+from bot.stats import stats
+
 
 class BaseRating:
 
@@ -105,13 +107,42 @@ class BaseRating:
 		await db.insert_many(self.table, data, on_dublicate='replace')
 		await db.insert_many('qc_rating_history', history)
 
-	async def apply_decay(self, decay):
-		data = await db.select(('*',), self.table, where=dict(channel_id=self.channel_id))
-		data = [p for p in data if p['deviation']]
+	async def apply_decay(self, rating, deviation, ranks_table):
+		""" Apply weekly rating and deviation decay """
+		now = int(time.time())
+		ranks = [i['rating'] for i in ranks_table if i['rating'] != 0]
+		data = await stats.last_games(self.channel_id)
+		history = []
+		to_update = []
 		for p in data:
-			print(decay, p['deviation'])
-			p['deviation'] = min((self.init_deviation, p['deviation']+decay))
-		await db.insert_many(self.table, data, on_dublicate='replace')
+			new_deviation = min((self.init_deviation, p['deviation'] + deviation))
+
+			min_rating = max([i for i in ranks if i <= p['rating']]+[0])
+			if min_rating != 0 and p['at'] < (now-(60*60*24*7)):
+				new_rating = max((min_rating, p['rating']-rating))
+			else:
+				new_rating = p['rating']
+
+			if new_rating != p['rating'] or new_deviation != p['deviation']:
+				history.append(dict(
+					user_id=p['user_id'],
+					channel_id=self.channel_id,
+					at=now,
+					rating_before=p['rating'],
+					rating_change=new_rating-p['rating'],
+					deviation_before=p['deviation'],
+					deviation_change=new_deviation-p['deviation'],
+					match_id=None,
+					reason="inactivity rating decay"
+				))
+				p.pop('at')
+				p['deviation'] = new_deviation
+				p['rating'] = new_rating
+				to_update.append(p)
+
+		if len(history):
+			await db.insert_many('qc_rating_history', history)
+			await db.insert_many(self.table, to_update, on_dublicate='replace')
 
 	async def reset(self):
 		data = await db.select(('user_id', 'rating', 'deviation'), self.table, where=dict(channel_id=self.channel_id))

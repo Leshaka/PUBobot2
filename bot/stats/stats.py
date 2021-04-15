@@ -306,6 +306,20 @@ async def top(channel_id, time_gap=None):
 	return stats
 
 
+async def last_games(channel_id):
+	#  get last played ranked match for all players
+	data = await db.fetchall(
+		"SELECT m.at, p.* FROM `qc_players` AS p " +
+		"JOIN qc_matches AS m ON m.match_id=("
+		"	SELECT match_id FROM qc_rating_history as h WHERE h.user_id=p.user_id ORDER BY match_id DESC LIMIT 1"
+		") " +
+		"WHERE p.channel_id=%s AND p.rating IS NOT NULL AND p.deviation IS NOT NULL "
+		"GROUP BY p.user_id",
+		(channel_id, )
+	)
+	return data
+
+
 class StatsJobs:
 
 	def __init__(self):
