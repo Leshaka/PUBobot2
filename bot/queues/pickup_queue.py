@@ -280,15 +280,11 @@ class PickupQueue:
 			left=self.cfg.size-self.length
 		)
 
-		if promotion_role and not promotion_role.mentionable:
-			try:
-				await promotion_role.edit(reason="Promote command", mentionable=True)
-			except Forbidden:
-				raise bot.Exc.PermissionError("Insufficient permissions to set the promotion role mentionable.")
-			else:
-				await self.qc.channel.send(promotion_msg)
-				await promotion_role.edit(reason="Promote command", mentionable=False)
-				return
+		if (
+			promotion_role and not promotion_role.mentionable and
+			not self.qc.channel.guild.me.guild_permissions.mention_everyone
+		):
+			raise bot.Exc.PermissionError("Insufficient permissions to ping the promotion role.")
 		else:
 			await self.qc.channel.send(promotion_msg)
 
