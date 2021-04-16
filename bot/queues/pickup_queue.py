@@ -22,7 +22,7 @@ class PickupQueue:
 				display="Queue name",
 				section="General",
 				notnull=True,
-				verify=lambda name: len(name) and not any((c in name for c in "+-: \t\n")),
+				verify=lambda name: len(name) and not any((c in name for c in ": \t\n")),
 				verify_message="Invalid queue name. A queue name should be one word without +-: characters."
 			),
 			Variables.TextVar(
@@ -222,7 +222,7 @@ class PickupQueue:
 
 	@staticmethod
 	def validate_name(name):
-		if not len(name) or any((c in name for c in "+-: \t\n")):
+		if not len(name) or any((c in name for c in ": \t\n")):
 			raise ValueError(f"Invalid queue name '{name}'. A queue name should be one word without +-: characters.")
 		return name
 
