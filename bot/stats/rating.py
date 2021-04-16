@@ -13,24 +13,45 @@ class BaseRating:
 
 	table = "qc_players"
 
-	def __init__(self, channel_id, init_rp=1500, init_deviation=300, scale=100, reduction_scale=100):
+	def __init__(
+			self, channel_id, init_rp=1500, init_deviation=300, min_deviation=None, scale=100,
+			reduction_scale=100, ws_boost=False, ls_boost=False
+	):
 		self.channel_id = channel_id
 		self.init_rp = init_rp
 		self.init_deviation = init_deviation
+		self.min_deviation = min_deviation or 0
 		self.scale = scale/100
 		self.reduction_scale = reduction_scale/100
+		self.ws_boost = ws_boost,
+		self.ls_boost = ls_boost
 
-	def _scale_changes(self, player, r_change, d_change):
+	def _scale_changes(self, player, r_change, d_change, score):
 		p = player.copy()
 		r_change = (r_change * self.scale) * self.reduction_scale if r_change < 0 else r_change * self.scale
-		p['rating'] = max(0, int(p['rating'] + r_change))
-		p['deviation'] = max(0, int(p['deviation'] + d_change))
+
+		if score == -1:
+			p['losses'] += 1
+			p['streak'] = -1 if p['streak'] >= 0 else p['streak'] - 1
+			if self.ls_boost and p['streak'] < -2:
+				r_change = r_change * (min(abs(p['streak']), 6) / 2)
+		elif score == 0:
+			p['draws'] += 1
+			p['streak'] = 0
+		elif score == 1:
+			p['wins'] += 1
+			p['streak'] = 1 if p['streak'] <= 0 else p['streak'] + 1
+			if self.ws_boost and p['streak'] > 2:
+				r_change = r_change * (min(p['streak'], 6) / 2)
+
+		p['rating'] = max(0, round(p['rating'] + r_change))
+		p['deviation'] = max(self.min_deviation, round(p['deviation'] + d_change))
 		return p
 
 	async def get_players(self, user_ids):
 		""" Return rating or initial rating for each member """
 		data = await db.select(
-			['user_id', 'rating', 'deviation', 'channel_id', 'wins', 'losses', 'draws'], self.table,
+			['user_id', 'rating', 'deviation', 'channel_id', 'wins', 'losses', 'draws', 'streak'], self.table,
 			where={'channel_id': self.channel_id}
 		)
 		results = []
@@ -39,6 +60,8 @@ class BaseRating:
 				if d['rating'] is None:
 					d['rating'] = self.init_rp
 					d['deviation'] = self.init_deviation
+				else:
+					d['deviation'] = min(self.init_deviation, d['deviation'])
 			else:
 				d = dict(
 					channel_id=self.channel_id, user_id=user_id, rating=self.init_rp,
@@ -179,14 +202,14 @@ class FlatRating(BaseRating):
 		if not draw:
 			results = []
 			for p in winners:
-				new = self._scale_changes(p, 10, 0)
+				new = self._scale_changes(p, 10, 0, 1)
 				results.append(new)
 
 			for p in losers:
-				new = new = self._scale_changes(p, -10, 0)
+				new = new = self._scale_changes(p, -10, 0, -1)
 				results.append(new)
 		else:
-			results = [self._scale_changes(p, 0, 0) for p in (*winners, *losers)]
+			results = [self._scale_changes(p, 0, 0, 0) for p in (*winners, *losers)]
 
 		return results
 
@@ -219,14 +242,14 @@ class Glicko2Rating(BaseRating):
 			po.setRating(p['rating'])
 			po.setRd(p['deviation'])
 			po.update_player(*avg_l)
-			new = self._scale_changes(p, po.getRating() - p['rating'], po.getRd() - p['deviation'])
+			new = self._scale_changes(p, po.getRating() - p['rating'], po.getRd() - p['deviation'], 0 if draw else 1)
 			results.append(new)
 
 		for p in losers:
 			po.setRating(p['rating'])
 			po.setRd(p['deviation'])
 			po.update_player(*avg_w)
-			new = self._scale_changes(p, po.getRating() - p['rating'], po.getRd() - p['deviation'])
+			new = self._scale_changes(p, po.getRating() - p['rating'], po.getRd() - p['deviation'], 0 if draw else -1)
 			results.append(new)
 
 		return results
@@ -251,12 +274,12 @@ class TrueSkillRating(BaseRating):
 		results = []
 		for p in winners:
 			res = g1.pop(0)
-			new = self._scale_changes(p, res.mu - p['rating'], res.sigma - p['deviation'])
+			new = self._scale_changes(p, res.mu - p['rating'], res.sigma - p['deviation'], 0 if draw else 1)
 			results.append(new)
 
 		for p in losers:
 			res = g2.pop(0)
-			new = self._scale_changes(p, res.mu - p['rating'], res.sigma - p['deviation'])
+			new = self._scale_changes(p, res.mu - p['rating'], res.sigma - p['deviation'], 0 if draw else -1)
 			results.append(new)
 
 		return results

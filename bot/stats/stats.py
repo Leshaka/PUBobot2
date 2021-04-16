@@ -28,7 +28,8 @@ db.ensure_table(dict(
 		dict(cname="deviation", ctype=db.types.int),
 		dict(cname="wins", ctype=db.types.int, notnull=True, default=0),
 		dict(cname="losses", ctype=db.types.int, notnull=True, default=0),
-		dict(cname="draws", ctype=db.types.int, notnull=True, default=0)
+		dict(cname="draws", ctype=db.types.int, notnull=True, default=0),
+		dict(cname="streak", ctype=db.types.int, notnull=True, default=0)
 	],
 	primary_keys=["user_id", "channel_id"]
 ))
@@ -158,13 +159,6 @@ async def register_match_ranked(m):
 		nick = get_nick(p)
 		team = 0 if p in m.teams[0] else 1
 
-		if m.winner is None:
-			after[p.id]['draws'] += 1
-		elif m.winner == team:
-			after[p.id]['wins'] += 1
-		else:
-			after[p.id]['losses'] += 1
-
 		await db.update(
 			"qc_players",
 			dict(
@@ -173,7 +167,8 @@ async def register_match_ranked(m):
 				deviation=after[p.id]['deviation'],
 				wins=after[p.id]['wins'],
 				losses=after[p.id]['losses'],
-				draws=after[p.id]['draws']
+				draws=after[p.id]['draws'],
+				streak=after[p.id]['streak']
 			),
 			keys=dict(channel_id=m.qc.rating.channel_id, user_id=p.id)
 		)

@@ -33,7 +33,7 @@ class QueueChannel:
 	cfg_factory = CfgFactory(
 		"qc_configs",
 		p_key="channel_id",
-		sections=["General", "Auto-remove", "Rating"],
+		sections=["General", "Auto-remove", "Rating", "Leaderboard"],
 		variables=[
 			Variables.StrVar(
 				"prefix",
@@ -160,23 +160,13 @@ class QueueChannel:
 				on_change=bot.update_rating_system
 			),
 			Variables.IntVar(
-				"rating_decay",
-				display="Rating decay",
+				"rating_min_deviation",
+				display="Minimum deviation",
 				section="Rating",
-				description="Set weekly rating decay until a nearest rank is met. Applies only to inactive players.",
-				default=15,
-				verify=lambda x: 0 <= x <= 100,
-				verify_message="Rating decay must be between 0 and 100",
-				on_change=bot.update_rating_system
-			),
-			Variables.IntVar(
-				"rating_deviation_decay",
-				display="Rating deviation decay",
-				section="Rating",
-				description="Set weekly rating deviation decay until initial deviation is met. Applies to all players.",
-				default=15,
-				verify=lambda x: 0 <= x <= 500,
-				verify_message="Rating deviation decay must be between 0 and 500",
+				description="Set players minimum deviation value. If not set, rating changes may seek to 0 over time.",
+				default=75,
+				verify=lambda x: 0 <= x <= 3000,
+				verify_message="Rating minimum deviation must be between 0 and 3000",
 				on_change=bot.update_rating_system
 			),
 			Variables.IntVar(
@@ -203,16 +193,54 @@ class QueueChannel:
 				default=100,
 				on_change=bot.update_rating_system
 			),
+			Variables.BoolVar(
+				"rating_ws_boost",
+				display="Rating winning streak boost",
+				section="Rating",
+				description="Apply rating boost from 1.5x to 3x from 3 to 6 won matches in a row.",
+				notnull=True,
+				default=0,
+				on_change=bot.update_rating_system
+			),
+			Variables.BoolVar(
+				"rating_ls_boost",
+				display="Rating losing streak boost",
+				section="Rating",
+				description="Apply rating boost from 1.5x to 3x from 3 to 6 lost matches in a row.",
+				notnull=True,
+				default=0,
+				on_change=bot.update_rating_system
+			),
+			Variables.IntVar(
+				"rating_decay",
+				display="Rating decay",
+				section="Rating",
+				description="Set weekly rating decay until a nearest rank is met. Applies only to inactive players.",
+				default=15,
+				verify=lambda x: 0 <= x <= 100,
+				verify_message="Rating decay must be between 0 and 100",
+				on_change=bot.update_rating_system
+			),
+			Variables.IntVar(
+				"rating_deviation_decay",
+				display="Rating deviation decay",
+				section="Rating",
+				description="Set weekly rating deviation decay until initial deviation is met. Applies to all players.",
+				default=15,
+				verify=lambda x: 0 <= x <= 500,
+				verify_message="Rating deviation decay must be between 0 and 500",
+				on_change=bot.update_rating_system
+			),
 			Variables.IntVar(
 				"lb_min_matches",
 				display="Leaderboard min matches",
-				section="Rating",
+				section="Leaderboard",
 				description="Set a minimum amount of played matches required for a player to be shown in the !leaderboard."
 			),
 			Variables.BoolVar(
 				"rating_nicks",
 				display="Set ratings to nicks",
-				section="Rating",
+				section="Leaderboard",
 				description="Add [rating] prefix to guild members nicknames.",
 				default=0,
 				notnull=True
@@ -220,7 +248,7 @@ class QueueChannel:
 		],
 		tables=[
 			VariableTable(
-				'ranks', display="Rating ranks", section="Rating",
+				'ranks', display="Rating ranks", section="Leaderboard",
 				variables=[
 					Variables.StrVar("rank", default="〈E〉"),
 					Variables.IntVar("rating", default=1200, description="The rank will be given on this rating or higher."),
@@ -263,8 +291,11 @@ class QueueChannel:
 			channel_id=(self.cfg.rating_channel or text_channel).id,
 			init_rp=self.cfg.rating_initial,
 			init_deviation=self.cfg.rating_deviation,
+			min_deviation=self.cfg.rating_min_deviation,
 			scale=self.cfg.rating_scale,
-			reduction_scale=self.cfg.rating_reduction_scale
+			reduction_scale=self.cfg.rating_reduction_scale,
+			ws_boost=self.cfg.rating_ws_boost,
+			ls_boost=self.cfg.rating_ls_boost
 		)
 		self.queues = []
 		self.channel = text_channel
@@ -362,8 +393,11 @@ class QueueChannel:
 			channel_id=(self.cfg.rating_channel or self.channel).id,
 			init_rp=self.cfg.rating_initial,
 			init_deviation=self.cfg.rating_deviation,
+			min_deviation=self.cfg.rating_min_deviation,
 			scale=self.cfg.rating_scale,
-			reduction_scale=self.cfg.rating_reduction_scale
+			reduction_scale=self.cfg.rating_reduction_scale,
+			ws_boost=self.cfg.rating_ws_boost,
+			ls_boost=self.cfg.rating_ls_boost
 		)
 
 	async def apply_rating_decay(self):
@@ -510,7 +544,7 @@ class QueueChannel:
 
 	async def get_lb(self):
 		data = await db.select(
-			['user_id', 'nick', 'rating', 'deviation', 'wins', 'losses', 'draws', 'is_hidden'], 'qc_players',
+			['user_id', 'nick', 'rating', 'deviation', 'wins', 'losses', 'draws', 'streak', 'is_hidden'], 'qc_players',
 			where={'channel_id': self.rating.channel_id}, order_by="rating"
 		)
 		return [
@@ -890,7 +924,7 @@ class QueueChannel:
 			place = data.index(p)+1
 		else:
 			data = await db.select(
-				['user_id', 'rating', 'deviation', 'channel_id', 'wins', 'losses', 'draws', 'is_hidden'], "qc_players",
+				['user_id', 'rating', 'deviation', 'channel_id', 'wins', 'losses', 'draws', 'is_hidden', 'streak'], "qc_players",
 				where={'channel_id': self.rating.channel_id}
 			)
 			p = find(lambda i: i['user_id'] == member.id, data)
@@ -906,7 +940,11 @@ class QueueChannel:
 			else:
 				embed.add_field(name=self.gt("Rank"), value="**〈?〉**", inline=True)
 				embed.add_field(name=self.gt("Rating"), value="**?**")
-			embed.add_field(name="W/L/D", value=f"**{p['wins']}**/**{p['losses']}**/**{p['draws']}**", inline=True)
+			embed.add_field(
+				name="W/L/D/S",
+				value="**{wins}**/**{losses}**/**{draws}**/**{streak}**".format(**p),
+				inline=True
+			)
 			embed.add_field(name=self.gt("Winrate"), value="**{}%**\n\u200b".format(
 				int(p['wins']*100 / (p['wins']+p['losses'] or 1))
 			), inline=True)
@@ -916,7 +954,7 @@ class QueueChannel:
 			changes = await db.select(
 				('at', 'rating_change', 'match_id', 'reason'),
 				'qc_rating_history', where=dict(user_id=member.id, channel_id=self.rating.channel_id),
-				order_by='id', limit=3
+				order_by='id', limit=5
 			)
 			if len(changes):
 				embed.add_field(
