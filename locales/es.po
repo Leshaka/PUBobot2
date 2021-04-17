@@ -11,10 +11,10 @@ msgid "no players"
 msgstr "no hay jugadores"
 
 msgid "You must possess admin permissions."
-msgstr "Debes tener permisos de administrador."
+msgstr "Tu debes tener permisos de administrador."
 
 msgid "You must possess moderator permissions."
-msgstr "Debes tener permisos de moderador."
+msgstr "Tu debes tener permisos de moderador."
 
 msgid "expire time ran off"
 msgstr "el tiempo de espera ha expirado"
