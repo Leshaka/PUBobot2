@@ -11,10 +11,10 @@ msgid "no players"
 msgstr "no hay jugadores"
 
 msgid "You must possess admin permissions."
-msgstr "Tu debes tener permisos de administrador."
+msgstr "Debes tener permisos de administrador."
 
 msgid "You must possess moderator permissions."
-msgstr "Tu debes tener permisos de moderador."
+msgstr "Debes tener permisos de moderador."
 
 msgid "expire time ran off"
 msgstr "el tiempo de espera ha expirado"
@@ -158,7 +158,7 @@ msgid " ID | Prisoner | Left | Reason"
 msgstr " ID | Bloqueado | Le queda | Razón"
 
 msgid "You have been banned, `{duration}` left."
-msgstr "Tu has sido baneado, te queda `{duration}`."
+msgstr "Has sido baneado, te queda `{duration}`."
 
 msgid "Noadds are empty."
 msgstr "La lista de Noadds está vacía."
@@ -222,7 +222,7 @@ msgid "Match {queue} ({id}) has timed out."
 msgstr "La partida ({id}) para {queue} ha expirado."
 
 msgid "{players} your match has been canceled."
-msgstr "{players} vuestro partido ha sido cancelado."
+msgstr "{players} vuestra partida ha sido cancelada."
 
 msgid "No changes to apply."
 msgstr "No hay cambios para aplicar."
@@ -292,13 +292,13 @@ msgid "The match is not on the draft stage."
 msgstr "La partida no está en la fase para formar los equipos ."
 
 msgid "You must possess the captain's role."
-msgstr "Tu debes poseer el rol de capitán."
+msgstr "Debes poseer el rol de capitán."
 
 msgid "Team {name} already have a captain."
 msgstr "El equipo {name} ya tiene un capitán."
 
 msgid "You are not a captain."
-msgstr "Tu no eres un capitán."
+msgstr "No eres un capitán."
 
 msgid "Not your turn to pick."
 msgstr "No es tu turno para elegir."
@@ -307,13 +307,13 @@ msgid "Specified player not in the unpicked list."
 msgstr "El jugador específico no está en la lista para elegir."
 
 msgid "The match must be on the draft or waiting report stage."
-msgstr "El partido debe estar en la fase de formación o a la espera de un resultado."
+msgstr "La partida debe estar en la fase de formación o a la espera de un resultado."
 
 msgid "You have stopped looking for a substitute."
-msgstr "Tu has dejado de buscar un sustituto."
+msgstr "Has dejado de buscar un sustituto."
 
 msgid "You are now looking for a substitute."
-msgstr "Tu estás ahora buscando un sustituto."
+msgstr "Estás ahora buscando un sustituto."
 
 msgid "Specified player is not looking for a substitute."
 msgstr "El jugador específico no está buscando un sustituto."
