@@ -282,7 +282,7 @@ class PickupQueue:
 
 		if (
 			promotion_role and not promotion_role.mentionable and
-			not self.qc.channel.guild.me.guild_permissions.mention_everyone
+			self.qc.channel.guild.me and not self.qc.channel.guild.me.guild_permissions.mention_everyone
 		):
 			raise bot.Exc.PermissionError("Insufficient permissions to ping the promotion role.")
 		else:
