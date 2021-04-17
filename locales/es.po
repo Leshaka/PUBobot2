@@ -321,25 +321,25 @@ msgstr "El jugador específico no está buscando un sustituto."
 # bot/match/check_in.py
 
 msgid "The match is not on the check-in stage."
-msgstr "Матч не на стадии подтверждения участников."
+msgstr "La partida no está en la fase de verificación."
 
 msgid "{member} has aborted the check-in."
-msgstr "{member} отменил свое участие."
+msgstr "{member} ha abortado la verificación."
 
 msgid "Reverting {queue} to the gathering stage..."
-msgstr "Возвращаем {queue} на стадию сбора..."
+msgstr "Volviendo a {queue} a la fase de formación..."
 
 msgid "{members} was not ready in time."
-msgstr "Не подтвердили участие: {members}."
+msgstr "{members} no estaban listos a tiempo."
 
 msgid "{member} won, its **{side}**!"
-msgstr "{member} выиграл, выпадает **{side}**!"
+msgstr "{member} ganó, así que **{side}**!"
 
 msgid "{member} lost, its **{side}**!"
-msgstr "{member} проиграл, выпадает **{side}**!"
+msgstr "{member} perdió, así que **{side}**!"
 
 msgid "heads"
-msgstr "орёл"
+msgstr "en cabeza"
 
 msgid "tails"
-msgstr "решка"
+msgstr "en cola"
