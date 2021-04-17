@@ -242,16 +242,16 @@ msgid "Waiting on:"
 msgstr "Esperando:"
 
 msgid "Please react with {ready_emoji} to **check-in** or {not_ready_emoji} to **abort**!"
-msgstr "Нажмите {ready_emoji} чтобы **подтвердить** или {not_ready_emoji} чтобы **отменить** участие!"
+msgstr "Por favor, reaccione con {ready_emoji} para **confirmar** o {not_ready_emoji} para **abortar**!"
 
 msgid "Please react with {ready_emoji} or vote for a map to **check-in**."
-msgstr "Нажмите {ready_emoji} или проголосуйте за карту чтобы **подтвердить** участие."
+msgstr "Por favor, reaccione con {ready_emoji} o vota por un mapa para **confirmar**."
 
 msgid "React with {not_ready_emoji} to **abort**!"
-msgstr "Нажмите {not_ready_emoji} чтобы **abort** участие!"
+msgstr "Reacciona con {not_ready_emoji} para **abortar**!"
 
 msgid "__**{queue}** is now on the draft stage!__"
-msgstr "__**{queue}** на стадии драфта!__"
+msgstr "__**{queue}** está ahora formando los equipos!__"
 
 msgid "empty"
 msgstr "vacío"
@@ -263,7 +263,7 @@ msgid "Pick players with `{self.m.qc.cfg.prefix}pick @player` command."
 msgstr "Elige jugadores con el comando `{self.m.qc.cfg.prefix}pick @jugador`."
 
 msgid "{member}'s turn to pick!"
-msgstr "Черёд выбирать {member}!"
+msgstr "Le toca a {member} elegir jugador!"
 
 msgid "Type {cmd} to become a captain and start picking teams."
 msgstr "Escribe el comando {cmd} para convertirte en capitán y formar equipos."
