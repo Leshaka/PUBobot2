@@ -175,19 +175,19 @@ msgid "**{queue}** pickup has started @ {channel}!"
 msgstr "¡La pickup **{queue}** ha empezado en el canal @ {channel}!"
 
 msgid "Server for **{queue}** is not set."
-msgstr "Сервер для **{queue}** не указан."
+msgstr "El servidor para **{queue}** no está configurado".
 
 msgid "Server for **{queue}**"
-msgstr "Сервер для **{queue}**"
+msgstr "El servidor para **{queue}**"
 
 msgid "Maps for **{queue}**"
-msgstr "Карты для **{queue}**"
+msgstr "Mapas para **{queue}**"
 
 msgid "Stats for __{target}__"
-msgstr "Статистика для __{target}__"
+msgstr "Estadísticas para __{target}__"
 
 msgid "Top 10 players for __{target}__"
-msgstr "ТОП 10 игроков для __{target}__"
+msgstr "Los 10 mejores jugadores para __{target}__"
 
 msgid "day"
 msgstr "día"
@@ -207,7 +207,7 @@ msgstr "**Partidas totales: {count}**"
 # bot/match/match.py
 
 msgid "The match must be on the waiting report stage."
-msgstr "Матч должен быть на стадии ожидания результата."
+msgstr "La partida debe estar en la fase de reporte de espera."
 
 msgid "You must be a team captain to report a loss or draw."
 msgstr "Debes ser capitán de un equipo para reportar una partida perdida o empate."
@@ -216,30 +216,30 @@ msgid "{self} is calling a draw, waiting for {enemy} to type `{prefix}rd`."
 msgstr "{self} informa de un empate, esperando que {enemy} confirme con el comando `{prefix}rd`."
 
 msgid "Specified team name not found."
-msgstr "Указанная команда не найдена."
+msgstr "No se ha encontrado el nombre del equipo especificado."
 
 msgid "Match {queue} ({id}) has timed out."
-msgstr "Истекло время ожидания для матча {queue} ({id})."
+msgstr "La partida ({id}) para {queue} ha expirado."
 
 msgid "{players} your match has been canceled."
-msgstr "{players} ваш матч был отменен."
+msgstr "{players} vuestro partido ha sido cancelado."
 
 msgid "No changes to apply."
-msgstr "Нет изменений."
+msgstr "No hay cambios para aplicar."
 
 msgid "Removed `{count}` roles from you."
-msgstr "С Вас снято `{count}` ролей."
+msgstr "Eliminado los roles `{count}` para ti."
 
 msgid "Added `{count}` roles to you."
-msgstr "Вам добавлено `{count}` ролей."
+msgstr "Añadido los roles `{count}` para ti."
 
 # bot/match/embeds.py
 
 msgid "__**{queue}** is now on the check-in stage!__"
-msgstr "__**{queue}** на стадии подтверждения участников!__"
+msgstr "__**{queue}** está ahora en la fase de verificación!__"
 
 msgid "Waiting on:"
-msgstr "Ожидаем:"
+msgstr "Esperando:"
 
 msgid "Please react with {ready_emoji} to **check-in** or {not_ready_emoji} to **abort**!"
 msgstr "Нажмите {ready_emoji} чтобы **подтвердить** или {not_ready_emoji} чтобы **отменить** участие!"
