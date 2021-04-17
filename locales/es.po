@@ -245,7 +245,7 @@ msgid "Please react with {ready_emoji} to **check-in** or {not_ready_emoji} to *
 msgstr "Por favor, reaccione con {ready_emoji} para **confirmar** o {not_ready_emoji} para **abortar**!"
 
 msgid "Please react with {ready_emoji} or vote for a map to **check-in**."
-msgstr "Por favor, reaccione con {ready_emoji} o vota por un mapa para **confirmar**."
+msgstr "Por favor reaccione con {ready_emoji} o vota por un mapa para **confirmar**."
 
 msgid "React with {not_ready_emoji} to **abort**!"
 msgstr "Reacciona con {not_ready_emoji} para **abortar**!"
