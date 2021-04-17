@@ -289,34 +289,34 @@ msgstr "Servidor"
 # bot/match/draft.py
 
 msgid "The match is not on the draft stage."
-msgstr "Матч не на стадии драфта."
+msgstr "La partida no está en la fase para formar los equipos ."
 
 msgid "You must possess the captain's role."
-msgstr "Необходимо иметь роль капитана."
+msgstr "Tu debes poseer el rol de capitán."
 
 msgid "Team {name} already have a captain."
-msgstr "Команда {name} уже имеет капитана."
+msgstr "El equipo {name} ya tiene un capitán."
 
 msgid "You are not a captain."
-msgstr "Вы не являетесь капитаном команды."
+msgstr "Tu no eres un capitán."
 
 msgid "Not your turn to pick."
-msgstr "Не ваша очередь выбирать."
+msgstr "No es tu turno para elegir."
 
 msgid "Specified player not in the unpicked list."
-msgstr "Указанный участник не в списке кандидатов."
+msgstr "El jugador específico no está en la lista para elegir."
 
 msgid "The match must be on the draft or waiting report stage."
-msgstr "Матч должен быть на стадии драфта или ожидания результата."
+msgstr "El partido debe estar en la fase de formación o a la espera de un resultado."
 
 msgid "You have stopped looking for a substitute."
-msgstr "Вы больше не ищете замену."
+msgstr "Tu has dejado de buscar un sustituto."
 
 msgid "You are now looking for a substitute."
-msgstr "Вы ищете замену."
+msgstr "Tu estás ahora buscando un sustituto."
 
 msgid "Specified player is not looking for a substitute."
-msgstr "Указаный участник не ищет замену."
+msgstr "El jugador específico no está buscando un sustituto."
 
 # bot/match/check_in.py
 
