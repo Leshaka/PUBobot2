@@ -246,6 +246,8 @@ class PickupQueue:
 			return
 		self.queue = players
 		if self.length:
+			if self in bot.active_queues:
+				bot.active_queues.remove(self)
 			bot.active_queues.append(self)
 
 	def __init__(self, qc, cfg):
