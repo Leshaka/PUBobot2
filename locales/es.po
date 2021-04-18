@@ -339,7 +339,7 @@ msgid "{member} lost, its **{side}**!"
 msgstr "{member} perdió, así que **{side}**!"
 
 msgid "heads"
-msgstr "en cabeza"
+msgstr "cara"
 
 msgid "tails"
-msgstr "en cola"
+msgstr "cruz"
