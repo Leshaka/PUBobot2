@@ -48,19 +48,28 @@ async def on_reaction_remove(reaction, user):  # FIXME: this event does not get 
 @dc.event
 async def on_ready():
 	await dc.change_presence(activity=Activity(type=ActivityType.watching, name=cfg.STATUS))
-	bot.last_match_id = await bot.stats.last_match_id()
-	log.info(f"Logged in discord as '{dc.user.name}#{dc.user.discriminator}'.")
-	log.info("Loading queue channels...")
-	for channel_id in await bot.QueueChannel.cfg_factory.p_keys():
-		channel = dc.get_channel(channel_id)
-		if channel:
-			bot.queue_channels[channel_id] = await bot.QueueChannel.create(channel)
-			await bot.queue_channels[channel_id].update_info()
-			log.info(f"\tInit channel {channel.guild.name}>#{channel.name} successful.")
-		else:
-			log.info(f"\tCould not reach a text channel with id {channel_id}.")
+	if not dc.was_ready:  # Connected for the first time, load everything
+		dc.was_ready = True
+		bot.last_match_id = await bot.stats.last_match_id()
+		log.info(f"Logged in discord as '{dc.user.name}#{dc.user.discriminator}'.")
+		log.info("Loading queue channels...")
+		for channel_id in await bot.QueueChannel.cfg_factory.p_keys():
+			channel = dc.get_channel(channel_id)
+			if channel:
+				bot.queue_channels[channel_id] = await bot.QueueChannel.create(channel)
+				await bot.queue_channels[channel_id].update_info()
+				log.info(f"\tInit channel {channel.guild.name}>#{channel.name} successful.")
+			else:
+				log.info(f"\tCould not reach a text channel with id {channel_id}.")
 
-	await bot.load_state()
+		await bot.load_state()
+	else:  # Reconnected, fetch new channel objects
+		for qc in bot.queue_channels.values():
+			if channel := dc.get_channel(qc.channel.id) is not None:
+				qc.channel = channel
+			else:
+				log.error(f"ERROR! Channel missing after reconnect {qc.channel.guild.name}>#{qc.channel.name} ({qc.channel.id})!")
+
 	log.info("Done.")
 
 
