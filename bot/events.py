@@ -68,6 +68,7 @@ async def on_ready():
 			if channel := dc.get_channel(qc.channel.id) is not None:
 				qc.channel = channel
 			else:
+				bot.queue_channels.pop(qc.id)
 				log.error(f"ERROR! Channel missing after reconnect {qc.channel.guild.name}>#{qc.channel.name} ({qc.channel.id})!")
 
 	log.info("Done.")
