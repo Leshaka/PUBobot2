@@ -149,7 +149,7 @@ msgid "Nothing found"
 msgstr "No se ha encontrado nada"
 
 msgid "Banned **{member}** for `{duration}`."
-msgstr **{member}** está baneado por un tiempo de `{duration}`."
+msgstr "**{member}** está baneado por un tiempo de `{duration}`."
 
 msgid "Specified member is not banned."
 msgstr "El miembro especificado no está baneado."
@@ -175,7 +175,7 @@ msgid "**{queue}** pickup has started @ {channel}!"
 msgstr "¡La pickup **{queue}** ha empezado en el canal @ {channel}!"
 
 msgid "Server for **{queue}** is not set."
-msgstr "El servidor para **{queue}** no está configurado".
+msgstr "El servidor para **{queue}** no está configurado."
 
 msgid "Server for **{queue}**"
 msgstr "El servidor para **{queue}**"
