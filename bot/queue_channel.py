@@ -1348,9 +1348,9 @@ class QueueChannel:
 			raise bot.Exc.NotFoundError(self.gt("Server for **{queue}** is not set.").format(
 				queue=q.name
 			))
-		await self.success(q.cfg.server, title=self.gt("Server for **{queue}**".format(
+		await self.success(q.cfg.server, title=self.gt("Server for **{queue}**").format(
 			queue=q.name
-		)))
+		))
 
 	async def _stats(self, message, args=None):
 		if not args:
