@@ -40,11 +40,17 @@ def hl_role(role_id):
 
 
 def error_embed(description, title='Error'):
-	return Embed(title=title, description=description, color=0xca0000)
+	if title:
+		return Embed(title=title, description=description, color=0xca0000)
+	else:
+		return Embed(description=description, color=0xca0000)
 
 
 def ok_embed(description, title='Success'):
-	return Embed(title=title, description=description, color=0x32cd32)
+	if title:
+		return Embed(title=title, description=description, color=0x32cd32)
+	else:
+		return Embed(description=description, color=0x32cd32)
 
 
 def format_channel(string, guild):
