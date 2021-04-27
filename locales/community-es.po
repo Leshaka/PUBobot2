@@ -3,7 +3,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 
 msgid "_lang"
-msgstr "es"
+msgstr "community-es"
 
 # bot/queue_channel.py
 
