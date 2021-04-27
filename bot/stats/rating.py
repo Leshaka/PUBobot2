@@ -23,7 +23,7 @@ class BaseRating:
 		self.min_deviation = min_deviation or 0
 		self.scale = scale/100
 		self.reduction_scale = reduction_scale/100
-		self.ws_boost = ws_boost,
+		self.ws_boost = ws_boost
 		self.ls_boost = ls_boost
 
 	def _scale_changes(self, player, r_change, d_change, score):
@@ -206,7 +206,7 @@ class FlatRating(BaseRating):
 				results.append(new)
 
 			for p in losers:
-				new = new = self._scale_changes(p, -10, 0, -1)
+				new = self._scale_changes(p, -10, 0, -1)
 				results.append(new)
 		else:
 			results = [self._scale_changes(p, 0, 0, 0) for p in (*winners, *losers)]
