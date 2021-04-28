@@ -31,7 +31,7 @@ Hosting the service for everyone is not free, not mentioning the actuall time an
 * * `nano config.cfg` - Fill config file with your discord bot instance credentials and mysql settings and save.
 * * `python3.9 PUBobot2.py` - If everything is installed correctly the bot should launch without any errors and give you CLI.
 
-### Credits
+## Credits
 Developer: **Leshaka**. Contact: leshkajm@ya.ru.  
 Used libraries: [discord.py](https://github.com/Rapptz/discord.py), [aiomysql](https://github.com/aio-libs/aiomysql), [emoji](https://github.com/carpedm20/emoji/), [glicko2](https://github.com/deepy/glicko2), [TrueSkill](https://trueskill.org/), [prettytable](https://github.com/jazzband/prettytable).
 
