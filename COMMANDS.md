@@ -98,7 +98,6 @@
 | !stats_reset         |            |          |               | Reset all channel statistics          |
 | !stats_reset_player  | `@user`    |          |               | Reset all stats for @user             |
 | !stats_replace_player| `@user1`   | `@user2` |               | Replace @user1 with @user2 in database|
-| !undo_match          | `match ID` |          |               | Undo a match                          |
 
 #### Bans and Phrases
 | command        | arg1      | arg2       | arg3       | description                                             |
