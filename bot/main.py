@@ -69,7 +69,7 @@ def save_state():
 		matches.append(match.serialize())
 
 	f = open("saved_state.json", 'w')
-	f.write(json.dumps(dict(queues=queues, matches=matches, allow_offline=allow_offline, expire=bot.expire.serialize())))
+	f.write(json.dumps(dict(queues=queues, matches=matches, allow_offline=bot.allow_offline, expire=bot.expire.serialize())))
 	f.close()
 
 

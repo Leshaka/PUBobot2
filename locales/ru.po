@@ -259,8 +259,8 @@ msgstr "пусто"
 msgid "Unpicked:"
 msgstr "Кандидаты:"
 
-msgid "Pick players with `{self.m.qc.cfg.prefix}pick @player` command."
-msgstr "Выбирайте участников с помощью `{self.m.qc.cfg.prefix}pick @player`."
+msgid "Pick players with `{prefix}pick @player` command."
+msgstr "Выбирайте участников с помощью `{prefix}pick @player`."
 
 msgid "{member}'s turn to pick!"
 msgstr "Черёд выбирать {member}!"

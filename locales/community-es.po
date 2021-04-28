@@ -116,7 +116,7 @@ msgid "Your default expire time is {time}."
 msgstr "Tu tiempo de expiración por defecto es {time}."
 
 msgid "Your offline immunity is **off**."
-msgstr "Tu inmunidad en desconectado está *desactivada**."
+msgstr "Tu inmunidad en desconectado está **desactivada**."
 
 msgid "Your offline immunity is **on** until the next match."
 msgstr "Tu inmunidad en desconectado está **activada** hasta la próxima partida."
@@ -259,8 +259,8 @@ msgstr "vacío"
 msgid "Unpicked:"
 msgstr "Jugador no elegido:"
 
-msgid "Pick players with `{self.m.qc.cfg.prefix}pick @player` command."
-msgstr "Elige jugadores con el comando `{self.m.qc.cfg.prefix}pick @jugador`."
+msgid "Pick players with `{prefix}pick @player` command."
+msgstr "Elige jugadores con el comando `{prefix}pick @jugador`."
 
 msgid "{member}'s turn to pick!"
 msgstr "Le toca a {member} elegir jugador!"

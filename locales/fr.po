@@ -261,8 +261,8 @@ msgstr "vider"
 msgid "Unpicked:"
 msgstr "Joueurs restants à choisir:"
 
-msgid "Pick players with `{self.m.qc.cfg.prefix}pick @player` command."
-msgstr "Choisit ton joueur avec la commande `{self.m.qc.cfg.prefix}pick @joueur`."
+msgid "Pick players with `{prefix}pick @player` command."
+msgstr "Choisit ton joueur avec la commande `{prefix}pick @joueur`."
 
 msgid "{member}'s turn to pick!"
 msgstr "C'est au tour de {member} de choisir son joueur!"

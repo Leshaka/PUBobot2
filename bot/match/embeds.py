@@ -93,7 +93,7 @@ class Embeds:
 			)
 
 			if len(self.m.teams[0]) and len(self.m.teams[1]):
-				msg = self.m.gt(f"Pick players with `{self.m.qc.cfg.prefix}pick @player` command.")
+				msg = self.m.gt("Pick players with `{prefix}pick @player` command.").format(prefix=self.m.qc.cfg.prefix)
 				pick_step = len(self.m.teams[0]) + len(self.m.teams[1]) - 2
 				picker_team = self.m.teams[self.m.draft.pick_order[pick_step]] if pick_step < len(self.m.draft.pick_order)-1 else None
 				if picker_team:
