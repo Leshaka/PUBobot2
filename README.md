@@ -1,6 +1,9 @@
 # PUBobot2
 **PUBobot2** is a Discord bot for pickup games organisation. PUBobot2 have a remarkable list of features such as rating matches, rank roles, drafts, map votepolls and more!
 
+### Some screenshots
+![screenshots](https://cdn.discordapp.com/attachments/824935426228748298/836978698321395712/screenshots.png)
+
 ### Using the public bot instance
 If you want to test the bot, feel free to join [**Pubobot2-dev** discord server](https://discord.gg/rjNt9nC).  
 All the bot settings can be found and configured on the [Web interface](https://pubobot.leshaka.xyz/).  
