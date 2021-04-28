@@ -1,11 +1,39 @@
 # PUBobot2
-**PUBobot2** is a Discord bot for pickup games organisation.
-## Requirements
-**Python 3.9** and modules: discord.py, aiomysql, emoji, jinja2, glicko2, trueskill, gettext  
-**gettext** for multilanguage support.
-## Credits
+**PUBobot2** is a Discord bot for pickup games organisation. PUBobot2 have a remarkable list of features such as rating matches, rank roles, drafts, map votepolls and more!
+
+### Using the public bot instance
+If you want to test the bot, feel free to join [**Pubobot2-dev** discord server](https://discord.gg/rjNt9nC).  
+All the bot settings can be configured with its [Web interface](https://pubobot.leshaka.xyz/).
+For the complete list of commands see [COMMANDS.md](https://github.com/Leshaka/PUBobot2/blob/main/COMMANDS.md).
+
+### Support
+Hosting the service for everyone is not free, not mentioning the actuall time and effort to develop the project. If you enjoy the bot please subscribe on [Patreon](https://patreon.com/pubobot2) or donate any amount directly on [PayPal](https://paypal.me/leshkajm).
+
+## Hosting the bot yourself
+
+### Requirements
+* **Python 3.9** and modules from pip: discord.py, pymysql, aiomysql, emoji, glicko2, trueskill, prettytable.  
+* **MySQL**.
+* **gettext** for multilanguage support.
+
+### Installing
+* Create mysql user and database for PUBobot2:
+* * `sudo mysql`
+* * `CREATE USER 'pubobot' IDENTIFIED BY 'your-password';`
+* * `CREATE DATABASE pubodb`
+* * `GRANT ALL PRIVILEGES ON pubobot.* TO 'pubodb'@'localhost';`
+* Install required modules and configure PUBobot2:
+* * `python3.9 -m pip install discord.py pymysql aiomysql emoji glicko2 trueskill prettytable`
+* * `git clone https://github.com/Leshaka/PUBobot2`
+* * `cd PUBobot2`
+* * `cp config.example.cfg config.cfg`
+* * `nano config.cfg` - Fill config file with your discord bot instance credentials and mysql settings and save.
+* * `python3.9 PUBobot2.py` - If everything is installed correctly the bot should launch without any errors and give you CLI.
+
+### Credits
 Developer: **Leshaka**. Contact: leshkajm@ya.ru.  
-Used libraries: [discord.py](https://github.com/Rapptz/discord.py), [aiohttp](https://github.com/aio-libs/aiohttp), [aiomysql](https://github.com/aio-libs/aiomysql), [emoji](https://github.com/carpedm20/emoji/), [jinja2](https://palletsprojects.com/p/jinja/), [glicko2](https://github.com/deepy/glicko2), [TrueSkill](https://trueskill.org/).
+Used libraries: [discord.py](https://github.com/Rapptz/discord.py), [aiomysql](https://github.com/aio-libs/aiomysql), [emoji](https://github.com/carpedm20/emoji/), [glicko2](https://github.com/deepy/glicko2), [TrueSkill](https://trueskill.org/), [prettytable](https://github.com/jazzband/prettytable).
+
 ## License
 Copyright (C) 2020 **Leshaka**.
 
