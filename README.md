@@ -32,6 +32,7 @@ Hosting the service for everyone is not free, not mentioning the actual time and
 * * `cd PUBobot2`
 * * `cp config.example.cfg config.cfg`
 * * `nano config.cfg` - Fill config file with your discord bot instance credentials and mysql settings and save.
+* * Optionally, if you want to use other languages run script to compile translations `./compile_locales.sh`
 * * `python3.9 PUBobot2.py` - If everything is installed correctly the bot should launch without any errors and give you CLI.
 
 ## Credits
