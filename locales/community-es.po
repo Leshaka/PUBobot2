@@ -178,7 +178,7 @@ msgid "Server for **{queue}** is not set."
 msgstr "El servidor para **{queue}** no está configurado."
 
 msgid "Server for **{queue}**"
-msgstr "El servidor para **{queue}**"
+msgstr "Servidor para **{queue}**"
 
 msgid "Maps for **{queue}**"
 msgstr "Mapas para **{queue}**"
