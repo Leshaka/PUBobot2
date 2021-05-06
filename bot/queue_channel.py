@@ -1480,6 +1480,9 @@ class QueueChannel:
 		except ValueError:
 			raise bot.Exc.SyntaxError(self.gt("Invalid duration format. Syntax: 3h2m1s or 03:02:01."))
 
+		if secs > 1000000:
+			raise bot.Exc.ValueError(self.gt("Specified duration time is too long."))
+
 		reason = args.pop(0) if len(args) else None
 		await bot.noadds.noadd(self, member, secs, message.author, reason=reason)
 		await self.success(self.gt("Banned **{member}** for `{duration}`.").format(
