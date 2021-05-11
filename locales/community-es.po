@@ -142,7 +142,7 @@ msgstr "Tus notificaciones por MP están ahora desactivadas."
 msgid "Your DM notifications is now turned on."
 msgstr "Tus notificaciones por MP están ahora activadas."
 
-msgid "Leaderboard is empty"
+msgid "Leaderboard is empty."
 msgstr "La tabla de clasificación está vacía"
 
 msgid "Nothing found"

@@ -154,8 +154,8 @@ class QueueChannel:
 				section="Rating",
 				description="Set player's initial rating deviation.",
 				default=200,
-				verify=lambda x: 0 <= x <= 3000,
-				verify_message="Rating deviation must be between 0 and 3000",
+				verify=lambda x: 1 <= x <= 3000,
+				verify_message="Rating deviation must be between 1 and 3000",
 				notnull=True,
 				on_change=bot.update_rating_system
 			),
@@ -165,8 +165,8 @@ class QueueChannel:
 				section="Rating",
 				description="Set players minimum deviation value. If not set, rating changes may seek to 0 over time.",
 				default=75,
-				verify=lambda x: 0 <= x <= 3000,
-				verify_message="Rating minimum deviation must be between 0 and 3000",
+				verify=lambda x: 1 <= x <= 3000,
+				verify_message="Rating minimum deviation must be between 1 and 3000",
 				on_change=bot.update_rating_system
 			),
 			Variables.IntVar(
@@ -1171,9 +1171,9 @@ class QueueChannel:
 			raise bot.Exc.SyntaxError(f"Usage: {self.cfg.prefix}cancel_match __match_id__")
 
 		if not (match := get(bot.active_matches, id=int(args))):
-			raise bot.Exc.NotFoundError(self.gt("Could not find match with specified id. Check `{prefix}matches`.".format(
+			raise bot.Exc.NotFoundError(self.gt("Could not find match with specified id. Check `{prefix}matches`.").format(
 				prefix=self.cfg.prefix
-			)))
+			))
 
 		await match.cancel()
 
@@ -1186,9 +1186,9 @@ class QueueChannel:
 		if result:
 			await self.success(self.gt("Done."))
 		else:
-			raise bot.Exc.NotFoundError(self.gt("Could not find match with specified id. Check `{prefix}matches`.".format(
+			raise bot.Exc.NotFoundError(self.gt("Could not find match with specified id. Check `{prefix}matches`.").format(
 				prefix=self.cfg.prefix
-			)))
+			))
 
 	async def _switch_dms(self, message, args=""):
 		data = await db.select_one(('allow_dm', ), 'players', where={'user_id': message.author.id})

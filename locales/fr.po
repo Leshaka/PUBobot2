@@ -143,7 +143,7 @@ msgid "Your DM notifications is now turned on."
 msgstr "Les notifications par MP sont désormais activés."
 # Lynxer : DM = MP in french that means "Message Privé"
 
-msgid "Leaderboard is empty"
+msgid "Leaderboard is empty."
 msgstr "Le leaderboard a été vidé"
 
 msgid "Nothing found"

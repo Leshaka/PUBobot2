@@ -142,7 +142,7 @@ msgstr "Ваши DM оповещения выключены."
 msgid "Your DM notifications is now turned on."
 msgstr "Ваши DM оповещения включены."
 
-msgid "Leaderboard is empty"
+msgid "Leaderboard is empty."
 msgstr "Таблица лидеров пуста"
 
 msgid "Nothing found"
