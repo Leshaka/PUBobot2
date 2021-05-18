@@ -56,7 +56,9 @@ class CheckIn:
 			bot.waiting_reactions.pop(self.message.id)
 			self.ready_players = set()
 			if len(self.maps):
-				order = sorted(range(len(self.maps)), key=lambda n: len(self.map_votes[n]), reverse=True)
+				order = list(range(len(self.maps)))
+				random.shuffle(order)
+				order.sort(key=lambda n: len(self.map_votes[n]), reverse=True)
 				self.m.maps = [self.maps[n] for n in order[:self.m.cfg['map_count']]]
 			await self.message.delete()
 			await self.m.next_state()
