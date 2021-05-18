@@ -239,17 +239,17 @@ class Glicko2Rating(BaseRating):
 		po = glicko2.Player()
 		results = []
 		for p in winners:
-			po.setRating(p['rating'])
+			po.setRating(avg_w[0][0])
 			po.setRd(p['deviation'])
 			po.update_player(*avg_l)
-			new = self._scale_changes(p, po.getRating() - p['rating'], po.getRd() - p['deviation'], 0 if draw else 1)
+			new = self._scale_changes(p, po.getRating() - avg_w[0][0], po.getRd() - p['deviation'], 0 if draw else 1)
 			results.append(new)
 
 		for p in losers:
-			po.setRating(p['rating'])
+			po.setRating(avg_l[0][0])
 			po.setRd(p['deviation'])
 			po.update_player(*avg_w)
-			new = self._scale_changes(p, po.getRating() - p['rating'], po.getRd() - p['deviation'], 0 if draw else -1)
+			new = self._scale_changes(p, po.getRating() - avg_l[0][0], po.getRd() - p['deviation'], 0 if draw else -1)
 			results.append(new)
 
 		return results
