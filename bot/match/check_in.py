@@ -115,10 +115,11 @@ class CheckIn:
 			except DiscordException:
 				pass
 
+		bot.active_matches.remove(self.m)
+
 		await self.m.send("\n".join((
 			self.m.gt("{members} was not ready in time.").format(members=join_and([m.mention for m in not_ready])),
 			self.m.gt("Reverting {queue} to the gathering stage...").format(queue=f"**{self.m.queue.name}**")
 		)))
 
 		await self.m.queue.revert(not_ready, list(self.ready_players))
-		bot.active_matches.remove(self.m)
