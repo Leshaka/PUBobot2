@@ -65,9 +65,9 @@ class ExpireTimer:
 		if self.next and frame_time >= self.next.at:
 			task = self.tasks.pop(self.next.hash)
 			log.debug(f"EXPIRE TIMER TRIGGER > {task.member.name} ({task.qc.id}/{task.member.id})")
+			self._define_next()
 			if task.qc and task.member:
 				await task.qc.remove_members(task.member, reason="expire", highlight=True)
-			self._define_next()
 
 
 expire = ExpireTimer()
