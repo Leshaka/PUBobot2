@@ -17,7 +17,7 @@ msgid "You must possess moderator permissions."
 msgstr "Vous devez posséder les permissions de modérateur."
 
 msgid "expire time ran off"
-msgstr "le temps d'expiration touche à sa fin"
+msgstr "le temps de protection anti-afk est arrivé à terme" // Lynxer: It's impossible to make a real french translation of this. So i did an another sentance that means at 99% the same thing.
 
 msgid "member offline"
 msgstr "membre hors ligne"
@@ -26,16 +26,16 @@ msgid "member AFK"
 msgstr "membre AFK"
 
 msgid "member left the guild"
-msgstr "ce membre a quitté le serveur"
+msgstr "le joueur a quitté le serveur"
 
 msgid "queue started on another channel"
-msgstr "une queue a commencé sur un autre channel"
+msgstr "une queue a été remplit sur un autre channel"
 
 msgid "removed by a moderator"
 msgstr "retiré par un modérateur"
 
 msgid "{member} were removed from all queues ({reason})."
-msgstr "{member} a été retiré de toutes les queues ({reason})."
+msgstr "{member} a été retiré de la queue ({reason})."
 
 msgid "{members} were removed from all queues ({reason})."
 msgstr "{members} a été retiré de toutes les queues ({reason})."
@@ -50,22 +50,22 @@ msgid "You are not allowed to add to queues on this channel."
 msgstr "Vous n'avez pas la permission d'ajouter de queue sur ce channel."
 
 msgid "You are not allowed to add to {queues} queues."
-msgstr "Vous n'avez pas l'autorisation d'ajouter {queues} dans les queues."
+msgstr "Vous n'êtes pas autorisé à rejoindre la queue {queues}."
 
 msgid "You are already in an active match."
-msgstr "Vous êtes déjà dans un match qui n'est pas encore terminé."
+msgstr "Vous êtes déjà dans un match actif non terminé."
 
 msgid "You are not in an active match."
-msgstr "Vous n'êtes actuellement pas dans un match."
+msgstr "Vous n'êtes actuellement pas dans un match actif."
 
 msgid "Specified user not found."
-msgstr "L'utilisateur que vous avez spécifié est introuvable."
+msgstr "L'utilisateur que vous avez identifié est introuvable."
 
 msgid "Specified user is not in a match."
-msgstr "L'utilisateur que vous nous avez spécifié ne se trouve pas dans un match."
+msgstr "L'utilisateur que vous avez identifié ne se trouve pas dans un match."
 
 msgid "Specified user is in an active match."
-msgstr "L'utilisateur que vous nous avez spécifié se trouve dans un match qui n'est pas encore terminé."
+msgstr "L'utilisateur que vous avez identifié se trouve dans un match qui n'est pas encore terminé."
 
 msgid "Matches"
 msgstr "Matchs"
@@ -86,31 +86,31 @@ msgid "No rating data found."
 msgstr "Aucune donnée d'évalutation n'a été trouvé."
 
 msgid "Could not find match with specified id. Check `{prefix}matches`."
-msgstr "Aucun match n'a été trouvé avec l'id de match que vous m'avez donné. Regardez-le dans `{prefix}matches`."
+msgstr "Impossible de trouver un match lié à ce numéro. Cherchez le bon numéro avec la commande `{prefix}matches`."
 
 msgid "You have {duration} expire time left."
-msgstr "Il te reste {duration} avant de te faire exclure de la queue."
+msgstr "Il te reste {duration} avant de te faire retirer de la queue."
 
 msgid "You don't have an expire timer set right now."
-msgstr "Aucune expiration de temps ne t'a été attribué."
+msgstr "Aucun temps d'expiration ne t'a été attribué."
 
 msgid "Invalid duration format. Syntax: 3h2m1s or 03:02:01."
-msgstr "Format de durée invalide. Veuillez suivre cette syntaxe: 3h2m1s ou 03:02:01."
+msgstr "Format de durée invalide. Veuillez suivre la syntaxe suivante: 3h2m1s ou 03:02:01."
 
 msgid "Expire time must be less than {time}."
 msgstr "Le temps d'expiration doit être inférieur à {time}."
 
 msgid "Set your expire time to {duration}."
-msgstr "J'ai réglé votre temps d'expiration pour {duration}."
+msgstr "J'ai réglé votre temps d'expiration à {duration}."
 
 msgid "Invalid duration format. Syntax: 3h2m1s or 03:02:01 or AFK."
-msgstr "Format de durée invalide. Veuillez suivre cette syntaxe: 3h2m1s ou 03:02:01 ou AFK."
+msgstr "Format de durée invalide. Veuillez suivre la syntaxe suivante: 3h2m1s ou 03:02:01 ou AFK."
 
 msgid "You will be removed from queues on AFK status by default."
 msgstr "Vous allez être retiré des queues avec le statut d'AFK par défault."
 
 msgid "Your expire time value will fallback to guild's settings."
-msgstr "La valeur de votre temps d'expiration va se retirer pour le cadre du serveur."
+msgstr "La valeur de votre temps d'expiration va se retirer dû aux réglages du serveur."
 
 msgid "Your default expire time is {time}."
 msgstr "Votre temps d'expiration par défaut est de {time}."
@@ -131,7 +131,7 @@ msgid "Specified queue not found."
 msgstr "La queue spécifiée est introuvable."
 
 msgid "You're promoting too often, please wait `{delay}` until next promote."
-msgstr "Vous faîtes de la promotion trop souvent, veuillez attendre `{delay}` avant de promouvoir à nouveau."
+msgstr "Vous utilisez cette commande trop souvent, veuillez attendre `{delay}` avant de pouvoir promouvoir à nouveau."
 
 msgid "Done."
 msgstr "C'est fait."
@@ -143,7 +143,7 @@ msgid "Your DM notifications is now turned on."
 msgstr "Les notifications par MP sont désormais activés."
 # Lynxer : DM = MP in french that means "Message Privé"
 
-msgid "Leaderboard is empty."
+msgid "Leaderboard is empty"
 msgstr "Le leaderboard a été vidé"
 
 msgid "Nothing found"
@@ -156,28 +156,27 @@ msgid "Specified member is not banned."
 msgstr "le membre spécifié n'est actuellement pas banni."
 
 msgid " ID | Prisoner | Left | Reason"
-msgstr " ID | Prisonnier | Reste | Raison"
+msgstr " ID | Banni | Reste | Raison"
 
 msgid "You have been banned, `{duration}` left."
 msgstr "Vous avez été banni, il vous reste `{duration}` avant votre débanissement."
 
 msgid "Noadds are empty."
-msgstr "La liste des Noadds a été vidé."
-# Lynxer : Noadds is a simple word that every french can understand. There is not a real word to translate it except "La liste noire a été vidé." which means "The blacklist is empty.". So it's better to use what i wrote under this.
+msgstr "La liste des bannis a été vidé."
 
 # bot/queues/pickup_queue.py
 
 msgid "{role} Please add to **{name}** pickup, `{left}` players left!"
-msgstr "{role} Rejoignez le pickup **{name}**, il nous manque `{left}` joueurs !"
+msgstr "{role}, veuillez rejoidre le pickup **{name}**, il nous manque `{left}` joueurs!"
 
 msgid "Not enough players to start the queue."
-msgstr "Il n'y a pas assez de joueurs pour lancer la queue."
+msgstr "Il n'y a pas assez de joueurs pour pouvoir lancer la queue."
 
 msgid "**{queue}** pickup has started @ {channel}!"
-msgstr "Le pickup **{queue}** vient tout juste de commencer sur le channel @ {channel}!"
+msgstr "Votre partie de **{queue}** vient tout juste de commencer sur le channel @ {channel}!"
 
 msgid "Server for **{queue}** is not set."
-msgstr "Le serveur n'a pas été réglé pour **{queue}**."
+msgstr "Le serveur pour **{queue}** n'a pas été réglé."
 
 msgid "Server for **{queue}**"
 msgstr "Le serveur pour **{queue}**"
@@ -212,16 +211,16 @@ msgid "The match must be on the waiting report stage."
 msgstr "Le match doit être à un stade d'attente de rapport de match."
 
 msgid "You must be a team captain to report a loss or draw."
-msgstr "Vous devez être le capitaine d'une équipe pour rapporter une défaite ou une victoire."
+msgstr "Vous devez être le capitaine d'une équipe pour rapporter une défaite ou une égalité."
 
 msgid "{self} is calling a draw, waiting for {enemy} to type `{prefix}rd`."
-msgstr "{self} rapporte une égalité, en attente de {enemy} pour confirmer avec la commande `{prefix}rd`."
+msgstr "{self} rapporte une égalité, en attente de {enemy} pour confirmer l'égalité avec la commande `{prefix}rd`."
 
 msgid "Specified team name not found."
 msgstr "Le nom d'équipe que vous avez spécifié est introuvable."
 
 msgid "Match {queue} ({id}) has timed out."
-msgstr "Le match numéro ({id}) pour le {queue} a durée trop longtemps sans recevoir de rapport de match."
+msgstr "Le match numéro ({id}) pour {queue} a durée trop longtemps sans recevoir de rapport de match."
 
 msgid "{players} your match has been canceled."
 msgstr "{players} votre match a été annulé."
@@ -247,7 +246,7 @@ msgid "Please react with {ready_emoji} to **check-in** or {not_ready_emoji} to *
 msgstr "Veuillez réagir avec {ready_emoji} pour **valider votre présence** ou {not_ready_emoji} pour **se retirer**."
 
 msgid "Please react with {ready_emoji} or vote for a map to **check-in**."
-msgstr "Veuillez réagir avec {ready_emoji} ou voter une map pour **valider votre présence**"
+msgstr "Veuillez réagir avec {ready_emoji} ou votez une map pour **valider votre présence**"
 
 msgid "React with {not_ready_emoji} to **abort**!"
 msgstr "Réagit avec {not_ready_emoji} pour **te retirer**!"
@@ -256,19 +255,19 @@ msgid "__**{queue}** is now on the draft stage!__"
 msgstr "__**{queue}** est au stade de création des équipes__"
 
 msgid "empty"
-msgstr "vider"
+msgstr "vide"
 
 msgid "Unpicked:"
 msgstr "Joueurs restants à choisir:"
 
-msgid "Pick players with `{prefix}pick @player` command."
-msgstr "Choisit ton joueur avec la commande `{prefix}pick @joueur`."
+msgid "Pick players with `{self.m.qc.cfg.prefix}pick @player` command."
+msgstr "Choisi ton joueur avec la commande `{self.m.qc.cfg.prefix}pick @joueur`."
 
 msgid "{member}'s turn to pick!"
 msgstr "C'est au tour de {member} de choisir son joueur!"
 
 msgid "Type {cmd} to become a captain and start picking teams."
-msgstr "Veuillez écrire la commande {cmd} pour devenir un capitaine et ainsi composer vos équipes."
+msgstr "Veuillez écrire la commande {cmd} pour devenir un capitaine et pour pouvoir composer vos équipes."
 
 msgid "__**{queue}** has started!__"
 msgstr "__**{queue} peut désormais commencer!** __"
@@ -316,7 +315,7 @@ msgid "You have stopped looking for a substitute."
 msgstr "Vous avez cessé de chercher un remplaçant."
 
 msgid "You are now looking for a substitute."
-msgstr "Vousrecherchez désormais un remplaçant."
+msgstr "Vous recherchez désormais un remplaçant."
 
 msgid "Specified player is not looking for a substitute."
 msgstr "Le joueur identifié n'est pas à la recherche de remplaçant."
@@ -330,7 +329,7 @@ msgid "{member} has aborted the check-in."
 msgstr "{member} n'a pas confirmé sa présence."
 
 msgid "Reverting {queue} to the gathering stage..."
-msgstr "Remets en place {queue} au système de rassemblement."
+msgstr "Remets en place {queue} au stade de rassemblement des joueurs."
 
 msgid "{members} was not ready in time."
 msgstr "{members} n'a pas pu être prêt dans les temps."
