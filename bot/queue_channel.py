@@ -333,8 +333,13 @@ class QueueChannel:
 			lb=self._leaderboard,
 			leaderboard=self._leaderboard,
 			rl=self._rl,
+			report_loss=self._rl,
 			rd=self._rd,
+			report_draw=self._rd,
+			rc=self._rc,
+			report_cancel=self._rc,
 			rw=self._rw,
+			report_win=self._rw,
 			expire=self._expire,
 			default_expire=self._default_expire,
 			ao=self._allow_offline,
@@ -974,12 +979,17 @@ class QueueChannel:
 	async def _rl(self, message, args=None):
 		if (match := self.get_match(message.author)) is None:
 			raise bot.Exc.NotInMatchError(self.gt("You are not in an active match."))
-		await match.report_loss(message.author, draw=False)
+		await match.report_loss(message.author, draw_flag=False)
 
 	async def _rd(self, message, args=None):
 		if (match := self.get_match(message.author)) is None:
 			raise bot.Exc.NotInMatchError(self.gt("You are not in an active match."))
-		await match.report_loss(message.author, draw=True)
+		await match.report_loss(message.author, draw_flag=1)
+
+	async def _rc(self, message, args=None):
+		if (match := self.get_match(message.author)) is None:
+			raise bot.Exc.NotInMatchError(self.gt("You are not in an active match."))
+		await match.report_loss(message.author, draw_flag=2)
 
 	async def _rw(self, message, args=""):
 		self._check_perms(message.author, 1)

@@ -39,7 +39,7 @@ class Match:
 			super().__init__(players or [])
 			self.name = name
 			self.emoji = emoji
-			self.want_draw = False
+			self.draw_flag = False  # 1 - wants draw; 2 - wants cancel
 			self.idx = idx
 
 		def set(self, players):
@@ -236,7 +236,7 @@ class Match:
 	async def start_waiting_report(self):
 		await self.final_message()
 
-	async def report_loss(self, member, draw):
+	async def report_loss(self, member, draw_flag):
 		if self.state != self.WAITING_REPORT:
 			raise bot.Exc.MatchStateError(self.gt("The match must be on the waiting report stage."))
 
@@ -245,10 +245,13 @@ class Match:
 			raise bot.Exc.PermissionError(self.gt("You must be a team captain to report a loss or draw."))
 
 		enemy_team = self.teams[1-team.idx]
-		if draw and not enemy_team.want_draw:
-			team.want_draw = True
+		if draw_flag and not enemy_team.draw_flag == draw_flag:
+			team.draw_flag = draw_flag
 			await self.qc.channel.send(
-				self.gt("{self} is calling a draw, waiting for {enemy} to type `{prefix}rd`.").format(
+				self.gt(
+					"{self} is calling a draw, waiting for {enemy} to type `{prefix}rd`." if draw_flag == 1 else
+					"{self} offers to cancel the match, waiting for {enemy} to type `{prefix}rc`."
+				).format(
 					self=member.mention,
 					enemy=enemy_team[0].mention,
 					prefix=self.qc.cfg.prefix
@@ -256,7 +259,14 @@ class Match:
 			)
 			return
 
-		self.winner = None if draw else enemy_team.idx
+		if draw_flag == 2:
+			await self.cancel()
+			return
+
+		elif draw_flag == 1:
+			self.winner = None
+		else:
+			self.winner = enemy_team.idx
 		await self.finish_match()
 
 	async def report_win(self, team_name):  # version for admins/mods

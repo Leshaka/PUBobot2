@@ -79,10 +79,11 @@
 | !put       | `@user`     | `team name` / unpicked | Place a user in a team as a moderator |
 
 #### Report match
-| command       | arg1     | arg2           | description                    |
-|---------------|----------|----------------|--------------------------------|
-| !rl           |          |                | Report a loss on current match |
-| !rd           |          |                | Report a draw on current match |
+| command       | arg1     | arg2           | description                      |
+|---------------|----------|----------------|----------------------------------|
+| !rl           |          |                | Report a loss on current match   |
+| !rd           |          |                | Report a draw on current match   |
+| !rc           |          |                | Report a cancel on current match |
 | !rw           | `match ID` | `team name` / draw | Report a win/draw as moderator |
 | !cancel_match | `match ID` |                | Cancel a match                 |
 

@@ -215,6 +215,9 @@ msgstr "Необходимо быть капитаном команды."
 msgid "{self} is calling a draw, waiting for {enemy} to type `{prefix}rd`."
 msgstr "{self} предлагает ничью, ожидаем `{prefix}rd` от {enemy}."
 
+msgid "{self} offers to cancel the match, waiting for {enemy} to type `{prefix}rc`."
+msgstr "{self} предлагает отмену матча, ожидаем `{prefix}rc` от {enemy}."
+
 msgid "Specified team name not found."
 msgstr "Указанная команда не найдена."
 
