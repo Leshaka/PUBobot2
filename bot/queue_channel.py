@@ -709,7 +709,7 @@ class QueueChannel:
 
 		# select active queues or default queues if no active queues
 		else:
-			t_queues = [q for q in self.queues if len(q.queue)]
+			t_queues = [q for q in self.queues if len(q.queue) and q.cfg.is_default]
 			if not len(t_queues):
 				t_queues = [q for q in self.queues if q.cfg.is_default]
 
