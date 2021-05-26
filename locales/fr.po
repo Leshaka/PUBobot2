@@ -17,7 +17,7 @@ msgid "You must possess moderator permissions."
 msgstr "Vous devez posséder les permissions de modérateur."
 
 msgid "expire time ran off"
-msgstr "le temps de protection anti-afk est arrivé à terme" // Lynxer: It's impossible to make a real french translation of this. So i did an another sentance that means at 99% the same thing.
+msgstr "le temps de protection anti-afk est arrivé à terme" # Lynxer: It's impossible to make a real french translation of this. So i did an another sentance that means at 99% the same thing.
 
 msgid "member offline"
 msgstr "membre hors ligne"
@@ -143,8 +143,8 @@ msgid "Your DM notifications is now turned on."
 msgstr "Les notifications par MP sont désormais activés."
 # Lynxer : DM = MP in french that means "Message Privé"
 
-msgid "Leaderboard is empty"
-msgstr "Le leaderboard a été vidé"
+msgid "Leaderboard is empty."
+msgstr "Le leaderboard a été vidé."
 
 msgid "Nothing found"
 msgstr "Aucune donnée n'a été trouvée"
@@ -216,6 +216,9 @@ msgstr "Vous devez être le capitaine d'une équipe pour rapporter une défaite 
 msgid "{self} is calling a draw, waiting for {enemy} to type `{prefix}rd`."
 msgstr "{self} rapporte une égalité, en attente de {enemy} pour confirmer l'égalité avec la commande `{prefix}rd`."
 
+msgid "{self} offers to cancel the match, waiting for {enemy} to type `{prefix}rc`."
+msgstr "{self} demande l’annulation du match, en attente de {enemy} pour confirmer avec la commande `{prefix}rc`."
+
 msgid "Specified team name not found."
 msgstr "Le nom d'équipe que vous avez spécifié est introuvable."
 
@@ -260,8 +263,8 @@ msgstr "vide"
 msgid "Unpicked:"
 msgstr "Joueurs restants à choisir:"
 
-msgid "Pick players with `{self.m.qc.cfg.prefix}pick @player` command."
-msgstr "Choisi ton joueur avec la commande `{self.m.qc.cfg.prefix}pick @joueur`."
+msgid "Pick players with `{prefix}pick @player` command."
+msgstr "Choisi ton joueur avec la commande `{prefix}pick @joueur`."
 
 msgid "{member}'s turn to pick!"
 msgstr "C'est au tour de {member} de choisir son joueur!"
@@ -308,8 +311,8 @@ msgstr "Ce n'est pas à votre tour de choisir un joueur."
 msgid "Specified player not in the unpicked list."
 msgstr "Le joueur identifié ne se trouve pas dans la liste des joueurs à choisir."
 
-msgid "The match must be on the draft or waiting report stage."
-msgstr "Le match doit être à un stade de composition d'équipe ou en attente d'un résultat."
+msgid "The match must be on the check-in, draft or waiting report stage."
+msgstr "Le match doit être au stade de vérification, de création des équipes ou en attente d’un résultat."
 
 msgid "You have stopped looking for a substitute."
 msgstr "Vous avez cessé de chercher un remplaçant."

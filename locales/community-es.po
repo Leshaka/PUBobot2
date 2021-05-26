@@ -215,6 +215,9 @@ msgstr "Debes ser capitán de un equipo para reportar una partida perdida o empa
 msgid "{self} is calling a draw, waiting for {enemy} to type `{prefix}rd`."
 msgstr "{self} informa de un empate, esperando que {enemy} confirme con el comando `{prefix}rd`."
 
+msgid "{self} offers to cancel the match, waiting for {enemy} to type `{prefix}rc`."
+msgstr "{self} pide cancelar la partida, a la espera de que {enemy} confirme con el comando `{prefix}rc`."
+
 msgid "Specified team name not found."
 msgstr "No se ha encontrado el nombre del equipo especificado."
 
@@ -306,8 +309,8 @@ msgstr "No es tu turno para elegir."
 msgid "Specified player not in the unpicked list."
 msgstr "El jugador específico no está en la lista para elegir."
 
-msgid "The match must be on the draft or waiting report stage."
-msgstr "La partida debe estar en la fase de formación o a la espera de un resultado."
+msgid "The match must be on the check-in, draft or waiting report stage."
+msgstr "La partida debe estar en la fase de verificación, formando los equipos o esperando un resultado."
 
 msgid "You have stopped looking for a substitute."
 msgstr "Has dejado de buscar un sustituto."
