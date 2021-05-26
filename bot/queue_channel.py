@@ -866,9 +866,11 @@ class QueueChannel:
 			raise bot.Exc.SyntaxError(f"Usage: {self.cfg.prefix}pick __player__")
 		elif (match := self.get_match(message.author)) is None:
 			raise bot.Exc.NotInMatchError(self.gt("You are not in an active match."))
-		elif (member := self.get_member(args)) is None:
+
+		members = [self.get_member(i.strip()) for i in args.strip().split(" ")]
+		if None in members:
 			raise bot.Exc.SyntaxError(self.gt("Specified user not found."))
-		await match.draft.pick(message.author, member)
+		await match.draft.pick(message.author, members)
 
 	async def _teams(self, message, args=None):
 		if (match := self.get_match(message.author)) is None:

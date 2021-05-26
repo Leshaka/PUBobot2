@@ -53,30 +53,31 @@ class Draft:
 		team.insert(0, author)
 		await self.print()
 
-	async def pick(self, author, player):
-		pick_step = max(0, (len(self.m.teams[0]) + len(self.m.teams[1]) - 2))
-		picker_team = self.m.teams[self.pick_order[pick_step]] if pick_step < len(self.pick_order) - 1 else None
+	async def pick(self, author, players):
+		for player in players:
+			pick_step = max(0, (len(self.m.teams[0]) + len(self.m.teams[1]) - 2))
+			picker_team = self.m.teams[self.pick_order[pick_step]] if pick_step < len(self.pick_order) - 1 else None
 
-		if self.m.state != self.m.DRAFT:
-			raise bot.Exc.MatchStateError(self.m.gt("The match is not on the draft stage."))
-		elif (team := find(lambda t: author in t[:1], self.m.teams[:2])) is None:
-			raise bot.Exc.PermissionError(self.m.gt("You are not a captain."))
-		elif picker_team is not None and picker_team is not team:
-			raise bot.Exc.PermissionError(self.m.gt("Not your turn to pick."))
-		elif player not in self.m.teams[2]:
-			raise bot.Exc.NotFoundError(self.m.gt("Specified player not in the unpicked list."))
+			if self.m.state != self.m.DRAFT:
+				raise bot.Exc.MatchStateError(self.m.gt("The match is not on the draft stage."))
+			elif (team := find(lambda t: author in t[:1], self.m.teams[:2])) is None:
+				raise bot.Exc.PermissionError(self.m.gt("You are not a captain."))
+			elif picker_team is not None and picker_team is not team:
+				raise bot.Exc.PermissionError(self.m.gt("Not your turn to pick."))
+			elif player not in self.m.teams[2]:
+				raise bot.Exc.NotFoundError(self.m.gt("Specified player not in the unpicked list."))
 
-		self.m.teams[2].remove(player)
-		team.append(player)
+			self.m.teams[2].remove(player)
+			team.append(player)
 
-		# auto last-pick rest of the players if possible
-		# if rest of pick_order covers the unpicked list
-		if len(self.m.teams[2]) and len(self.pick_order[pick_step+1:]) >= len(self.m.teams[2]):
-			# if rest of pick_order is a single team
-			if len(set(self.pick_order[pick_step+1:])) == 1:
-				picker_team = self.m.teams[self.pick_order[pick_step+1]]
-				picker_team.extend(self.m.teams[2])
-				self.m.teams[2].clear()
+			# auto last-pick rest of the players if possible
+			# if rest of pick_order covers the unpicked list
+			if len(self.m.teams[2]) and len(self.pick_order[pick_step+1:]) >= len(self.m.teams[2]):
+				# if rest of pick_order is a single team
+				if len(set(self.pick_order[pick_step+1:])) == 1:
+					picker_team = self.m.teams[self.pick_order[pick_step+1]]
+					picker_team.extend(self.m.teams[2])
+					self.m.teams[2].clear()
 
 		await self.refresh()
 
