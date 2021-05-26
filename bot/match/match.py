@@ -131,7 +131,6 @@ class Match:
 		self.players = list(players)
 		self.ratings = ratings
 		self.winner = None
-		print(self.ratings)
 
 		team_names = self.cfg['team_names']
 		team_emojis = self.cfg['team_emojis'] or random.sample(self.TEAM_EMOJIS, 2)

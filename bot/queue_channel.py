@@ -1206,6 +1206,8 @@ class QueueChannel:
 			raise bot.Exc.NotFoundError(self.gt("Could not find match with specified id. Check `{prefix}matches`.").format(
 				prefix=self.cfg.prefix
 			))
+		if match.qc != self:
+			raise bot.Exc.PermissionError("Specified match does not belong to this channel.")
 
 		await match.cancel()
 
