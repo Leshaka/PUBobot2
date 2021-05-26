@@ -197,8 +197,8 @@ class PickupQueue:
 				display="Vote poll map count",
 				section="Appearance",
 				default=None,
-				verify=lambda n: 2 <= n <= 5,
-				verify_message="Vote maps number must be between 2 and 5.",
+				verify=lambda n: 2 <= n <= 9,
+				verify_message="Vote maps number must be between 2 and 9.",
 				description="Set to enable map voting, this requires check-in timeout to be set."
 			)
 		],

@@ -70,13 +70,14 @@ class BaseRating:
 			results.append(d)
 		return results
 
-	async def set_rating(self, member, rating, deviation=None):
+	async def set_rating(self, member, rating=None, deviation=None, penality=0, reason=None):
 		old = await db.select_one(
 			('rating', 'deviation'), self.table,
 			where=dict(channel_id=self.channel_id, user_id=member.id)
 		)
 
 		if not old:
+			rating = max(1, rating - penality if rating else self.init_rp - penality)
 			await db.insert(
 				self.table,
 				dict(
@@ -86,6 +87,7 @@ class BaseRating:
 			)
 			old = dict(rating=self.init_rp, deviation=self.init_deviation)
 		else:
+			rating = max(1, rating - penality if rating else old['rating'] - penality)
 			old['rating'] = old['rating'] or self.init_rp
 			old['deviation'] = old['deviation'] or self.init_deviation
 			await db.update(
@@ -100,7 +102,7 @@ class BaseRating:
 				channel_id=self.channel_id, user_id=member.id, at=int(time.time()), rating_before=old['rating'],
 				deviation_before=old['deviation'], rating_change=rating-old['rating'],
 				deviation_change=deviation-old['deviation'] if deviation else 0,
-				match_id=None, reason='manual seeding'
+				match_id=None, reason=reason
 			)
 		)
 

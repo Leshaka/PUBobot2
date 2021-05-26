@@ -348,6 +348,7 @@ class QueueChannel:
 			promote=self._promote,
 			rating_set=self._rating_set,
 			seed=self._rating_set,
+			rating_penality=self._rating_penality,
 			rating_hide=self._rating_hide,
 			rating_unhide=self._rating_unhide,
 			rating_reset=self._rating_reset,
@@ -1142,6 +1143,8 @@ class QueueChannel:
 			if (member := self.get_member(args.pop(0))) is None:
 				raise ValueError()
 			rating = int(args.pop(0))
+			if not 0 < rating < 10000:
+				raise ValueError()
 			deviation = int(args.pop(0)) if len(args) else None
 		except (ValueError, IndexError):
 			raise bot.Exc.SyntaxError(f"Usage: {self.cfg.prefix}rating_set __@user__ __rating__ [__deviation__]")
@@ -1149,7 +1152,24 @@ class QueueChannel:
 		if not 0 < rating < 10000 or not 0 < (deviation or 1) < 3000:
 			raise bot.Exc.ValueError("Bad rating or deviation value.")
 
-		await self.rating.set_rating(member, rating, deviation)
+		await self.rating.set_rating(member, rating=rating, deviation=deviation, reason="manual seeding")
+		await self.update_rating_roles(member)
+		await self.success(self.gt("Done."))
+
+	async def _rating_penality(self, message, args=None):
+		self._check_perms(message.author, 1)
+		args = args.split(" ", maxsplit=2)
+		try:
+			if (member := self.get_member(args.pop(0))) is None:
+				raise ValueError()
+			penality = int(args.pop(0))
+			if abs(penality) > 10000:
+				raise ValueError()
+		except (ValueError, IndexError):
+			raise bot.Exc.SyntaxError(f"Usage: {self.cfg.prefix}rating_penality __@user__ __points__ [__reason__]")
+
+		reason = "penality: " + args[0] if len(args) else "penality by a moderator"
+		await self.rating.set_rating(member, penality=penality, reason=reason)
 		await self.update_rating_roles(member)
 		await self.success(self.gt("Done."))
 

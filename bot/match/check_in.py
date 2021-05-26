@@ -11,7 +11,7 @@ class CheckIn:
 
 	READY_EMOJI = "☑"
 	NOT_READY_EMOJI = "⛔"
-	INT_EMOJIS = ["1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣"]
+	INT_EMOJIS = ["1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6⃣", "7⃣", "8⃣", "9⃣"]
 
 	def __init__(self, match, timeout):
 		self.m = match
