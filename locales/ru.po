@@ -309,8 +309,8 @@ msgstr "Не ваша очередь выбирать."
 msgid "Specified player not in the unpicked list."
 msgstr "Указанный участник не в списке кандидатов."
 
-msgid "The match must be on the draft or waiting report stage."
-msgstr "Матч должен быть на стадии драфта или ожидания результата."
+msgid "The match must be on the check-in, draft or waiting report stage."
+msgstr "Матч должен быть на стадии подтверждения участников, драфта или ожидания результата."
 
 msgid "You have stopped looking for a substitute."
 msgstr "Вы больше не ищете замену."
