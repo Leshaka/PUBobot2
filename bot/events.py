@@ -64,7 +64,7 @@ async def on_ready():
 
 		await bot.load_state()
 	else:  # Reconnected, fetch new channel objects
-		for qc in bot.queue_channels.values():
+		for qc in list(bot.queue_channels.values()):
 			if channel := dc.get_channel(qc.channel.id) is not None:
 				qc.channel = channel
 			else:
