@@ -70,6 +70,16 @@ class PickupQueue:
 				verify_message="Check in timeout must be less than a hour.",
 				description="Set the check-in stage duration."
 			),
+			Variables.BoolVar(
+				"check_in_discard",
+				display="Allow discard check-in",
+				section="General",
+				default=1,
+				description="".join((
+					"Allow to discard participation during the check-in stage ",
+					"and abort the match if not everyone is ready in time.")),
+				notnull=True
+			),
 			Variables.OptionVar(
 				"pick_teams",
 				display="Pick teams",
@@ -350,7 +360,7 @@ class PickupQueue:
 			pick_teams=self.cfg.pick_teams, pick_order=self.cfg.pick_order,
 			maps=[i['name'] for i in self.cfg.tables.maps], vote_maps=self.cfg.vote_maps,
 			map_count=self.cfg.map_count, check_in_timeout=self.cfg.check_in_timeout,
-			start_msg=self.cfg.start_msg, server=self.cfg.server
+			check_in_discard=self.cfg.check_in_discard, start_msg=self.cfg.start_msg, server=self.cfg.server
 		)
 
 	async def revert(self, not_ready, ready):

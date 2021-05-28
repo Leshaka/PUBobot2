@@ -326,6 +326,9 @@ msgstr "Указаный участник не ищет замену."
 msgid "The match is not on the check-in stage."
 msgstr "Матч не на стадии подтверждения участников."
 
+msgid "Discarding check-in is not allowed."
+msgstr "Отмена участия запрещена."
+
 msgid "{member} has aborted the check-in."
 msgstr "{member} отменил свое участие."
 

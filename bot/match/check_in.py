@@ -16,6 +16,7 @@ class CheckIn:
 	def __init__(self, match, timeout):
 		self.m = match
 		self.timeout = timeout
+		self.allow_discard = self.m.cfg['check_in_discard']
 		self.ready_players = set()
 		self.message = None
 
@@ -31,14 +32,19 @@ class CheckIn:
 
 	async def think(self, frame_time):
 		if frame_time > self.m.start_time + self.timeout:
-			await self.abort_timeout()
+			if self.allow_discard:
+				await self.abort_timeout()
+			else:
+				await self.finish()
 
 	async def start(self):
 		text = f"!spawn message {self.m.id}"
 		self.message = await self.m.send(text)
 
+		emojis = [self.READY_EMOJI, '🔸', self.NOT_READY_EMOJI] if self.allow_discard else [self.READY_EMOJI]
+		emojis += [self.INT_EMOJIS[n] for n in range(len(self.maps))]
 		try:
-			for emoji in [self.READY_EMOJI, '🔸', self.NOT_READY_EMOJI] + [self.INT_EMOJIS[n] for n in range(len(self.maps))]:
+			for emoji in emojis:
 				await self.message.add_reaction(emoji)
 		except DiscordException:
 			pass
@@ -53,15 +59,18 @@ class CheckIn:
 			except DiscordException:
 				pass
 		else:
-			bot.waiting_reactions.pop(self.message.id)
-			self.ready_players = set()
-			if len(self.maps):
-				order = list(range(len(self.maps)))
-				random.shuffle(order)
-				order.sort(key=lambda n: len(self.map_votes[n]), reverse=True)
-				self.m.maps = [self.maps[n] for n in order[:self.m.cfg['map_count']]]
-			await self.message.delete()
-			await self.m.next_state()
+			await self.finish()
+
+	async def finish(self):
+		bot.waiting_reactions.pop(self.message.id)
+		self.ready_players = set()
+		if len(self.maps):
+			order = list(range(len(self.maps)))
+			random.shuffle(order)
+			order.sort(key=lambda n: len(self.map_votes[n]), reverse=True)
+			self.m.maps = [self.maps[n] for n in order[:self.m.cfg['map_count']]]
+		await self.message.delete()
+		await self.m.next_state()
 
 	async def process_reaction(self, reaction, user, remove=False):
 		if self.m.state != self.m.CHECK_IN or user not in self.m.players:
@@ -85,7 +94,7 @@ class CheckIn:
 				self.ready_players.add(user)
 			await self.refresh()
 
-		elif str(reaction) == self.NOT_READY_EMOJI:
+		elif str(reaction) == self.NOT_READY_EMOJI and self.allow_discard:
 			await self.abort_member(user)
 
 	async def set_ready(self, member, ready):
@@ -95,6 +104,8 @@ class CheckIn:
 			self.ready_players.add(member)
 			await self.refresh()
 		elif not ready:
+			if not self.allow_discard:
+				raise bot.Exc.PermissionError(self.m.gt("Discarding check-in is not allowed."))
 			await self.abort_member(member)
 
 	async def abort_member(self, member):
