@@ -201,8 +201,9 @@ msgstr "mese"
 msgid "year"
 msgstr "anno"
 
+# TODO
 msgid "**Total matches: {count}**"
-msgstr "**Partite totali: {count}**"        //TODO
+msgstr "**Partite totali: {count}**"
 
 # bot/match/match.py
 
