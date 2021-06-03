@@ -207,142 +207,142 @@ msgstr "**Partite totali: {count}**"        //TODO
 # bot/match/match.py
 
 msgid "The match must be on the waiting report stage."
-msgstr "Матч должен быть на стадии ожидания результата."
+msgstr "La partita deve essere in fase di attesa dei risultati."
 
 msgid "You must be a team captain to report a loss or draw."
-msgstr "Необходимо быть капитаном команды."
+msgstr "Devi essere capitano della squadra per comunicare la sconfitta o il pareggio."
 
 msgid "{self} is calling a draw, waiting for {enemy} to type `{prefix}rd`."
-msgstr "{self} предлагает ничью, ожидаем `{prefix}rd` от {enemy}."
+msgstr "{self} dichiara un pareggio, aspettando che {enemy} digiti `{prefix}rd`."
 
 msgid "{self} offers to cancel the match, waiting for {enemy} to type `{prefix}rc`."
-msgstr "{self} предлагает отмену матча, ожидаем `{prefix}rc` от {enemy}."
+msgstr "{self} sta proponendo l'annullamento della partita, aspettando che {enemy} digiti `{prefix}rc`."
 
 msgid "Specified team name not found."
-msgstr "Указанная команда не найдена."
+msgstr "La quadra specificata non è stata trovata."
 
 msgid "Match {queue} ({id}) has timed out."
-msgstr "Истекло время ожидания для матча {queue} ({id})."
+msgstr "La partita {queue} ({id}) è scaduta."
 
 msgid "{players} your match has been canceled."
-msgstr "{players} ваш матч был отменен."
+msgstr "{players} la tua partita è stata annullata."
 
 msgid "No changes to apply."
-msgstr "Нет изменений."
+msgstr "Nessuna modifica da applicare."
 
 msgid "Removed `{count}` roles from you."
-msgstr "С Вас снято `{count}` ролей."
+msgstr "Ti sono stati rimossi `{count}` ruoli."
 
 msgid "Added `{count}` roles to you."
-msgstr "Вам добавлено `{count}` ролей."
+msgstr "Ti sono stati aggiunti `{count}` ruoli."
 
 # bot/match/embeds.py
 
 msgid "__**{queue}** is now on the check-in stage!__"
-msgstr "__**{queue}** на стадии подтверждения участников!__"
+msgstr "__**{queue}** è entrata in fase di chek-in!__"
 
 msgid "Waiting on:"
-msgstr "Ожидаем:"
+msgstr "Aspettando:"
 
 msgid "Please react with {ready_emoji} to **check-in** or {not_ready_emoji} to **abort**!"
-msgstr "Нажмите {ready_emoji} чтобы **подтвердить** или {not_ready_emoji} чтобы **отменить** участие!"
+msgstr "Reagisci con {ready_emoji} per fare il **check-in** o {not_ready_emoji} per **annullare**!"
 
 msgid "Please react with {ready_emoji} or vote for a map to **check-in**."
-msgstr "Нажмите {ready_emoji} или проголосуйте за карту чтобы **подтвердить** участие."
+msgstr "Reagisci con {ready_emoji} o vota una mappa per fare il **check-in**."
 
 msgid "React with {not_ready_emoji} to **abort**!"
-msgstr "Нажмите {not_ready_emoji} чтобы **abort** участие!"
+msgstr "Ragisci con {not_ready_emoji} per **annullare**!"
 
 msgid "__**{queue}** is now on the draft stage!__"
-msgstr "__**{queue}** на стадии драфта!__"
+msgstr "__**{queue}** è in fase di scelta!__"
 
 msgid "empty"
-msgstr "пусто"
+msgstr "vuoto"
 
 msgid "Unpicked:"
-msgstr "Кандидаты:"
+msgstr "Non scelti:"
 
 msgid "Pick players with `{prefix}pick @player` command."
-msgstr "Выбирайте участников с помощью `{prefix}pick @player`."
+msgstr "Scegli un giocatore con il comando `{prefix}pick @player`."
 
 msgid "{member}'s turn to pick!"
-msgstr "Черёд выбирать {member}!"
+msgstr "{member} sceglie per questo turno!"
 
 msgid "Type {cmd} to become a captain and start picking teams."
-msgstr "Используйте {cmd} чтобы стать капитаном и начать выбирать игроков."
+msgstr "Digita {cmd} per diventare un capitano e procedere scegliendo le squadre."
 
 msgid "__**{queue}** has started!__"
-msgstr "__**{queue}** начался!__"
+msgstr "__**{queue}** è cominciata!__"
 
 msgid "Players"
-msgstr "Участники"
+msgstr "Giocatori"
 
 msgid "Captains"
-msgstr "Капитаны"
+msgstr "Capitani"
 
 msgid "Map"
-msgstr "Карта"
+msgstr "Mappa"
 
 msgid "Maps"
-msgstr "Карты"
+msgstr "Mappe"
 
 msgid "Server"
-msgstr "Сервер"
+msgstr "Server"
 
 # bot/match/draft.py
 
 msgid "The match is not on the draft stage."
-msgstr "Матч не на стадии драфта."
+msgstr "Il match non è in fase di scelta."
 
 msgid "You must possess the captain's role."
-msgstr "Необходимо иметь роль капитана."
+msgstr "Devi avere il ruolo di capitano."
 
 msgid "Team {name} already have a captain."
-msgstr "Команда {name} уже имеет капитана."
+msgstr "Il team {name} ha già un capitano."
 
 msgid "You are not a captain."
-msgstr "Вы не являетесь капитаном команды."
+msgstr "Non sei un capitano."
 
 msgid "Not your turn to pick."
-msgstr "Не ваша очередь выбирать."
+msgstr "Non è il tuo turno di scegliere."
 
 msgid "Specified player not in the unpicked list."
-msgstr "Указанный участник не в списке кандидатов."
+msgstr "Il giocatore specifico non è nell'elenco di quelli da scegliere."
 
 msgid "The match must be on the check-in, draft or waiting report stage."
-msgstr "Матч должен быть на стадии подтверждения участников, драфта или ожидания результата."
+msgstr "La partita deve essere in fase di check-in, scelta o di attesa dei risultati."
 
 msgid "You have stopped looking for a substitute."
-msgstr "Вы больше не ищете замену."
+msgstr "Hai smesso di cercare un sostituto."
 
 msgid "You are now looking for a substitute."
-msgstr "Вы ищете замену."
+msgstr "Ora stai cercando un sostituto."
 
 msgid "Specified player is not looking for a substitute."
-msgstr "Указаный участник не ищет замену."
+msgstr "Il giocatore specificato non sta cercando un sostituto."
 
 # bot/match/check_in.py
 
 msgid "The match is not on the check-in stage."
-msgstr "Матч не на стадии подтверждения участников."
+msgstr "La partita non è in fase di check-in."
 
 msgid "{member} has aborted the check-in."
-msgstr "{member} отменил свое участие."
+msgstr "{member} ha annullato il check-in."
 
 msgid "Reverting {queue} to the gathering stage..."
-msgstr "Возвращаем {queue} на стадию сбора..."
+msgstr "Riportando {queue} alla fase di ricerca..."
 
 msgid "{members} was not ready in time."
-msgstr "Не подтвердили участие: {members}."
+msgstr "{members} non ha reagito in tempo."
 
 msgid "{member} won, its **{side}**!"
-msgstr "{member} выиграл, выпадает **{side}**!"
+msgstr "{member} ha vinto, è uscito **{side}**!"
 
 msgid "{member} lost, its **{side}**!"
-msgstr "{member} проиграл, выпадает **{side}**!"
+msgstr "{member} ha perso, è uscito **{side}**!"
 
 msgid "heads"
-msgstr "орёл"
+msgstr "testa"
 
 msgid "tails"
-msgstr "решка"
+msgstr "croce"
