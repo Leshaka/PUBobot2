@@ -64,12 +64,15 @@ async def on_ready():
 
 		await bot.load_state()
 	else:  # Reconnected, fetch new channel objects
+		log.info("Reconnected to discord.")
 		for qc in list(bot.queue_channels.values()):
-			if channel := dc.get_channel(qc.channel.id) is not None:
+			if channel := dc.get_channel(qc.id) is not None:
 				qc.channel = channel
 			else:
 				bot.queue_channels.pop(qc.id)
-				log.error(f"ERROR! Channel missing after reconnect {qc.channel.guild.name}>#{qc.channel.name} ({qc.channel.id})!")
+				log.error("ERROR! Channel missing after reconnect {}>#{} ({})!".format(
+					qc.cfg.cfg_info.get('guild_name'), qc.cfg.cfg_info.get('channel_name'), qc.id
+				))
 
 	log.info("Done.")
 
@@ -78,11 +81,11 @@ async def on_ready():
 async def on_member_update(before, after):
 	if str(after.status) in ['idle', 'offline']:
 		if after.id not in bot.allow_offline:
-			for qc in filter(lambda i: i.channel.guild.id == after.guild.id, bot.queue_channels.values()):
+			for qc in filter(lambda i: i.channel and i.channel.guild.id == after.guild.id, bot.queue_channels.values()):
 				await qc.auto_remove(after)
 
 
 @dc.event
 async def on_member_remove(member):
-	for qc in filter(lambda i: i.channel.guild.id == member.guild.id, bot.queue_channels.values()):
+	for qc in filter(lambda i: i.channel and i.channel.guild.id == member.guild.id, bot.queue_channels.values()):
 		await qc.remove_members(member, reason="left guild")

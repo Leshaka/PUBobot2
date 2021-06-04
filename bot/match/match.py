@@ -72,14 +72,14 @@ class Match:
 		return dict(
 			match_id=self.id,
 			queue_id=self.queue.id,
-			channel_id=self.qc.channel.id,
+			channel_id=self.qc.id,
 			cfg=self.cfg,
-			players=[p.id for p in self.players],
-			teams=[[p.id for p in team] for team in self.teams],
+			players=[p.id for p in self.players if p],
+			teams=[[p.id for p in team if p] for team in self.teams],
 			maps=self.maps,
 			state=self.state,
 			states=self.states,
-			ready_players=[p.id for p in self.check_in.ready_players]
+			ready_players=[p.id for p in self.check_in.ready_players if p]
 		)
 
 	@classmethod

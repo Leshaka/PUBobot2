@@ -245,8 +245,8 @@ class PickupQueue:
 	def serialize(self):
 		return dict(
 			queue_id=self.id,
-			channel_id=self.qc.channel.id,
-			players=[i.id for i in self.queue]
+			channel_id=self.qc.id,
+			players=[i.id for i in self.queue if i]
 		)
 
 	async def from_json(self, data):
