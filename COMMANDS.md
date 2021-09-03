@@ -1,4 +1,4 @@
-# Avaible Commands
+# Available Commands
 
 <br>
 
