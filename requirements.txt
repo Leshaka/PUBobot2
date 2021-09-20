@@ -1,0 +1,17 @@
+aiohttp==3.7.4.post0
+aiomysql==0.0.21
+async-timeout==3.0.1
+attrs==21.2.0
+chardet==4.0.0
+discord.py==1.7.3
+emoji==1.5.0
+glicko2==2.0.0
+idna==3.2
+multidict==5.1.0
+prettytable==2.2.0
+PyMySQL==0.9.3
+six==1.16.0
+trueskill==0.4.5
+typing-extensions==3.10.0.2
+wcwidth==0.2.5
+yarl==1.6.3

@@ -1,0 +1,36 @@
+version: '3.4'
+services:
+  db:
+    image: mysql
+    command: --default-authentication-plugin=mysql_native_password
+    restart: always
+    volumes:
+      - ./hack/:/docker-entrypoint-initdb.d/
+      - db_data:/var/lib/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: pubobot
+      MYSQL_USER: pubobot
+      MYSQL_PASSWORD: pubobot-password
+    network_mode: host
+    # networks:
+    #   - bot
+
+  bot:
+    depends_on:
+      - db
+    restart: always
+    build:
+      dockerfile: Dockerfile
+      context: .
+    volumes:
+      - ./config.cfg:/home/bot/config.cfg:ro
+    network_mode: host
+    # networks:
+    #   - bot
+
+# networks:
+#   bot:
+
+volumes:
+  db_data: {}
