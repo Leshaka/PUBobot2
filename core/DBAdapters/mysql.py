@@ -237,8 +237,20 @@ class Adapter:
         )
         args = list(where.values()) if where else ()
 
+        # fix queries where there are some restricted words
+        sql_restricted_words = [
+            'rank',
+            'role',
+        ]
+        parsed_columns = []
+        for column in columns:
+            if column in sql_restricted_words:
+                parsed_columns.append('`{}`'.format(column))
+            else:
+                parsed_columns.append(column)
+
         request = "SELECT {columns} FROM `{table}`{where}{order}{limit}".format(
-            columns=", ".join(columns),
+            columns=", ".join(parsed_columns),
             table=table,
             where=conditions,
             order=" ORDER BY " + order_by + (" ASC" if order_asc else " DESC")
