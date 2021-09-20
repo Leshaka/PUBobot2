@@ -1,19 +1,19 @@
 class QueueResponse:
-	pass
+    pass
 
 
 class QueueResponses:
-	class QueueFull(QueueResponse):
-		pass
+    class QueueFull(QueueResponse):
+        pass
 
-	class QueueStarted(QueueResponse):
-		pass
+    class QueueStarted(QueueResponse):
+        pass
 
-	class Success(QueueResponse):
-		pass
+    class Success(QueueResponse):
+        pass
 
-	class Duplicate(QueueResponse):
-		pass
+    class Duplicate(QueueResponse):
+        pass
 
-	class NotAllowed(QueueResponse):
-		pass
+    class NotAllowed(QueueResponse):
+        pass
