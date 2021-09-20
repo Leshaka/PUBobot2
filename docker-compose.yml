@@ -25,6 +25,7 @@ services:
       context: .
     volumes:
       - ./config.cfg:/home/bot/config.cfg:ro
+      - ./logs:/home/bot/logs:rw
     network_mode: host
     # networks:
     #   - bot
