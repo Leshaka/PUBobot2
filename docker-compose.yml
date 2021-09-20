@@ -5,7 +5,8 @@ services:
     command: --default-authentication-plugin=mysql_native_password
     restart: always
     volumes:
-      - ./hack/:/docker-entrypoint-initdb.d/
+      - ./hack/mysql/conf.d/:/etc/mysql/conf.d/
+      - ./hack/mysql/logs/:/var/log/mysql/
       - db_data:/var/lib/mysql
     environment:
       MYSQL_ROOT_PASSWORD: root

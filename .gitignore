@@ -2,3 +2,4 @@
 config.cfg
 locales/compiled/
 logs/*
+hack/mysql/logs/

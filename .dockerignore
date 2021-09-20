@@ -1,3 +1,4 @@
 config.cfg
 .git/
 logs/
+hack/mysql/logs/
