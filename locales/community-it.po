@@ -327,6 +327,9 @@ msgstr "Il giocatore specificato non sta cercando un sostituto."
 msgid "The match is not on the check-in stage."
 msgstr "La partita non è in fase di check-in."
 
+msgid "Discarding check-in is not allowed."
+msgstr "Discarding check-in is not allowed."
+
 msgid "{member} has aborted the check-in."
 msgstr "{member} ha annullato il check-in."
 
