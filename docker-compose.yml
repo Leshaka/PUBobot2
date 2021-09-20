@@ -14,8 +14,6 @@ services:
       MYSQL_USER: pubobot
       MYSQL_PASSWORD: pubobot-password
     network_mode: host
-    # networks:
-    #   - bot
 
   bot:
     depends_on:
@@ -28,11 +26,6 @@ services:
       - ./config.cfg:/home/bot/config.cfg:ro
       - ./logs:/home/bot/logs:rw
     network_mode: host
-    # networks:
-    #   - bot
-
-# networks:
-#   bot:
 
 volumes:
   db_data: {}
