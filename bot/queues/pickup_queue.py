@@ -99,12 +99,13 @@ class PickupQueue:
 				"pick_captains",
 				display="Pick captains",
 				section="Teams",
-				options=["by role and rating", "fair pairs", "random", "no captains"],
+				options=["by role and rating", "fair pairs", "random with role preference", "random", "no captains"],
 				default="by role and rating",
 				description="\n".join([
 					"Set how captains should be picked (for 'draft' or 'no teams' above):",
 					"  by role and rating - sort by captain role and rating and pick the best",
 					"  fair pairs - pick random pair of players with closest ratings to each other",
+					"  random with role preference - pick captains randomly with preference of the captain role",
 					"  random - pick captains randomly",
 					"  no captains - do not pick captains automatically"
 				]),

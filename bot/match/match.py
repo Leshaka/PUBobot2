@@ -175,6 +175,11 @@ class Match:
 			self.captains = [candidates[i], candidates[i + 1]]
 		elif pick_captains == "random":
 			self.captains = random.sample(self.players, 2)
+		elif pick_captains == "random with role preference":
+			rand = random.sample(self.players, len(self.players))
+			self.captains = sorted(
+				rand, key=lambda p: self.cfg['captains_role_id'] in [role.id for role in p.roles], reverse=True
+			)
 
 	def init_teams(self, pick_teams):
 		if pick_teams == "draft":
