@@ -686,20 +686,30 @@ class QueueChannel:
 		else:
 			await self.channel.send("> [ **no queues configured** ]")
 
-	async def _add_member(self, message, args=None):
-		if self.cfg.blacklist_role and self.cfg.blacklist_role in message.author.roles:
+	async def check_allowed_to_add(self, member, queue=None):
+		""" raises exception if not allowed, returns phrase string or None if allowed """
+
+		if self.cfg.blacklist_role and self.cfg.blacklist_role in member.roles:
 			raise bot.Exc.PermissionError(self.gt("You are not allowed to add to queues on this channel."))
-		if self.cfg.whitelist_role and self.cfg.whitelist_role not in message.author.roles:
+		if self.cfg.whitelist_role and self.cfg.whitelist_role not in member.roles:
 			raise bot.Exc.PermissionError(self.gt("You are not allowed to add to queues on this channel."))
 
-		ban_left, phrase = await bot.noadds.get_user(self, message.author)
+		ban_left, phrase = await bot.noadds.get_user(self, member)
 		if ban_left:
 			raise bot.Exc.PermissionError(self.gt("You have been banned, `{duration}` left.").format(
 				duration=seconds_to_str(ban_left)
 			))
 
-		if any((message.author in m.players for m in bot.active_matches)):
+		if any((member in m.players for m in bot.active_matches)):
 			raise bot.Exc.InMatchError(self.gt("You are already in an active match."))
+
+		if queue:
+			await queue.check_allowed_to_add(member)
+		return phrase
+
+
+	async def _add_member(self, message, args=None):
+		phrase = await self.check_allowed_to_add(message.author)
 
 		targets = args.lower().split(" ") if args else []
 
@@ -895,14 +905,13 @@ class QueueChannel:
 		await match.draft.sub_me(message.author)
 
 	async def _sub_for(self, message, args=None):
-		if self.get_match(message.author) is not None:
-			raise bot.Exc.InMatchError(self.gt("You are already in an active match."))
 		if not args:
 			raise bot.Exc.SyntaxError(f"Usage: {self.cfg.prefix}sub_for __@player__")
 		elif (member := self.get_member(args)) is None:
 			raise bot.Exc.SyntaxError(self.gt("Specified user not found."))
 		elif (match := self.get_match(member)) is None:
 			raise bot.Exc.NotInMatchError(self.gt("Specified user is not in a match."))
+		await self.check_allowed_to_add(message.author, queue=match.queue)
 		await match.draft.sub_for(member, message.author)
 
 	async def _sub_force(self, message, args=""):

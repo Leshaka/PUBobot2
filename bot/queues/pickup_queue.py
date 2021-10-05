@@ -314,6 +314,15 @@ class PickupQueue:
 		if self in bot.active_queues:
 			bot.active_queues.remove(self)
 
+	async def check_allowed_to_add(self, member):
+		if (
+			self.cfg.blacklist_role and self.cfg.blacklist_role in member.roles
+			or self.cfg.whitelist_role and self.cfg.whitelist_role not in member.roles
+		):
+			raise bot.Exc.PermissionError(
+				self.qc.gt("You are not allowed to add to {queues} queues.".format(queues=self.name))
+			)
+
 	async def add_member(self, member):
 		if (
 			self.cfg.blacklist_role and self.cfg.blacklist_role in member.roles
