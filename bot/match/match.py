@@ -179,7 +179,7 @@ class Match:
 			rand = random.sample(self.players, len(self.players))
 			self.captains = sorted(
 				rand, key=lambda p: self.cfg['captains_role_id'] in [role.id for role in p.roles], reverse=True
-			)
+			)[:2]
 
 	def init_teams(self, pick_teams):
 		if pick_teams == "draft":
