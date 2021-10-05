@@ -194,6 +194,14 @@ class PickupQueue:
 				section="General",
 				description="Only users with this role will be able to add to this queue."
 			),
+			Variables.DurationVar(
+				"match_lifetime",
+				display="Match lifetime",
+				verify=lambda i: 299 < i < 86401,
+				verify_message="Must be not lesser than 5 minutes and not bigger than 24 hours.",
+				section="General",
+				description="Set a custom match life time before it times out then ranked is enabled. Default: 3 hours."
+			),
 			Variables.IntVar(
 				"map_count",
 				display="Map count",
@@ -361,7 +369,8 @@ class PickupQueue:
 			pick_teams=self.cfg.pick_teams, pick_order=self.cfg.pick_order,
 			maps=[i['name'] for i in self.cfg.tables.maps], vote_maps=self.cfg.vote_maps,
 			map_count=self.cfg.map_count, check_in_timeout=self.cfg.check_in_timeout,
-			check_in_discard=self.cfg.check_in_discard, start_msg=self.cfg.start_msg, server=self.cfg.server
+			check_in_discard=self.cfg.check_in_discard, match_lifetime=self.cfg.match_lifetime,
+			start_msg=self.cfg.start_msg, server=self.cfg.server
 		)
 
 	async def revert(self, not_ready, ready):
