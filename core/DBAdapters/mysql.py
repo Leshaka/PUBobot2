@@ -182,6 +182,18 @@ class Adapter:
 		conditions = " WHERE " + " AND ".join(("`{}`=%s".format(k) for k in where.keys())) if where else ''
 		args = list(where.values()) if where else ()
 
+		# fix queries where there are some restricted words, for example in MySQL 8 'rank' is restricred
+		sql_restricted_words = [
+				'rank',
+				'role',
+		]
+		parsed_columns = []
+		for column in columns:
+			if column in sql_restricted_words:
+				parsed_columns.append('`{}`'.format(column))
+			else:
+				parsed_columns.append(column)
+
 		request = "SELECT {columns} FROM `{table}`{where}{order}{limit}".format(
 			columns=', '.join(columns),
 			table=table,
