@@ -20,6 +20,10 @@ class CheckIn:
 		self.ready_players = set()
 		self.message = None
 
+		for p in (p for p in self.m.players if p.id in bot.auto_ready.keys()):
+			self.ready_players.add(p)
+			bot.auto_ready.pop(p.id)
+
 		if len(self.m.cfg['maps']) > 1 and self.m.cfg['vote_maps']:
 			self.maps = self.m.random_maps(self.m.cfg['maps'], self.m.cfg['vote_maps'], self.m.queue.last_map)
 			self.map_votes = [set() for i in self.maps]

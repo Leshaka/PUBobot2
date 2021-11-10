@@ -321,6 +321,8 @@ class QueueChannel:
 			ready=self._ready,
 			nr=self._not_ready,
 			not_ready=self._not_ready,
+			auto_ready=self._auto_ready,
+			ar=self._auto_ready,
 			capfor=self._cap_for,
 			pick=self._pick,
 			p=self._pick,
@@ -865,6 +867,30 @@ class QueueChannel:
 			await match.check_in.set_ready(message.author, False)
 		else:
 			raise bot.Exc.NotInMatchError(self.gt("You are not in an active match."))
+
+	async def _auto_ready(self, message, args=None):
+		max_duration = 30  # minutes
+		if args:
+			try:
+				secs = parse_duration(args)
+			except ValueError:
+				raise bot.Exc.SyntaxError(f"Usage: {self.cfg.prefix}auto_ready [__duration__]")
+			if secs > 60 * max_duration:
+				raise bot.Exc.ValueError(self.gt("Maximum auto_ready duration is {minutes} minutes.").format(
+					minutes=max_duration
+				))
+		else:
+			secs = 60*15
+
+		if message.author.id in bot.auto_ready.keys():
+			bot.auto_ready.pop(message.author.id)
+			await self.success(self.gt("Your automatic ready confirmation is now turned off."))
+		else:
+			bot.auto_ready[message.author.id] = int(time.time())+secs
+			await self.success(
+				self.gt("During next {duration} your match participation will be confirmed automatically.").format(
+					duration=seconds_to_str(secs)
+				))
 
 	async def _cap_for(self, message, args=None):
 		if not args:

@@ -14,6 +14,7 @@ active_matches = []
 waiting_reactions = dict()  # {message.id: function}
 allow_offline = []  # [user_id]
 last_match_id = None
+auto_ready = dict()  # {user.id: timestamp}
 
 
 async def enable_channel(message):
@@ -109,3 +110,9 @@ async def load_state():
 async def remove_players(*users, reason=None):
 	for qc in set((q.qc for q in active_queues)):
 		await qc.remove_members(*users, reason=reason)
+
+
+async def expire_auto_ready(frame_time):
+	for user_id, at in list(auto_ready.items()):
+		if at < frame_time:
+			auto_ready.pop(user_id)

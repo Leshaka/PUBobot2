@@ -163,6 +163,15 @@ msgstr "Вы забанены, осталось `{duration}`."
 msgid "Noadds are empty."
 msgstr "Список пуст."
 
+msgid "Maximum auto_ready duration is {minutes} minutes."
+msgstr "Максимальное допустимое значение для автоматического подтверждения - {minutes} минут."
+
+msgid "Your automatic ready confirmation is now turned off."
+msgstr "Ваше автоматическое подтверждение выключено."
+
+msgid "During next {duration} your match participation will be confirmed automatically."
+msgstr "В течение {duration} ваше участие будет подтверждено автоматически."
+
 # bot/queues/pickup_queue.py
 
 msgid "{role} Please add to **{name}** pickup, `{left}` players left!"
