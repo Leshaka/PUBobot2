@@ -156,12 +156,12 @@ class PickupQueue:
 				]),
 				verify_message="Start direct message is too long."
 			),
-			Variables.StrVar(
+			Variables.TextVar(
 				"server",
 				display="Server",
 				section="Appearance",
 				description="Print this server on a match start.",
-				verify=lambda s: len(s) < 101,
+				verify=lambda s: len(s) < 501,
 				verify_message="Server string is too long."
 			),
 			Variables.RoleVar(
