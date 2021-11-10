@@ -79,13 +79,14 @@
 | !put       | `@user`     | `team name` / unpicked | Place a user in a team as a moderator |
 
 #### Report match
-| command       | arg1     | arg2           | description                      |
-|---------------|----------|----------------|----------------------------------|
-| !rl           |          |                | Report a loss on current match   |
-| !rd           |          |                | Report a draw on current match   |
-| !rc           |          |                | Report a cancel on current match |
-| !rw           | `match ID` | `team name` / draw | Report a win/draw as moderator |
-| !cancel_match | `match ID` |                | Cancel a match                 |
+| command        | arg1       | arg2               | arg3      | description                      |
+|----------------|------------|--------------------|-----------|----------------------------------|
+| !rl            |            |                    |           | Report a loss on current match   |
+| !rd            |            |                    |           | Report a draw on current match   |
+| !rc            |            |                    |           | Report a cancel on current match |
+| !rw            | `match ID` | `team name` / draw |           | Report a win/draw as moderator   |
+| !cancel_match  | `match ID` |                    |           | Cancel a match                   |
+| !report_manual | `queue`    | `@winners`         | `@losers` | Manually report a match result. Example : `!report_manual 2v2 / @winner1 @winner2 / @loser1 @loser2`.
 
 #### Stats and Ratings managment
 | command              | arg1       | arg2   | arg3      | description                                 |
