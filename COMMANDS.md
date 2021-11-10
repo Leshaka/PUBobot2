@@ -54,14 +54,15 @@
 | !subforce        | `@user1` | `@user2` | Substitute user1 with user2 in an active match. |
 
 #### Personal settings
-| command         | arg1              | description                                                 |
-|-----------------|-------------------|-------------------------------------------------------------|
-| !expire         | `duration`          | Sets your expire timer                                      |
-| !default_expire | `duration` / AFK / none | Sets your default expire timer                              |
-| !ao             |                   | Switch offline immunity for active queues                   |
-| !switch_dms     |                   | Toggles DMs on queue start                                  |
-| !subscribe      | [`queues`]          | Subscribe to channel or specified queues promotion role     |
-| !unsubscribe    | [`queues`]          | Unsubscribe from channel or specified queues promotion role |
+| command           | arg1                    | description                                                 |
+|-------------------|-------------------------|-------------------------------------------------------------|
+| !expire           | `duration`              | Sets your expire timer                                      |
+| !default_expire   | `duration` / AFK / none | Sets your default expire timer                              |
+| !ao               |                         | Switch offline immunity for active queues                   |
+| !switch_dms       |                         | Toggles DMs on queue start                                  |
+| !subscribe        | [`queues`]              | Subscribe to channel or specified queues promotion role     |
+| !unsubscribe      | [`queues`]              | Unsubscribe from channel or specified queues promotion role |
+| !ar / !auto_ready | [`duration`]            | Confirm next match check-in automatically                   |
 
 #### Check-in
 | command         | description      |
