@@ -114,6 +114,15 @@ class QueueChannel:
 				section="General",
 				description="If set, only players with this role will be able to add to queues."
 			),
+			Variables.DurationVar(
+				"max_auto_ready",
+				display="Auto ready limit",
+				section="General",
+				description="Set limit on how long !auto_ready duration can be. Disable to prohibit the command.",
+				default=15*60,
+				verify=lambda d: 0 < d < 86401,
+				verify_message="Auto ready limit must be 24 hours or less."
+			),
 			Variables.TextVar(
 				"description",
 				display="Description",
@@ -869,18 +878,20 @@ class QueueChannel:
 			raise bot.Exc.NotInMatchError(self.gt("You are not in an active match."))
 
 	async def _auto_ready(self, message, args=None):
-		max_duration = 30  # minutes
+		log.info(self.cfg.max_auto_ready)
+		if not self.cfg.max_auto_ready:
+			raise bot.Exc.PermissionError(self.gt("!auto_ready command is turned off on this channel."))
 		if args:
 			try:
 				secs = parse_duration(args)
 			except ValueError:
 				raise bot.Exc.SyntaxError(f"Usage: {self.cfg.prefix}auto_ready [__duration__]")
-			if secs > 60 * max_duration:
-				raise bot.Exc.ValueError(self.gt("Maximum auto_ready duration is {minutes} minutes.").format(
-					minutes=max_duration
+			if secs > self.cfg.max_auto_ready:
+				raise bot.Exc.ValueError(self.gt("Maximum auto_ready duration is {duration}.").format(
+					duration=seconds_to_str(self.cfg.max_auto_ready)
 				))
 		else:
-			secs = 60*15
+			secs = min([60*5, self.cfg.max_auto_ready])
 
 		if message.author.id in bot.auto_ready.keys():
 			bot.auto_ready.pop(message.author.id)

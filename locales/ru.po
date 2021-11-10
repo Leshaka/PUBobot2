@@ -163,8 +163,11 @@ msgstr "Вы забанены, осталось `{duration}`."
 msgid "Noadds are empty."
 msgstr "Список пуст."
 
-msgid "Maximum auto_ready duration is {minutes} minutes."
-msgstr "Максимальное допустимое значение для автоматического подтверждения - {minutes} минут."
+msgid "!auto_ready command is turned off on this channel."
+msgstr "Команда !auto_ready выключена на этом канале."
+
+msgid "Maximum auto_ready duration is {duration}."
+msgstr "Максимальное допустимое значение для автоматического подтверждения - {duration}."
 
 msgid "Your automatic ready confirmation is now turned off."
 msgstr "Ваше автоматическое подтверждение выключено."
