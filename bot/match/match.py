@@ -68,6 +68,19 @@ class Match:
 			match.states.append(match.WAITING_REPORT)
 		bot.active_matches.append(match)
 
+	@classmethod
+	async def fake_ranked_match(cls, queue, qc, winners, losers, draw=False, **kwargs):
+		players = winners + losers
+		if len(set(players)) != len(players):
+			raise bot.Exc.ValueError("Players list can not contains duplicates.")
+		ratings = {p['user_id']: p['rating'] for p in await qc.rating.get_players((p.id for p in players))}
+		bot.last_match_id += 1
+		match = cls(bot.last_match_id, queue, qc, players, ratings, pick_teams="premade", **kwargs)
+		match.teams[0].set(winners)
+		match.teams[1].set(losers)
+		match.winner = None if draw else 0
+		await bot.stats.register_match_ranked(match)
+
 	def serialize(self):
 		return dict(
 			match_id=self.id,

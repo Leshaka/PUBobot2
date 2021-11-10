@@ -340,6 +340,7 @@ class QueueChannel:
 			report_cancel=self._rc,
 			rw=self._rw,
 			report_win=self._rw,
+			report_manual=self._report_manual,
 			expire=self._expire,
 			default_expire=self._default_expire,
 			ao=self._allow_offline,
@@ -1013,6 +1014,17 @@ class QueueChannel:
 				prefix=self.cfg.prefix
 			))
 		await match.report_win(args[1])
+
+	async def _report_manual(self, message, args=""):
+		self._check_perms(message.author, 1)
+		args = args.split(" / ")
+		queue = find(lambda q: q.name.lower() == args[0].lower(), self.queues)
+		teams = [[self.get_member(p) for p in team.split(" ")] for team in args[1:]]
+		if queue is None or len(teams) != 2 or None in teams[0] or None in teams[1]:
+			raise bot.Exc.SyntaxError(
+				f"Usage: {self.cfg.prefix}report_manual __queue__ / __won_team_players__ / __lost_team_players__"
+			)
+		await queue.fake_ranked_match(teams[0], teams[1])
 
 	async def _expire(self, message, args=None):
 		if not args:
