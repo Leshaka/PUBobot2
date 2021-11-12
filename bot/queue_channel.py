@@ -202,6 +202,20 @@ class QueueChannel:
 				default=100,
 				on_change=bot.update_rating_system
 			),
+			Variables.IntVar(
+				"rating_draw_scale",
+				display="Rating draw scale",
+				section="Rating",
+				description="\n".join([
+					"Additional scale for draws, default 100 (100%).",
+					"Warning: changing this will break ratings balance."
+				]),
+				verify=lambda x: 0 <= x <= 1000,
+				verify_message="Rating draw scale must be between 0 and 1000",
+				notnull=True,
+				default=100,
+				on_change=bot.update_rating_system
+			),
 			Variables.BoolVar(
 				"rating_ws_boost",
 				display="Rating winning streak boost",
@@ -303,6 +317,7 @@ class QueueChannel:
 			min_deviation=self.cfg.rating_min_deviation,
 			scale=self.cfg.rating_scale,
 			reduction_scale=self.cfg.rating_reduction_scale,
+			draw_scale=self.cfg.rating_draw_scale,
 			ws_boost=self.cfg.rating_ws_boost,
 			ls_boost=self.cfg.rating_ls_boost
 		)
@@ -414,6 +429,7 @@ class QueueChannel:
 			min_deviation=self.cfg.rating_min_deviation,
 			scale=self.cfg.rating_scale,
 			reduction_scale=self.cfg.rating_reduction_scale,
+			draw_scale=self.cfg.rating_draw_scale,
 			ws_boost=self.cfg.rating_ws_boost,
 			ls_boost=self.cfg.rating_ls_boost
 		)
@@ -878,7 +894,6 @@ class QueueChannel:
 			raise bot.Exc.NotInMatchError(self.gt("You are not in an active match."))
 
 	async def _auto_ready(self, message, args=None):
-		log.info(self.cfg.max_auto_ready)
 		if not self.cfg.max_auto_ready:
 			raise bot.Exc.PermissionError(self.gt("!auto_ready command is turned off on this channel."))
 		if args:

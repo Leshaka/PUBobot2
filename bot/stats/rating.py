@@ -15,13 +15,14 @@ class BaseRating:
 
 	def __init__(
 			self, channel_id, init_rp=1500, init_deviation=300, min_deviation=None, scale=100,
-			reduction_scale=100, ws_boost=False, ls_boost=False
+			reduction_scale=100, draw_scale=100, ws_boost=False, ls_boost=False
 	):
 		self.channel_id = channel_id
 		self.init_rp = init_rp
 		self.init_deviation = init_deviation
 		self.min_deviation = min_deviation or 0
 		self.scale = scale/100
+		self.draw_scale = draw_scale/100
 		self.reduction_scale = reduction_scale/100
 		self.ws_boost = ws_boost
 		self.ls_boost = ls_boost
@@ -36,6 +37,7 @@ class BaseRating:
 			if self.ls_boost and p['streak'] < -2:
 				r_change = r_change * (min(abs(p['streak']), 6) / 2)
 		elif score == 0:
+			r_change = r_change * self.draw_scale
 			p['draws'] += 1
 			p['streak'] = 0
 		elif score == 1:
