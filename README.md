@@ -23,11 +23,11 @@ Hosting the service for everyone is not free, not mentioning the actual time and
 ### Installing
 * Create mysql user and database for PUBobot2:
 * * `sudo mysql`
-* * `CREATE USER 'pubobot' IDENTIFIED BY 'your-password';`
+* * `CREATE USER 'pubobot'@'localhost' IDENTIFIED BY 'your-password';`
 * * `CREATE DATABASE pubodb CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;`
-* * `GRANT ALL PRIVILEGES ON pubobot.* TO 'pubodb'@'localhost';`
+* * `GRANT ALL PRIVILEGES ON pubodb.* TO 'pubobot'@'localhost';`
 * Install required modules and configure PUBobot2:
-* * `python3.9 -m pip install discord.py pymysql aiomysql emoji glicko2 trueskill prettytable`
+* * `python3.9 -m pip install discord.py pymysql==0.9.3 aiomysql emoji glicko2 trueskill prettytable`
 * * `git clone https://github.com/Leshaka/PUBobot2`
 * * `cd PUBobot2`
 * * `cp config.example.cfg config.cfg`
