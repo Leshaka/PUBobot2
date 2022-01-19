@@ -80,6 +80,13 @@ class PickupQueue:
 					"and abort the match if not everyone is ready in time.")),
 				notnull=True
 			),
+			Variables.IntVar(
+				"team_size",
+				display="Force team size",
+				section="Teams",
+				description="Force a maximum amount of players per team.",
+				verify=lambda i: 0 < i < 101
+			),
 			Variables.OptionVar(
 				"pick_teams",
 				display="Pick teams",
@@ -212,6 +219,19 @@ class PickupQueue:
 				description="Number of maps to show on match start."
 			),
 			Variables.IntVar(
+				"map_cooldown",
+				display="Map cooldown",
+				section="Appearance",
+				default=1,
+				notnull=True,
+				verify=lambda n: 0 <= n <= 100,
+				verify_message="Map cooldown number must be between 0 and 100.",
+				description="\n".join([
+					"Prefer to not choose last played map(s) for the next specified matches amount.",
+					"This affects map voting pools as well. Set 0 to disable."
+				])
+			),
+			Variables.IntVar(
 				"vote_maps",
 				display="Vote poll map count",
 				section="Appearance",
@@ -274,7 +294,7 @@ class PickupQueue:
 		self.cfg = cfg
 		self.id = self.cfg.p_key
 		self.queue = []
-		self.last_map = None
+		self.last_maps = []
 
 	@property
 	def name(self):
@@ -373,7 +393,7 @@ class PickupQueue:
 			self, self.qc, players,
 			team_names=self.cfg.team_names.split(" ") if self.cfg.team_names else None,
 			team_emojis=self.cfg.team_emojis.split(" ") if self.cfg.team_emojis else None,
-			ranked=self.cfg.ranked, team_size=int(self.cfg.size/2), pick_captains=self.cfg.pick_captains,
+			ranked=self.cfg.ranked, team_size=min(int(self.cfg.size/2), int(self.cfg.team_size)), pick_captains=self.cfg.pick_captains,
 			captains_role_id=self.cfg.captains_role.id if self.cfg.captains_role else None,
 			pick_teams=self.cfg.pick_teams, pick_order=self.cfg.pick_order,
 			maps=[i['name'] for i in self.cfg.tables.maps], vote_maps=self.cfg.vote_maps,

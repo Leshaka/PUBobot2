@@ -61,7 +61,7 @@ class Match:
 		bot.last_match_id += 1
 		match = cls(bot.last_match_id, queue, qc, players, ratings, **kwargs)
 		# Prepare the Match object
-		match.maps = match.random_maps(match.cfg['maps'], match.cfg['map_count'], queue.last_map)
+		match.maps = match.random_maps(match.cfg['maps'], match.cfg['map_count'], queue.last_maps)
 		match.init_captains(match.cfg['pick_captains'], match.cfg['captains_role_id'])
 		match.init_teams(match.cfg['pick_teams'])
 		if match.ranked:
@@ -166,9 +166,11 @@ class Match:
 		self.embeds = Embeds(self)
 
 	@staticmethod
-	def random_maps(maps, map_count, last_map=None):
-		if last_map and last_map in maps and map_count < len(maps):
-			maps.remove(last_map)
+	def random_maps(maps, map_count, last_maps=None):
+		for last_map in (last_maps or [])[::-1]:
+			if last_map in maps and map_count < len(maps):
+				maps.remove(last_map)
+
 		return random.sample(maps, min(map_count, len(maps)))
 
 	def sort_players(self, players):
@@ -200,7 +202,7 @@ class Match:
 			self.teams[1].set(self.captains[1:])
 			self.teams[2].set([p for p in self.players if p not in self.captains])
 		elif pick_teams == "matchmaking":
-			team_len = int(len(self.players)/2)
+			team_len = min(self.cfg['team_size'], int(len(self.players)/2))
 			best_rating = sum(self.ratings.values())/2
 			best_team = min(
 				combinations(self.players, team_len),
@@ -212,9 +214,11 @@ class Match:
 			self.teams[1].set(self.sort_players(
 				[p for p in self.players if p not in best_team][:self.cfg['team_size']]
 			))
+			self.teams[2].set([p for p in self.players if p not in [*self.teams[0], *self.teams[1]]])
 		elif pick_teams == "random teams":
 			self.teams[0].set(random.sample(self.players, min(len(self.players)//2, self.cfg['team_size'])))
 			self.teams[1].set([p for p in self.players if p not in self.teams[0]][:self.cfg['team_size']])
+			self.teams[2].set([p for p in self.players if p not in [*self.teams[0], *self.teams[1]]])
 
 	async def think(self, frame_time):
 		if self.state == self.INIT:
@@ -251,6 +255,14 @@ class Match:
 		return self.qc.rating_rank(self.ratings[member.id])['rank']
 
 	async def start_waiting_report(self):
+		# remove never picked players from the match
+		if len(self.teams[2]):
+			for p in self.teams[2]:
+				self.players.remove(p)
+			await self.send(self.gt("{players} were removed from the match.").format(
+				players=join_and([m.mention for m in self.teams[2]])
+			))
+			self.teams[2].clear()
 		await self.final_message()
 
 	async def report_loss(self, member, draw_flag):
@@ -337,7 +349,8 @@ class Match:
 
 	async def finish_match(self):
 		bot.active_matches.remove(self)
-		self.queue.last_map = self.maps[0] if len(self.maps) == 1 else None
+		self.queue.last_maps += self.maps
+		self.queue.last_maps = self.queue.last_maps[-len(self.maps)*self.queue.cfg.map_cooldown:]
 
 		if self.ranked:
 			await bot.stats.register_match_ranked(self)

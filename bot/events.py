@@ -67,9 +67,7 @@ async def on_ready():
 	else:  # Reconnected, fetch new channel objects
 		log.info("Reconnected to discord.")
 		for qc in list(bot.queue_channels.values()):
-			if channel := dc.get_channel(qc.id) is not None:
-				qc.channel = channel
-			else:
+			if dc.get_channel(qc.id) is None:
 				bot.queue_channels.pop(qc.id)
 				log.error("ERROR! Channel missing after reconnect {}>#{} ({})!".format(
 					qc.cfg.cfg_info.get('guild_name'), qc.cfg.cfg_info.get('channel_name'), qc.id
