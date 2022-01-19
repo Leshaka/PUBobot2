@@ -1377,6 +1377,12 @@ class QueueChannel:
 			embed.add_field(name=last_game['beta_name'], value="`" + ", ".join(team) + "`")
 		if len(team := [p['nick'] for p in players if p['team'] is None]):
 			embed.add_field(name=self.gt("Players"), value="`" + ", ".join(team) + "`")
+		if last_game['ranked']:
+			if last_game['winner'] is None:
+				winner = 'Draw'
+			else:
+				winner = [last_game['alpha_name'], last_game['beta_name']][last_game['winner']]
+			embed.add_field(name=self.gt("Winner"), value=winner)
 		await self.channel.send(embed=embed)
 
 	async def _commands(self, message, args=None):
