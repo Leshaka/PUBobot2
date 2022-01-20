@@ -112,10 +112,11 @@
 | !phrases_clear | [`@user`] |            |            | Clear all phrases on the channel or for specified @user |
 
 #### Miscellaneous
-| command         | var1          | description                            |
-|-----------------|---------------|----------------------------------------|
-| !server / !ip   | `queue`         | Show server string for specified queue |
-| !cointoss / !ct | [heads / tails] | Flip a cointoss                        |
-| !maps           | `queue`         | Show list of maps for specified queue  |
-| !map            | `queue`         | Show a random map for specified queue  |
-| !help           | `queue`         | Show queue description                 |
+| command         | var1            | description                             |
+|-----------------|-----------------|-----------------------------------------|
+| !server / !ip   | `queue`         | Show server string for specified queue  |
+| !cointoss / !ct | [heads / tails] | Flip a cointoss                         |
+| !nick           | nickname        | Change your nickname with rating prefix |
+| !maps           | `queue`         | Show list of maps for specified queue   |
+| !map            | `queue`         | Show a random map for specified queue   |
+| !help           | `queue`         | Show queue description                  |
