@@ -408,7 +408,8 @@ class QueueChannel:
 			noadd=self._noadd,
 			forgive=self._forgive,
 			phrases_add=self._phrases_add,
-			phrases_clear=self._phrases_clear
+			phrases_clear=self._phrases_clear,
+			nick=self._set_nick
 		)
 
 	async def update_info(self):
@@ -1633,3 +1634,17 @@ class QueueChannel:
 			raise bot.Exc.SyntaxError(self.gt("Specified user not found."))
 		await bot.noadds.phrases_clear(self, member=member)
 		await self.success(self.gt("Done."))
+
+	async def _set_nick(self, message, args=None):
+		if args is None:
+			raise bot.Exc.SyntaxError(f"Usage: {self.cfg.prefix}nick __nickname__")
+		data = await db.select_one(
+			['rating'], 'qc_players',
+			where={'channel_id': self.id, 'user_id': message.author.id}
+		)
+		if not data or data['rating'] is None:
+			rating = self.rating.init_rp
+		else:
+			rating = data['rating']
+
+		await message.author.edit(nick=f"[{rating}] " + args)
