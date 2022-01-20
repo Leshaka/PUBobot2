@@ -15,7 +15,7 @@ class PickupQueue:
 		p_key="pq_id",
 		f_key="channel_id",
 		icon="pq.png",
-		sections=["General", "Teams", "Appearance"],
+		sections=["General", "Teams", "Appearance", "Maps"],
 		variables=[
 			Variables.StrVar(
 				"name",
@@ -212,7 +212,7 @@ class PickupQueue:
 			Variables.IntVar(
 				"map_count",
 				display="Map count",
-				section="Appearance",
+				section="Maps",
 				default=1,
 				verify=lambda n: 0 <= n <= 5,
 				verify_message="Maps number must be between 0 and 5.",
@@ -221,7 +221,7 @@ class PickupQueue:
 			Variables.IntVar(
 				"map_cooldown",
 				display="Map cooldown",
-				section="Appearance",
+				section="Maps",
 				default=1,
 				notnull=True,
 				verify=lambda n: 0 <= n <= 100,
@@ -234,7 +234,7 @@ class PickupQueue:
 			Variables.IntVar(
 				"vote_maps",
 				display="Vote poll map count",
-				section="Appearance",
+				section="Maps",
 				default=None,
 				verify=lambda n: 2 <= n <= 9,
 				verify_message="Vote maps number must be between 2 and 9.",
@@ -250,7 +250,7 @@ class PickupQueue:
 				]
 			),
 			VariableTable(
-				"maps", display="Maps", section="Appearance",
+				"maps", display="Maps", section="Maps",
 				description="List of maps to choose from.",
 				variables=[
 					Variables.StrVar("name", notnull=True)
@@ -388,12 +388,16 @@ class PickupQueue:
 				server=self.cfg.server
 			)
 		)
+		if self.cfg.team_size:
+			team_size = min(int(self.cfg.size / 2), int(self.cfg.team_size))
+		else:
+			team_size = int(self.cfg.size / 2)
 
 		await bot.Match.new(
 			self, self.qc, players,
 			team_names=self.cfg.team_names.split(" ") if self.cfg.team_names else None,
 			team_emojis=self.cfg.team_emojis.split(" ") if self.cfg.team_emojis else None,
-			ranked=self.cfg.ranked, team_size=min(int(self.cfg.size/2), int(self.cfg.team_size)), pick_captains=self.cfg.pick_captains,
+			ranked=self.cfg.ranked, team_size=team_size, pick_captains=self.cfg.pick_captains,
 			captains_role_id=self.cfg.captains_role.id if self.cfg.captains_role else None,
 			pick_teams=self.cfg.pick_teams, pick_order=self.cfg.pick_order,
 			maps=[i['name'] for i in self.cfg.tables.maps], vote_maps=self.cfg.vote_maps,
