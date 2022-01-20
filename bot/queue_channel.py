@@ -13,7 +13,7 @@ from core.cfg_factory import CfgFactory, Variables, VariableTable
 from core.locales import locales
 from core.utils import error_embed, ok_embed, find, get, join_and, seconds_to_str, parse_duration, get_nick, discord_table
 from core.database import db
-from core.client import FakeMember, dc
+from core.client import FakeMember
 
 import bot
 from bot.stats.rating import FlatRating, Glicko2Rating, TrueSkillRating
@@ -322,6 +322,7 @@ class QueueChannel:
 			ls_boost=self.cfg.rating_ls_boost
 		)
 		self.queues = []
+		self.channel = text_channel
 		self.topic = f"> {self.gt('no players')}"
 		self.last_promote = 0
 		self.commands = dict(
@@ -409,10 +410,6 @@ class QueueChannel:
 			phrases_add=self._phrases_add,
 			phrases_clear=self._phrases_clear
 		)
-
-	@property
-	def channel(self):
-		return dc.get_channel(self.id)
 
 	async def update_info(self):
 		self.cfg.cfg_info['channel_name'] = self.channel.name
