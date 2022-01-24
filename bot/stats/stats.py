@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import time
 import datetime
+from asyncio import sleep as asleep
 import bot
 from core.console import log
 from core.database import db
@@ -340,6 +341,7 @@ class StatsJobs:
 			log.info("--- Applying weekly deviation decays ---")
 			for qc in bot.queue_channels.values():
 				await qc.apply_rating_decay()
+				await asleep(1)
 
 
 jobs = StatsJobs()
