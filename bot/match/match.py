@@ -262,8 +262,12 @@ class Match:
 			await self.send(self.gt("{players} were removed from the match.").format(
 				players=join_and([m.mention for m in self.teams[2]])
 			))
+			unpicked = list(self.teams[2])
 			self.teams[2].clear()
-		await self.final_message()
+			await self.final_message()
+			await self.queue.revert([], unpicked)
+		else:
+			await self.final_message()
 
 	async def report_loss(self, member, draw_flag):
 		if self.state != self.WAITING_REPORT:
