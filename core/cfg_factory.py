@@ -312,6 +312,25 @@ class IntVar(Variable):
 		return int(string)
 
 
+class SliderVar(Variable):
+
+	def __init__(self, name, min_val=0, max_val=100, unit="%", **kwargs):
+		super().__init__(name, **kwargs)
+		self.min_val = min_val
+		self.max_val = max_val
+		self.unit = unit
+		self.ctype = db.types.int
+
+	async def validate(self, string, guild):
+		if not string or string.lower() in ['none', 'null']:
+			if self.notnull:
+				raise ValueError(f"{self.name} can't be null.")
+			return None
+		if self.min_val <= (num := int(string)) <= self.max_val:
+			return num
+		raise ValueError(f"{self.name} value must be between {self.min_val} and {self.max_val}.")
+
+
 class RoleVar(Variable):
 
 	def __init__(self, name, **kwargs):
@@ -527,6 +546,7 @@ class Variables:
 	OptionVar = OptionVar
 	BoolVar = BoolVar
 	IntVar = IntVar
+	SliderVar = SliderVar
 	RoleVar = RoleVar
 	TextChanVar = TextChanVar
 	DurationVar = DurationVar

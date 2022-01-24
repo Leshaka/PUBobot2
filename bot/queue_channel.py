@@ -178,42 +178,47 @@ class QueueChannel:
 				verify_message="Rating minimum deviation must be between 1 and 3000",
 				on_change=bot.update_rating_system
 			),
-			Variables.IntVar(
+			Variables.SliderVar(
 				"rating_scale",
 				display="Rating scale",
 				section="Rating",
-				verify=lambda x: 0 <= x <= 1000,
-				description="Scale all rating changes, default 100 (100%).",
-				notnull=True,
-				default=100,
+				max_val=1000,
+				description="Scale all rating changes, 100% = x1.",
 				on_change=bot.update_rating_system
 			),
-			Variables.IntVar(
-				"rating_reduction_scale",
-				display="Rating reduction scale",
+			Variables.SliderVar(
+				"rating_loss_scale",
+				display="Rating loss scale",
 				section="Rating",
 				description="\n".join([
-					"Scale all negative rating changes, default 100 (100%).",
+					"Scale rating changes for losses, 100% = x1.",
 					"Warning: changing this will break ratings balance."
 				]),
-				verify=lambda x: 0 <= x <= 1000,
-				verify_message="Rating reduction scale must be between 0 and 1000",
-				notnull=True,
-				default=100,
+				max_val=500,
 				on_change=bot.update_rating_system
 			),
-			Variables.IntVar(
-				"rating_draw_scale",
-				display="Rating draw scale",
+			Variables.SliderVar(
+				"rating_win_scale",
+				display="Rating win scale",
 				section="Rating",
 				description="\n".join([
-					"Additional scale for draws, default 100 (100%).",
+					"Scale rating changes for wins, 100% = x1.",
 					"Warning: changing this will break ratings balance."
 				]),
-				verify=lambda x: 0 <= x <= 1000,
-				verify_message="Rating draw scale must be between 0 and 1000",
-				notnull=True,
-				default=100,
+				max_val=500,
+				on_change=bot.update_rating_system
+			),
+			Variables.SliderVar(
+				"rating_draw_bonus",
+				display="Rating draw bonus",
+				section="Rating",
+				description="\n".join([
+					"Add rating bonus for draws.",
+					"100% = x + 1x // -100% = x - 1x",
+					"Warning: changing this will break ratings balance."
+				]),
+				max_val=500,
+				min_val=-500,
 				on_change=bot.update_rating_system
 			),
 			Variables.BoolVar(
@@ -315,9 +320,9 @@ class QueueChannel:
 			init_rp=self.cfg.rating_initial,
 			init_deviation=self.cfg.rating_deviation,
 			min_deviation=self.cfg.rating_min_deviation,
-			scale=self.cfg.rating_scale,
-			reduction_scale=self.cfg.rating_reduction_scale,
-			draw_scale=self.cfg.rating_draw_scale,
+			loss_scale=self.cfg.rating_loss_scale,
+			win_scale=self.cfg.rating_win_scale,
+			draw_bonus=self.cfg.rating_draw_bonus,
 			ws_boost=self.cfg.rating_ws_boost,
 			ls_boost=self.cfg.rating_ls_boost
 		)
@@ -429,8 +434,9 @@ class QueueChannel:
 			init_deviation=self.cfg.rating_deviation,
 			min_deviation=self.cfg.rating_min_deviation,
 			scale=self.cfg.rating_scale,
-			reduction_scale=self.cfg.rating_reduction_scale,
-			draw_scale=self.cfg.rating_draw_scale,
+			loss_scale=self.cfg.rating_loss_scale,
+			win_scale=self.cfg.rating_win_scale,
+			draw_bonus=self.cfg.rating_draw_bonus,
 			ws_boost=self.cfg.rating_ws_boost,
 			ls_boost=self.cfg.rating_ls_boost
 		)

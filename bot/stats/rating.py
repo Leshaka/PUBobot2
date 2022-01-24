@@ -15,32 +15,43 @@ class BaseRating:
 
 	def __init__(
 			self, channel_id, init_rp=1500, init_deviation=300, min_deviation=None, scale=100,
-			reduction_scale=100, draw_scale=100, ws_boost=False, ls_boost=False
+			loss_scale=100, win_scale=100, draw_bonus=0, ws_boost=False, ls_boost=False
 	):
 		self.channel_id = channel_id
 		self.init_rp = init_rp
 		self.init_deviation = init_deviation
 		self.min_deviation = min_deviation or 0
-		self.scale = scale/100
-		self.draw_scale = draw_scale/100
-		self.reduction_scale = reduction_scale/100
+		self.scale = (scale or 100)/100.0
+		self.win_scale = (win_scale or 100)/100.0
+		self.loss_scale = (loss_scale or 100)/100.0
+		self.draw_bonus = (draw_bonus or 0)/100.0
 		self.ws_boost = ws_boost
 		self.ls_boost = ls_boost
 
+	def _scale_win(self, r_change):
+		return r_change * self.win_scale
+
+	def _scale_loss(self, r_change):
+		return r_change * self.loss_scale
+
+	def _scale_draw(self, r_change):
+		return r_change + (abs(r_change) * self.draw_bonus)
+
 	def _scale_changes(self, player, r_change, d_change, score):
 		p = player.copy()
-		r_change = (r_change * self.scale) * self.reduction_scale if r_change < 0 else r_change * self.scale
 
 		if score == -1:
+			r_change = self._scale_loss(r_change) * self.scale
 			p['losses'] += 1
 			p['streak'] = -1 if p['streak'] >= 0 else p['streak'] - 1
 			if self.ls_boost and p['streak'] < -2:
 				r_change = r_change * (min(abs(p['streak']), 6) / 2)
 		elif score == 0:
-			r_change = r_change * self.draw_scale
+			r_change = self._scale_draw(r_change) * self.scale
 			p['draws'] += 1
 			p['streak'] = 0
 		elif score == 1:
+			r_change = self._scale_win(r_change) * self.scale
 			p['wins'] += 1
 			p['streak'] = 1 if p['streak'] <= 0 else p['streak'] + 1
 			if self.ws_boost and p['streak'] > 2:
@@ -201,6 +212,9 @@ class FlatRating(BaseRating):
 
 	def __init__(self, **kwargs):
 		super().__init__(**kwargs)
+
+	def _scale_draw(self, r_change):
+		return 10 * self.draw_bonus
 
 	def rate(self, winners, losers, draw=False):
 		if not draw:
