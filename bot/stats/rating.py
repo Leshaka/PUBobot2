@@ -217,19 +217,20 @@ class FlatRating(BaseRating):
 		return 10 * self.draw_bonus
 
 	def rate(self, winners, losers, draw=False):
+		r1, r2 = [], []
 		if not draw:
-			results = []
 			for p in winners:
 				new = self._scale_changes(p, 10, 0, 1)
-				results.append(new)
+				r1.append(new)
 
 			for p in losers:
 				new = self._scale_changes(p, -10, 0, -1)
-				results.append(new)
+				r2.append(new)
 		else:
-			results = [self._scale_changes(p, 0, 0, 0) for p in (*winners, *losers)]
+			r1 = [self._scale_changes(p, 0, 0, 0) for p in winners]
+			r2 = [self._scale_changes(p, 0, 0, 0) for p in losers]
 
-		return results
+		return [r1, r2]
 
 
 class Glicko2Rating(BaseRating):
@@ -240,6 +241,7 @@ class Glicko2Rating(BaseRating):
 	def rate(self, winners, losers, draw=False):
 		score_w = 0.5 if draw else 1
 		score_l = 0.5 if draw else 0
+		r1, r2 = [], []
 		print("Scores:")
 		print(score_l, score_w)
 
@@ -255,22 +257,21 @@ class Glicko2Rating(BaseRating):
 		]
 
 		po = glicko2.Player()
-		results = []
 		for p in winners:
 			po.setRating(avg_w[0][0])
 			po.setRd(p['deviation'])
 			po.update_player(*avg_l)
 			new = self._scale_changes(p, po.getRating() - avg_w[0][0], po.getRd() - p['deviation'], 0 if draw else 1)
-			results.append(new)
+			r1.append(new)
 
 		for p in losers:
 			po.setRating(avg_l[0][0])
 			po.setRd(p['deviation'])
 			po.update_player(*avg_w)
 			new = self._scale_changes(p, po.getRating() - avg_l[0][0], po.getRd() - p['deviation'], 0 if draw else -1)
-			results.append(new)
+			r2.append(new)
 
-		return results
+		return [r1, r2]
 
 
 class TrueSkillRating(BaseRating):
@@ -285,19 +286,19 @@ class TrueSkillRating(BaseRating):
 	def rate(self, winners, losers, draw=False):
 		g1 = [self.ts.create_rating(mu=p['rating'], sigma=p['deviation']) for p in winners]
 		g2 = [self.ts.create_rating(mu=p['rating'], sigma=p['deviation']) for p in losers]
+		r1, r2 = [], []
 
 		ranks = [0, 0] if draw else [0, 1]
 		g1, g2 = (list(i) for i in self.ts.rate((g1, g2), ranks=ranks))
 
-		results = []
 		for p in winners:
 			res = g1.pop(0)
 			new = self._scale_changes(p, res.mu - p['rating'], res.sigma - p['deviation'], 0 if draw else 1)
-			results.append(new)
+			r1.append(new)
 
 		for p in losers:
 			res = g2.pop(0)
 			new = self._scale_changes(p, res.mu - p['rating'], res.sigma - p['deviation'], 0 if draw else -1)
-			results.append(new)
+			r2.append(new)
 
-		return results
+		return [r1, r2]

@@ -371,6 +371,8 @@ class QueueChannel:
 			report_cancel=self._rc,
 			rw=self._rw,
 			report_win=self._rw,
+			report_score=self._rs,
+			rs=self._rs,
 			report_manual=self._report_manual,
 			expire=self._expire,
 			default_expire=self._default_expire,
@@ -1073,6 +1075,34 @@ class QueueChannel:
 				prefix=self.cfg.prefix
 			))
 		await match.report_win(args[1])
+
+	async def _rs(self, message, args=""):
+		def usage():
+			raise bot.Exc.SyntaxError(f"Usage: {self.cfg.prefix}rs [match_id] alpha_score:beta_score")
+
+		# Get match
+		self._check_perms(message.author, 1)
+		args = args.split(" ")
+		if len(args) > 1:
+			if not args[0].isdigit():
+				usage()
+			if (match := find(lambda m: m.qc == self and m.id == int(args[0]), bot.active_matches)) is None:
+				raise bot.Exc.NotFoundError(
+					self.gt("Could not find match with specified id. Check `{prefix}matches`.").format(
+						prefix=self.cfg.prefix
+					))
+			args = args[1:]
+		else:
+			if (match := self.get_match(message.author)) is None:
+				raise bot.Exc.NotInMatchError(self.gt("You are not in an active match."))
+
+		# Get score
+		if (scores := re.match(r"^(\d+):(\d+)$", args[0])) is None:
+			usage()
+		scores = [int(i) for i in scores.groups()]
+		if all((i == 0 for i in scores)):
+			raise bot.Exc.ValueError(self.gt("At least one team must have a positive score."))
+		await match.report_scores(scores)
 
 	async def _report_manual(self, message, args=""):
 		self._check_perms(message.author, 1)

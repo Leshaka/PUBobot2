@@ -64,6 +64,8 @@ db.ensure_table(dict(
 		dict(cname="beta_name", ctype=db.types.str),
 		dict(cname="ranked", ctype=db.types.bool),
 		dict(cname="winner", ctype=db.types.bool),
+		dict(cname="alpha_score", ctype=db.types.int),
+		dict(cname="beta_score", ctype=db.types.int),
 		dict(cname="maps", ctype=db.types.str)
 	],
 	primary_keys=["match_id"]
@@ -133,7 +135,8 @@ async def register_match_ranked(m):
 	await db.insert('qc_matches', dict(
 		match_id=m.id, channel_id=m.qc.channel.id, queue_id=m.queue.cfg.p_key, queue_name=m.queue.name,
 		alpha_name=m.teams[0].name, beta_name=m.teams[1].name,
-		at=int(time.time()), ranked=1, winner=m.winner, maps="\n".join(m.maps)
+		at=int(time.time()), ranked=1, winner=m.winner,
+		alpha_score=m.scores[0], beta_score=m.scores[1], maps="\n".join(m.maps)
 	))
 
 	for channel_id in {m.qc.id, m.qc.rating.channel_id}:
@@ -142,19 +145,27 @@ async def register_match_ranked(m):
 			for p in m.players
 		), on_dublicate="ignore")
 
-	before = [
+	results = [[
 		await m.qc.rating.get_players((p.id for p in m.teams[0])),
 		await m.qc.rating.get_players((p.id for p in m.teams[1])),
-	]
+	]]
 
-	after = m.qc.rating.rate(
-		winners=before[m.winner or 0],
-		losers=before[abs((m.winner or 0)-1)],
-		draw=m.winner is None
-	)
+	if m.winner is None:  # draw
+		after = m.qc.rating.rate(winners=results[0][0], losers=results[0][1], draw=True)
+		results.append(after)
+	else:  # process actual scores
+		n = 0
+		while n < m.scores[0] or n < m.scores[1]:
+			if n < m.scores[0]:
+				after = m.qc.rating.rate(winners=results[-1][0], losers=results[-1][1], draw=False)
+				results.append(after)
+			if n < m.scores[1]:
+				after = m.qc.rating.rate(winners=results[-1][1], losers=results[-1][0], draw=False)
+				results.append(after[::-1])
+			n += 1
 
-	after = iter_to_dict(after, key='user_id')
-	before = iter_to_dict((*before[0], *before[1]), key='user_id')
+	after = iter_to_dict((*results[-1][0], *results[-1][1]), key='user_id')
+	before = iter_to_dict((*results[0][0], *results[0][1]), key='user_id')
 
 	for p in m.players:
 		nick = get_nick(p)

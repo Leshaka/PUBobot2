@@ -144,6 +144,7 @@ class Match:
 		self.players = list(players)
 		self.ratings = ratings
 		self.winner = None
+		self.scores = [0, 0]
 
 		team_names = self.cfg['team_names']
 		team_emojis = self.cfg['team_emojis'] or random.sample(self.TEAM_EMOJIS, 2)
@@ -300,6 +301,7 @@ class Match:
 			self.winner = None
 		else:
 			self.winner = enemy_team.idx
+			self.scores[self.winner] = 1
 		await self.finish_match()
 
 	async def report_win(self, team_name):  # version for admins/mods
@@ -311,9 +313,24 @@ class Match:
 			self.winner = None
 		elif (team := find(lambda t: t.name.lower() == team_name, self.teams[:2])) is not None:
 			self.winner = team.idx
+			self.scores[self.winner] = 1
 		else:
 			raise bot.Exc.SyntaxError(self.gt("Specified team name not found."))
 
+		await self.finish_match()
+
+	async def report_scores(self, scores):
+		if self.state != self.WAITING_REPORT:
+			raise bot.Exc.MatchStateError(self.gt("The match must be on the waiting report stage."))
+
+		if scores[0] > scores[1]:
+			self.winner = 0
+		elif scores[1] > scores[0]:
+			self.winner = 1
+		else:
+			self.winner = None
+
+		self.scores = scores
 		await self.finish_match()
 
 	async def print_rating_results(self, before, after):
