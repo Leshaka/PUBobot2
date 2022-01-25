@@ -183,6 +183,14 @@ class PickupQueue:
 				section="Appearance",
 				description="Replace default promotion message. You can use {name}, {role} and {left} placeholders in the text."
 			),
+			Variables.BoolVar(
+				"show_streamers",
+				display="Show streamers",
+				section="Appearance",
+				default=1,
+				notnull=True,
+				description="Show streaming players on a match start."
+			),
 			Variables.RoleVar(
 				"captains_role",
 				display="Captains role",
