@@ -426,12 +426,17 @@ class PickupQueue:
 	async def revert(self, not_ready, ready):
 		old_players = list(self.queue)
 		self.queue = list(ready)
-		while len(self.queue) < self.cfg.size and len(old_players):
-			self.queue.append(old_players.pop(0))
-		if len(self.queue) == self.cfg.size:
-			await self.start()
-			self.queue = list(old_players)
+		if self.cfg.autostart:
+			while len(self.queue) < self.cfg.size and len(old_players):
+				self.queue.append(old_players.pop(0))
+			if len(self.queue) <= self.cfg.size:
+				await self.start()
+				self.queue = list(old_players)
+			else:
+				for p in ready:
+					await self.qc.update_expire(p)
 		else:
+			self.queue = list(ready) + old_players
 			for p in ready:
 				await self.qc.update_expire(p)
 
