@@ -216,6 +216,9 @@ msgstr "год"
 msgid "**Total matches: {count}**"
 msgstr "**Всего матчей: {count}**"
 
+msgid "At least one team must have a positive score."
+msgstr "Хотя бы одна команда должна иметь положительный счет."
+
 # bot/match/match.py
 
 msgid "The match must be on the waiting report stage."
@@ -247,6 +250,9 @@ msgstr "С Вас снято `{count}` ролей."
 
 msgid "Added `{count}` roles to you."
 msgstr "Вам добавлено `{count}` ролей."
+
+msgid "{players} were removed from the match."
+msgstr "{players} были сняты с матча."
 
 # bot/match/embeds.py
 
@@ -300,6 +306,12 @@ msgstr "Карты"
 
 msgid "Server"
 msgstr "Сервер"
+
+msgid "Player streams"
+msgstr "Трансляции игроков"
+
+msgid "Winner"
+msgstr "Победитель"
 
 # bot/match/draft.py
 
