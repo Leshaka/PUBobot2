@@ -163,6 +163,18 @@ msgstr "Sei stato bannato, `{duration}` rimanenti."
 msgid "Noadds are empty."
 msgstr "La lista dei Noadd è vuota."
 
+msgid "!auto_ready command is turned off on this channel."
+msgstr "El comando !auto_ready está desactivado en este canal."
+
+msgid "Maximum auto_ready duration is {duration}."
+msgstr "La duración máxima de auto_ready es de {duration}."
+
+msgid "Your automatic ready confirmation is now turned off."
+msgstr "Tu confirmación automática para estar listo está ahora desactivada."
+
+msgid "During next {duration} your match participation will be confirmed automatically."
+msgstr "Durante los próximos {duration} se confirmará automáticamente tu participación en la partida."
+
 # bot/queues/pickup_queue.py
 
 msgid "{role} Please add to **{name}** pickup, `{left}` players left!"
@@ -205,6 +217,9 @@ msgstr "anno"
 msgid "**Total matches: {count}**"
 msgstr "**Partite totali: {count}**"
 
+msgid "At least one team must have a positive score."
+msgstr "Al menos uno de los dos equipos debe tener una puntuación positiva."
+
 # bot/match/match.py
 
 msgid "The match must be on the waiting report stage."
@@ -236,6 +251,9 @@ msgstr "Ti sono stati rimossi `{count}` ruoli."
 
 msgid "Added `{count}` roles to you."
 msgstr "Ti sono stati aggiunti `{count}` ruoli."
+
+msgid "{players} were removed from the match."
+msgstr "{players} fueron expulsados de la partida."
 
 # bot/match/embeds.py
 
@@ -290,6 +308,12 @@ msgstr "Mappe"
 msgid "Server"
 msgstr "Server"
 
+msgid "Player streams"
+msgstr "Jugador retransmitiendo en directo"
+
+msgid "Winner"
+msgstr "Ganador"
+
 # bot/match/draft.py
 
 msgid "The match is not on the draft stage."
@@ -326,6 +350,9 @@ msgstr "Il giocatore specificato non sta cercando un sostituto."
 
 msgid "The match is not on the check-in stage."
 msgstr "La partita non è in fase di check-in."
+
+msgid "Discarding check-in is not allowed."
+msgstr "No puedes realizar esta acción durante esta fase de la partida."
 
 msgid "{member} has aborted the check-in."
 msgstr "{member} ha annullato il check-in."
