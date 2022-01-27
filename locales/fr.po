@@ -164,6 +164,18 @@ msgstr "Vous avez été banni, il vous reste `{duration}` avant votre débanisse
 msgid "Noadds are empty."
 msgstr "La liste des bannis a été vidé."
 
+msgid "!auto_ready command is turned off on this channel."
+msgstr "La commande !autoready a été désactivée sur ce channel."
+
+msgid "Maximum auto_ready duration is {duration}."
+msgstr "La durée maximale de l'auto_ready est de {duration}."
+
+msgid "Your automatic ready confirmation is now turned off."
+msgstr "Vous avez désactivé la confirmation automatique de votre présence."
+
+msgid "During next {duration} your match participation will be confirmed automatically."
+msgstr "Pendant {duration}, votre présence sera confirmée automatiquement pour vos prochains matchs."
+
 # bot/queues/pickup_queue.py
 
 msgid "{role} Please add to **{name}** pickup, `{left}` players left!"
@@ -205,6 +217,9 @@ msgstr "ans"
 msgid "**Total matches: {count}**"
 msgstr "**Nombre total de matchs: {count}**"
 
+msgid "At least one team must have a positive score."
+msgstr "Au moins une des deux équipes doit avoir un score positif."
+
 # bot/match/match.py
 
 msgid "The match must be on the waiting report stage."
@@ -236,6 +251,9 @@ msgstr "J'ai retiré le rôle `{count}` pour vous."
 
 msgid "Added `{count}` roles to you."
 msgstr "J'ai ajouté le rôle `{count}` pour vous."
+
+msgid "{players} were removed from the match."
+msgstr "{players} ont été retirés du match."
 
 # bot/match/embeds.py
 
@@ -291,6 +309,11 @@ msgstr "Maps"
 msgid "Server"
 msgstr "Serveur"
 
+msgid "Player streams"
+msgstr "Ces joueurs jouent le match en direct"
+
+msgid "Winner"
+msgstr "Vainqueur"
 # bot/match/draft.py
 
 msgid "The match is not on the draft stage."
@@ -327,6 +350,9 @@ msgstr "Le joueur identifié n'est pas à la recherche de remplaçant."
 
 msgid "The match is not on the check-in stage."
 msgstr "Le match n'est pas au stade de vérification de présence."
+
+msgid "Discarding check-in is not allowed."
+msgstr "Vous ne pouvez plus effectuer cette action durant cette phase de la partie."
 
 msgid "{member} has aborted the check-in."
 msgstr "{member} n'a pas confirmé sa présence."
