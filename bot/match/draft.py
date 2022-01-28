@@ -87,7 +87,14 @@ class Draft:
 		if self.m.state not in [self.m.DRAFT, self.m.WAITING_REPORT]:
 			raise bot.Exc.MatchStateError(self.m.gt("The match must be on the draft or waiting report stage."))
 
-		find(lambda t: player in t, self.m.teams).remove(player)
+		if (old_team := find(lambda t: player in t, self.m.teams)) is not None:
+			old_team.remove(player)
+		else:
+			self.m.players.append(player)
+			self.m.ratings = {
+				p['user_id']: p['rating'] for p in await self.m.qc.rating.get_players((p.id for p in self.m.players))
+			}
+
 		team.append(player)
 		await self.refresh()
 

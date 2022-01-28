@@ -954,9 +954,15 @@ class QueueChannel:
 		self._check_perms(message.author, 1)
 		args = args.split(" ")
 		if len(args) < 2:
-			raise bot.Exc.SyntaxError(f"Usage: {self.cfg.prefix}put __player__ __team__")
+			raise bot.Exc.SyntaxError(f"Usage: {self.cfg.prefix}put __player__ __team__ [__match_id__]")
 		elif (member := self.get_member(args[0])) is None:
 			raise bot.Exc.SyntaxError(self.gt("Specified user not found."))
+		elif len(args) == 3 and args[2].isdigit():
+			if (match := find(lambda m: m.qc == self and m.id == int(args[2]), bot.active_matches)) is None:
+				raise bot.Exc.NotFoundError(
+					self.gt("Could not find match with specified id. Check `{prefix}matches`.").format(
+						prefix=self.cfg.prefix
+					))
 		elif (match := self.get_match(member)) is None:
 			raise bot.Exc.NotInMatchError(self.gt("Specified user is not in a match."))
 		await match.draft.put(member, args[1])
