@@ -71,13 +71,13 @@
 | !nr / !notready | Discard check-in |
 
 #### Draft
-| command    | arg1        | arg2             | description                     |
-|------------|-------------|------------------|---------------------------------|
-| !capfor    | `team name` |                  | Become team captain             |
-| !pick / !p | `@user`     |                  | Pick a player                   |
-| !subme     |             |                  | Request a sub                   |
-| !subfor    | `@user`     |                  | Sub a user                      |
-| !put       | `@user`     | `team name` / unpicked | Place a user in a team as a moderator |
+| command    | arg1        | arg2                   | arg3         | description                     |
+|------------|-------------|------------------------|--------------|---------------------------------|
+| !capfor    | `team name` |                        |              | Become team captain             |
+| !pick / !p | `@user`     |                        |              | Pick a player                   |
+| !subme     |             |                        |              | Request a sub                   |
+| !subfor    | `@user`     |                        |              | Sub a user                      |
+| !put       | `@user`     | `team name` / unpicked | [`match_id`] | Place a user in a team as a moderator, match_id is needed if specified `@user` is not in the match. |
 
 #### Report match
 | command        | arg1       | arg2               | arg3      | description                      |
