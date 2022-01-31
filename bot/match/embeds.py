@@ -1,4 +1,4 @@
-from discord import Embed, Colour, Streaming
+from nextcord import Embed, Colour, Streaming
 from core.client import dc
 from core.utils import get_nick, join_and
 

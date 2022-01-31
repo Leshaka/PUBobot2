@@ -2,7 +2,7 @@
 from time import time
 from itertools import combinations
 import random
-from discord import DiscordException
+from nextcord import DiscordException
 
 import bot
 from core.utils import find, get, iter_to_dict, join_and, get_nick

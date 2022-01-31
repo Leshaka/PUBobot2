@@ -5,7 +5,7 @@ import time
 import asyncio
 import traceback
 from random import randint, choice
-from discord import Embed, Colour, Forbidden
+from nextcord import Embed, Colour, Forbidden
 
 from core.config import cfg
 from core.console import log

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import random
 import bot
-from discord.errors import DiscordException
+from nextcord.errors import DiscordException
 
 from core.utils import join_and
 from core.console import log

@@ -6,7 +6,6 @@ import signal
 import asyncio
 import traceback
 import queue
-import discord
 from asyncio import sleep as asleep
 from asyncio import iscoroutine
 
@@ -80,7 +79,7 @@ async def think():
 			log.error('Error running exit task from {}: {}\n{}'.format(task.__module__, str(e), traceback.format_exc()))
 
 	log.info("Waiting for connection to close...")
-	await dc.logout()
+	await dc.close()
 
 	log.info("Closing db.")
 	await database.db.close()
@@ -88,8 +87,6 @@ async def think():
 		log.info("Closing web server.")
 		webserver.srv.close()
 		await webserver.srv.wait_closed()
-	log.info("Closing discord.")
-	await dc.logout()
 	log.info("Closing log.")
 	log.close()
 	print("Exit now.")

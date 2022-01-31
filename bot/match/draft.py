@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import bot
 from core.utils import find
-from discord import DiscordException
+from nextcord import DiscordException
 
 
 class Draft:

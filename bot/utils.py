@@ -1,6 +1,6 @@
 from asyncio import sleep as asleep
 from asyncio import create_task
-from discord import DiscordException
+from nextcord import DiscordException
 
 from bot import queue_channels
 from core.client import dc

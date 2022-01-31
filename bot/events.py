@@ -1,4 +1,4 @@
-from discord import ChannelType, Activity, ActivityType
+from nextcord import ChannelType, Activity, ActivityType
 
 from core.client import dc
 from core.console import log
@@ -48,7 +48,7 @@ async def on_reaction_remove(reaction, user):  # FIXME: this event does not get 
 
 @dc.event
 async def on_ready():
-	await dc.change_presence(activity=Activity(type=ActivityType.watching, name=cfg.STATUS, url="https://pubobot.leshaka.xyz/"))
+	await dc.change_presence(activity=Activity(type=ActivityType.watching, name=cfg.STATUS))
 	if not dc.was_ready:  # Connected for the first time, load everything
 		dc.was_ready = True
 		bot.last_match_id = await bot.stats.last_match_id()

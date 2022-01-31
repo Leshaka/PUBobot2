@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-from discord import Forbidden
 
 from core.console import log
 from core.cfg_factory import CfgFactory, Variables, VariableTable

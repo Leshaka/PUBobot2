@@ -2,8 +2,8 @@
 import random
 import re
 from prettytable import PrettyTable, MARKDOWN
-from discord import Embed
-from discord.utils import get, find, escape_markdown
+from nextcord import Embed
+from nextcord.utils import get, find, escape_markdown
 from datetime import timedelta
 
 
