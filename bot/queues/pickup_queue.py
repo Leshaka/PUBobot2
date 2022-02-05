@@ -319,7 +319,7 @@ class PickupQueue:
 	def length(self):
 		return len(self.queue)
 
-	async def promote(self):
+	async def promote(self, channel):
 		promotion_role = self.cfg.promotion_role or self.qc.cfg.promotion_role
 		promotion_msg = self.cfg.promotion_msg or self.qc.gt("{role} Please add to **{name}** pickup, `{left}` players left!")
 		promotion_msg = promotion_msg.format(
@@ -330,11 +330,11 @@ class PickupQueue:
 
 		if (
 			promotion_role and not promotion_role.mentionable and
-			self.qc.channel.guild.me and not self.qc.channel.guild.me.guild_permissions.mention_everyone
+			channel.guild.me and not channel.guild.me.guild_permissions.mention_everyone
 		):
 			raise bot.Exc.PermissionError("Insufficient permissions to ping the promotion role.")
 		else:
-			await self.qc.channel.send(promotion_msg)
+			await channel.send(promotion_msg)
 
 	async def reset(self):
 		self.queue = []

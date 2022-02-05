@@ -4,6 +4,7 @@ import json
 import time
 import asyncio
 import traceback
+from enum import Enum
 from random import randint, choice
 from nextcord import Embed, Colour, Forbidden
 
@@ -20,6 +21,47 @@ from bot.stats.rating import FlatRating, Glicko2Rating, TrueSkillRating
 
 MAX_EXPIRE_TIME = 12*60*60
 MAX_PROMOTION_DELAY = 12*60*60
+
+
+class Perms(Enum):
+	MEMBER = 0
+	MODERATOR = 1
+	ADMIN = 2
+
+
+class Context:
+	"""
+	Generate universal context data for each type of interaction
+	such as text message, web interaction, slash command, button press etc
+	belonging to a QueueChannel object.
+	"""
+
+	@classmethod
+	def from_msg(cls, qc, message):
+		return cls(qc, message.channel, message.author)
+
+	def __init__(self, qc, channel, author):
+		self.qc = qc
+		self.channel = channel
+		self.author = author
+
+	@property
+	def access_level(self):
+		if (self.qc.cfg.admin_role in self.author.roles or
+					self.author.id == cfg.DC_OWNER_ID or
+					self.channel.permissions_for(self.author).administrator):
+			return 2
+		elif self.qc.cfg.moderator_role in self.author.roles:
+			return 1
+		else:
+			return 0
+
+	def _check_perms(self, req_perms):
+		if self.access_level < req_perms:
+			if req_perms == 2:
+				raise bot.Exc.PermissionError(self.qc.gt("You must possess admin permissions."))
+			else:
+				raise bot.Exc.PermissionError(self.qc.gt("You must possess moderator permissions."))
 
 
 class QueueChannel:
@@ -306,7 +348,7 @@ class QueueChannel:
 		qc_cfg = await cls.cfg_factory.spawn(text_channel.guild, p_key=text_channel.id)
 		self = cls(text_channel, qc_cfg)
 
-		for pq_cfg in await bot.PickupQueue.cfg_factory.select(text_channel.guild, {"channel_id": self.channel.id}):
+		for pq_cfg in await bot.PickupQueue.cfg_factory.select(text_channel.guild, {"channel_id": self.id}):
 			self.queues.append(bot.PickupQueue(self, pq_cfg))
 
 		return self
@@ -327,7 +369,6 @@ class QueueChannel:
 			ls_boost=self.cfg.rating_ls_boost
 		)
 		self.queues = []
-		self.channel = text_channel
 		self.topic = f"> {self.gt('no players')}"
 		self.last_promote = 0
 		self.commands = dict(
@@ -419,10 +460,10 @@ class QueueChannel:
 			nick=self._set_nick
 		)
 
-	async def update_info(self):
-		self.cfg.cfg_info['channel_name'] = self.channel.name
-		self.cfg.cfg_info['guild_id'] = self.channel.guild.id
-		self.cfg.cfg_info['guild_name'] = self.channel.guild.name
+	async def update_info(self, text_channel):
+		self.cfg.cfg_info['channel_name'] = text_channel.name
+		self.cfg.cfg_info['guild_id'] = text_channel.guild.id
+		self.cfg.cfg_info['guild_name'] = text_channel.guild.name
 
 		await self.cfg.set_info(self.cfg.cfg_info)
 
@@ -431,7 +472,7 @@ class QueueChannel:
 
 	def update_rating_system(self):
 		self.rating = self.rating_names[self.cfg.rating_system](
-			channel_id=(self.cfg.rating_channel or self.channel).id,
+			channel_id=(self.cfg.rating_channel or self).id,
 			init_rp=self.cfg.rating_initial,
 			init_deviation=self.cfg.rating_deviation,
 			min_deviation=self.cfg.rating_min_deviation,
@@ -446,23 +487,6 @@ class QueueChannel:
 	async def apply_rating_decay(self):
 		if self.id == self.rating.channel_id and (self.cfg.rating_decay or self.cfg.rating_deviation_decay):
 			await self.rating.apply_decay(self.cfg.rating_decay or 0, self.cfg.rating_deviation_decay or 0, self._ranks_table)
-
-	def access_level(self, member):
-		if (self.cfg.admin_role in member.roles or
-					member.id == cfg.DC_OWNER_ID or
-					self.channel.permissions_for(member).administrator):
-			return 2
-		elif self.cfg.moderator_role in member.roles:
-			return 1
-		else:
-			return 0
-
-	def _check_perms(self, member, req_perms):
-		if self.access_level(member) < req_perms:
-			if req_perms == 2:
-				raise bot.Exc.PermissionError(self.gt("You must possess admin permissions."))
-			else:
-				raise bot.Exc.PermissionError(self.gt("You must possess moderator permissions."))
 
 	@property
 	def _ranks_table(self):
@@ -482,7 +506,7 @@ class QueueChannel:
 		self.queues.append(q_obj)
 		return q_obj
 
-	async def update_topic(self, force_announce=False, phrase=None):
+	async def update_topic(self, channel, force_announce=False, phrase=None):
 		populated = [q for q in self.queues if len(q.queue)]
 		if not len(populated):
 			new_topic = f"> {self.gt('no players')}"
@@ -493,9 +517,9 @@ class QueueChannel:
 		if new_topic != self.topic or force_announce:
 			self.topic = new_topic
 			if phrase:
-				await self.channel.send(phrase + "\n" + self.topic)
+				await channel.send(phrase + "\n" + self.topic)
 			else:
-				await self.channel.send(self.topic)
+				await channel.send(self.topic)
 
 	async def auto_remove(self, member):
 		if member.id in bot.allow_offline:
@@ -506,7 +530,7 @@ class QueueChannel:
 		if str(member.status) == "offline" and self.cfg.remove_offline:
 			await self.remove_members(member, reason="offline")
 
-	async def remove_members(self, *members, reason=None, highlight=False):
+	async def remove_members(self, channel, *members, reason=None, highlight=False):
 		affected = set()
 		for q in (q for q in self.queues if q.length):
 			affected.update(q.pop_members(*members))
@@ -534,27 +558,27 @@ class QueueChannel:
 					reason = self.gt("removed by a moderator")
 
 				if len(affected) == 1:
-					await self.channel.send(self.gt("{member} were removed from all queues ({reason}).").format(
+					await channel.send(self.gt("{member} were removed from all queues ({reason}).").format(
 						member=mention,
 						reason=reason
 					))
 				else:
-					await self.channel.send(self.gt("{members} were removed from all queues ({reason}).").format(
+					await channel.send(self.gt("{members} were removed from all queues ({reason}).").format(
 						members=mention,
 						reason=reason
 					))
 
-	async def error(self, content, title=None, reply_to=None):
+	async def error(self, ctx, content, title=None, reply=False):
 		title = title or self.gt("Error")
-		if reply_to:
-			content = f"<@{reply_to.id}>, " + content
-		await self.channel.send(embed=error_embed(content, title=title))
+		if reply:
+			content = f"{ctx.author.mention}, " + content
+		await ctx.channel.send(embed=error_embed(content, title=title))
 
-	async def success(self, content, title=None, reply_to=None):
+	async def success(self, ctx, content, title=None, reply=None):
 		# title = title or self.gt("Success")
-		if reply_to:
-			content = f"<@{reply_to.id}>, " + content
-		await self.channel.send(embed=ok_embed(content, title=title))
+		if reply:
+			content = f"{ctx.author.mention}, " + content
+		await ctx.channel.send(embed=ok_embed(content, title=title))
 
 	def get_match(self, member):
 		for match in bot.active_matches:
@@ -562,17 +586,17 @@ class QueueChannel:
 				return match
 		return None
 
-	def get_member(self, string):
+	def get_member(self, guild, string):
 		if highlight := re.match(r"<@!?(\d+)>", string):
-			return self.channel.guild.get_member(int(highlight.group(1)))
+			return guild.get_member(int(highlight.group(1)))
 		elif mask := re.match(r"^(\w+)@(\d{5,20})$", string):
 			name, user_id = mask.groups()
-			return FakeMember(guild=self.channel.guild, user_id=int(user_id), name=name)
+			return FakeMember(guild=guild, user_id=int(user_id), name=name)
 		else:
 			string = string.lower()
 			return find(
 				lambda m: string == m.name.lower() or (m.nick and string == m.nick.lower()),
-				self.channel.guild.members
+				guild.members
 			)
 
 	def rating_rank(self, rating):
@@ -656,6 +680,7 @@ class QueueChannel:
 		if not len(message.content) > 1:
 			return
 
+		ctx = Context.from_msg(self, message)
 		cmd = message.content.split(' ', 1)[0].lower()
 
 		# special commands
@@ -670,8 +695,9 @@ class QueueChannel:
 
 		# normal commands starting with prefix
 		elif self.cfg.prefix == cmd[0]:
-			if await db.select_one(['guild_id'], 'disabled_guilds', where={'guild_id': self.channel.guild.id}):
+			if await db.select_one(['guild_id'], 'disabled_guilds', where={'guild_id': ctx.channel.guild.id}):
 				await self.error(
+					ctx,
 					f"This guild is disabled.\nPlease check {cfg.WS_ROOT_URL}/main/{self.channel.guild.id}/_billing"
 				)
 				return
@@ -681,10 +707,10 @@ class QueueChannel:
 
 		if f:
 			log.command("{} | #{} | {}: {}".format(
-				self.channel.guild.name, self.channel.name, get_nick(message.author), message.content
+				ctx.channel.guild.name, ctx.channel.name, get_nick(message.author), message.content
 			))
 			try:
-				await f(message, *args)
+				await f(ctx, message, *args)
 			except bot.Exc.PubobotException as e:
 				await message.channel.send(embed=error_embed(str(e), title=type(e).__name__))
 			except BaseException as e:
@@ -693,8 +719,8 @@ class QueueChannel:
 
 	#  Bot commands #
 
-	async def _create_pickup(self, message, args=""):
-		self._check_perms(message.author, 2)
+	async def _create_pickup(self, ctx, message, args=""):
+		ctx.check_perms(Perms.ADMIN)
 		args = args.split(" ")
 		if len(args) != 2 or not args[1].isdigit():
 			raise bot.Exc.SyntaxError(f"Usage: {self.cfg.prefix}create_pickup __name__ __size__")
@@ -703,25 +729,25 @@ class QueueChannel:
 		except ValueError as e:
 			raise bot.Exc.ValueError(str(e))
 		else:
-			await self.success(f"[**{pq.name}** ({pq.status})]")
+			await self.success(ctx, f"[**{pq.name}** ({pq.status})]")
 
-	async def _delete_queue(self, message, args=None):
-		self._check_perms(message.author, 2)
+	async def _delete_queue(self, ctx, message, args=None):
+		ctx.check_perms(Perms.ADMIN)
 		if not args:
 			raise bot.Exc.SyntaxError(f"Usage: {self.cfg.prefix}delete_queue __name__")
 		if (queue := get(self.queues, name=args)) is None:
 			raise bot.Exc.NotFoundError(f"Specified queue name not found on the channel.")
 		await queue.cfg.delete()
 		self.queues.remove(queue)
-		await self._show_queues(message, args=None)
+		await self._show_queues(ctx, args=None)
 
-	async def _show_queues(self, message, args=None):
+	async def _show_queues(self, ctx, args=None):
 		if len(self.queues):
-			await self.channel.send("> [" + " | ".join(
+			await ctx.channel.send("> [" + " | ".join(
 				[f"**{q.name}** ({q.status})" for q in self.queues]
 			) + "]")
 		else:
-			await self.channel.send("> [ **no queues configured** ]")
+			await ctx.channel.send("> [ **no queues configured** ]")
 
 	async def check_allowed_to_add(self, member, queue=None):
 		""" raises exception if not allowed, returns phrase string or None if allowed """
@@ -744,9 +770,8 @@ class QueueChannel:
 			await queue.check_allowed_to_add(member)
 		return phrase
 
-
-	async def _add_member(self, message, args=None):
-		phrase = await self.check_allowed_to_add(message.author)
+	async def _add_member(self, ctx, message, args=None):
+		phrase = await self.check_allowed_to_add(ctx.author)
 
 		targets = args.lower().split(" ") if args else []
 
@@ -768,24 +793,24 @@ class QueueChannel:
 
 		qr = dict()  # get queue responses
 		for q in t_queues:
-			qr[q] = await q.add_member(message.author)
+			qr[q] = await q.add_member(ctx.author)
 			if qr[q] == bot.Qr.QueueStarted:
 				return
 
 		if len(not_allowed := [q for q in qr.keys() if qr[q] == bot.Qr.NotAllowed]):
-			await self.error(self.gt("You are not allowed to add to {queues} queues.".format(
+			await self.error(ctx, self.gt("You are not allowed to add to {queues} queues.".format(
 				queues=join_and([f"**{q.name}**" for q in not_allowed])
 			)))
 
 		if bot.Qr.Success in qr.values():
-			await self.update_expire(message.author)
-			await self.update_topic(phrase=f"{message.author.mention}, {phrase}" if phrase else None)
+			await self.update_expire(ctx.author)
+			await self.update_topic(phrase=f"{ctx.author.mention}, {phrase}" if phrase else None)
 
-	async def _remove_member(self, message, args=None):
+	async def _remove_member(self, ctx, message, args=None):
 		targets = args.lower().split(" ") if args else []
 
 		if not len(targets):
-			await self.remove_members(message.author)
+			await self.remove_members(ctx.author)
 			return
 
 		t_queues = (q for q in self.queues if any(
@@ -793,14 +818,14 @@ class QueueChannel:
 		))
 
 		for q in t_queues:
-			q.pop_members(message.author)
+			q.pop_members(ctx.author)
 
-		if not any((q.is_added(message.author) for q in self.queues)):
-			bot.expire.cancel(self, message.author)
+		if not any((q.is_added(ctx.author) for q in self.queues)):
+			bot.expire.cancel(self, ctx.author)
 
 		await self.update_topic()
 
-	async def _who(self, message, args=None):
+	async def _who(self, ctx, message, args=None):
 		targets = args.lower().split(" ") if args else []
 
 		if len(targets):
@@ -811,12 +836,12 @@ class QueueChannel:
 			t_queues = [q for q in self.queues if len(q.queue)]
 
 		if not len(t_queues):
-			await self.channel.send(f"> {self.gt('no players')}")
+			await ctx.channel.send(f"> {self.gt('no players')}")
 		else:
-			await self.channel.send("\n".join([f"> **{q.name}** ({q.status}) | {q.who}" for q in t_queues]))
+			await ctx.channel.send("\n".join([f"> **{q.name}** ({q.status}) | {q.who}" for q in t_queues]))
 
-	async def _set(self, message, args=""):
-		self._check_perms(message.author, 2)
+	async def _set(self, ctx, message, args=""):
+		ctx.check_perms(Perms.ADMIN)
 		args = args.split(" ", maxsplit=2)
 		if len(args) != 2:
 			raise bot.Exc.SyntaxError(f"Usage: {self.cfg.prefix}set __variable__ __value__")
@@ -829,10 +854,10 @@ class QueueChannel:
 		except Exception as e:
 			raise bot.Exc.ValueError(str(e))
 		else:
-			await self.success(f"Variable __{var_name}__ configured.")
+			await self.success(ctx, f"Variable __{var_name}__ configured.")
 
-	async def _set_queue(self, message, args=""):
-		self._check_perms(message.author, 2)
+	async def _set_queue(self, ctx, message, args=""):
+		ctx.check_perms(Perms.ADMIN)
 		args = args.split(" ", maxsplit=2)
 		if len(args) != 3:
 			raise bot.Exc.SyntaxError(f"Usage: {self.cfg.prefix}set_queue __queue__ __variable__ __value__")
@@ -846,24 +871,25 @@ class QueueChannel:
 		except Exception as e:
 			raise bot.Exc.ValueError(str(e))
 		else:
-			await self.success(f"Variable __{var_name}__ configured.")
+			await self.success(ctx, f"Variable __{var_name}__ configured.")
 
-	async def _cfg(self, message, args=None):
-		await message.author.send(f"```json\n{json.dumps(self.cfg.to_json(), ensure_ascii=False, indent=2)}```")
+	async def _cfg(self, ctx, message, args=None):
+		await ctx.author.send(f"```json\n{json.dumps(self.cfg.to_json(), ensure_ascii=False, indent=2)}```")
 
-	async def _cfg_queue(self, message, args=None):
+	async def _cfg_queue(self, ctx, message, args=None):
+		ctx.check_perms(Perms.ADMIN)
 		if not args:
 			raise bot.Exc.SyntaxError(f"Usage: {self.cfg.prefix}cfg_queue __queue__")
 
 		args = args.lower()
 		for q in self.queues:
 			if q.name.lower() == args:
-				await message.author.send(f"```json\n{json.dumps(q.cfg.to_json(), ensure_ascii=False, indent=2)}```")
+				await ctx.author.send(f"```json\n{json.dumps(q.cfg.to_json(), ensure_ascii=False, indent=2)}```")
 				return
 		raise bot.Exc.SyntaxError(f"No such queue '{args}'.")
 
-	async def _set_cfg(self, message, args=None):
-		self._check_perms(message.author, 2)
+	async def _set_cfg(self, ctx, message, args=None):
+		ctx.check_perms(Perms.ADMIN)
 		if not args:
 			raise bot.Exc.SyntaxError(f"Usage: {self.cfg.prefix}set_cfg __json__")
 		try:
@@ -871,10 +897,10 @@ class QueueChannel:
 		except Exception as e:
 			raise bot.Exc.ValueError(str(e))
 		else:
-			await self.success(f"Channel configuration updated.")
+			await self.success(ctx, f"Channel configuration updated.")
 
-	async def _set_cfg_queue(self, message, args=""):
-		self._check_perms(message.author, 2)
+	async def _set_cfg_queue(self, ctx, message, args=""):
+		ctx.check_perms(Perms.ADMIN)
 		args = args.split(" ", maxsplit=1)
 		if len(args) != 2:
 			raise bot.Exc.SyntaxError(f"Usage: {self.cfg.prefix}set_cfg_queue __queue__ __json__")
@@ -886,23 +912,23 @@ class QueueChannel:
 				except Exception as e:
 					raise bot.Exc.ValueError(str(e))
 				else:
-					await self.success(f"__{q.name}__ queue configuration updated.")
+					await self.success(ctx, f"__{q.name}__ queue configuration updated.")
 				return
 		raise bot.Exc.SyntaxError(f"No such queue '{args}'.")
 
-	async def _ready(self, message, args=None):
-		if match := self.get_match(message.author):
-			await match.check_in.set_ready(message.author, True)
+	async def _ready(self, ctx, message, args=None):
+		if match := self.get_match(ctx.author):
+			await match.check_in.set_ready(ctx.author, True)
 		else:
 			raise bot.Exc.NotInMatchError(self.gt("You are not in an active match."))
 
-	async def _not_ready(self, message, args=None):
-		if match := self.get_match(message.author):
-			await match.check_in.set_ready(message.author, False)
+	async def _not_ready(self, ctx, message, args=None):
+		if match := self.get_match(ctx.author):
+			await match.check_in.set_ready(ctx.author, False)
 		else:
 			raise bot.Exc.NotInMatchError(self.gt("You are not in an active match."))
 
-	async def _auto_ready(self, message, args=None):
+	async def _auto_ready(self, ctx, message, args=None):
 		if not self.cfg.max_auto_ready:
 			raise bot.Exc.PermissionError(self.gt("!auto_ready command is turned off on this channel."))
 		if args:
@@ -917,45 +943,46 @@ class QueueChannel:
 		else:
 			secs = min([60*5, self.cfg.max_auto_ready])
 
-		if message.author.id in bot.auto_ready.keys():
-			bot.auto_ready.pop(message.author.id)
-			await self.success(self.gt("Your automatic ready confirmation is now turned off."))
+		if ctx.author.id in bot.auto_ready.keys():
+			bot.auto_ready.pop(ctx.author.id)
+			await self.success(ctx, self.gt("Your automatic ready confirmation is now turned off."))
 		else:
-			bot.auto_ready[message.author.id] = int(time.time())+secs
+			bot.auto_ready[ctx.author.id] = int(time.time())+secs
 			await self.success(
+				ctx,
 				self.gt("During next {duration} your match participation will be confirmed automatically.").format(
 					duration=seconds_to_str(secs)
 				))
 
-	async def _cap_for(self, message, args=None):
+	async def _cap_for(self, ctx, message, args=None):
 		if not args:
 			raise bot.Exc.SyntaxError(f"Usage: {self.cfg.prefix}capfor __team__")
-		elif (match := self.get_match(message.author)) is None:
+		elif (match := self.get_match(ctx.author)) is None:
 			raise bot.Exc.NotInMatchError(self.gt("You are not in an active match."))
-		await match.draft.cap_for(message.author, args)
+		await match.draft.cap_for(ctx.author, args)
 
-	async def _pick(self, message, args=None):
+	async def _pick(self, ctx, message, args=None):
 		if not args:
 			raise bot.Exc.SyntaxError(f"Usage: {self.cfg.prefix}pick __player__")
-		elif (match := self.get_match(message.author)) is None:
+		elif (match := self.get_match(ctx.author)) is None:
 			raise bot.Exc.NotInMatchError(self.gt("You are not in an active match."))
 
 		members = [self.get_member(i.strip()) for i in args.strip().split(" ")]
 		if None in members:
 			raise bot.Exc.SyntaxError(self.gt("Specified user not found."))
-		await match.draft.pick(message.author, members)
+		await match.draft.pick(ctx.author, members)
 
-	async def _teams(self, message, args=None):
-		if (match := self.get_match(message.author)) is None:
+	async def _teams(self, ctx, message, args=None):
+		if (match := self.get_match(ctx.author)) is None:
 			raise bot.Exc.NotInMatchError(self.gt("You are not in an active match."))
 		await match.draft.print()
 
-	async def _put(self, message, args=""):
-		self._check_perms(message.author, 1)
+	async def _put(self, ctx, message, args=""):
+		self._check_perms(ctx.author, 1)
 		args = args.split(" ")
 		if len(args) < 2:
 			raise bot.Exc.SyntaxError(f"Usage: {self.cfg.prefix}put __player__ __team__ [__match_id__]")
-		elif (member := self.get_member(args[0])) is None:
+		elif (member := self.get_member(ctx.channel.guild, args[0])) is None:
 			raise bot.Exc.SyntaxError(self.gt("Specified user not found."))
 		elif len(args) == 3 and args[2].isdigit():
 			if (match := find(lambda m: m.qc == self and m.id == int(args[2]), bot.active_matches)) is None:
@@ -967,42 +994,42 @@ class QueueChannel:
 			raise bot.Exc.NotInMatchError(self.gt("Specified user is not in a match."))
 		await match.draft.put(member, args[1])
 
-	async def _sub_me(self, message, args=None):
-		if (match := self.get_match(message.author)) is None:
+	async def _sub_me(self, ctx, message, args=None):
+		if (match := self.get_match(ctx.author)) is None:
 			raise bot.Exc.NotInMatchError(self.gt("You are not in an active match."))
-		await match.draft.sub_me(message.author)
+		await match.draft.sub_me(ctx.author)
 
-	async def _sub_for(self, message, args=None):
+	async def _sub_for(self, ctx, message, args=None):
 		if not args:
 			raise bot.Exc.SyntaxError(f"Usage: {self.cfg.prefix}sub_for __@player__")
-		elif (member := self.get_member(args)) is None:
+		elif (member := self.get_member(ctx.channel.guild, args)) is None:
 			raise bot.Exc.SyntaxError(self.gt("Specified user not found."))
 		elif (match := self.get_match(member)) is None:
 			raise bot.Exc.NotInMatchError(self.gt("Specified user is not in a match."))
-		await self.check_allowed_to_add(message.author, queue=match.queue)
-		await match.draft.sub_for(member, message.author)
+		await self.check_allowed_to_add(ctx.author, queue=match.queue)
+		await match.draft.sub_for(member, ctx.author)
 
-	async def _sub_force(self, message, args=""):
-		self._check_perms(message.author, 1)
+	async def _sub_force(self, ctx, message, args=""):
+		ctx.check_perms(Perms.MODERATOR)
 		if len(args := args.split(" ")) != 2:
 			raise bot.Exc.SyntaxError(f"Usage: {self.cfg.prefix}sub_force __@player1__ __@player2__")
 		elif (member1 := self.get_member(args[0])) is None:
 			raise bot.Exc.SyntaxError(self.gt("Specified user not found."))
 		elif (member2 := self.get_member(args[1])) is None:
 			raise bot.Exc.SyntaxError(self.gt("Specified user not found."))
-		elif (match1 := self.get_match(member1)) is None:
+		elif (match := self.get_match(member1)) is None:
 			raise bot.Exc.NotInMatchError(self.gt("Specified user is not in a match."))
 		elif self.get_match(member2) is not None:
 			raise bot.Exc.InMatchError(self.gt("Specified user is in an active match."))
 
-		await match1.draft.sub_for(member1, member2, force=True)
+		await match.draft.sub_for(member1, member2, force=True)
 
-	async def _rank(self, message, args=None):
+	async def _rank(self, ctx, message, args=None):
 		if args:
-			if (member := self.get_member(args)) is None:
+			if (member := self.get_member(ctx.channel.guild, args)) is None:
 				raise bot.Exc.SyntaxError(self.gt("Specified user not found."))
 		else:
-			member = message.author
+			member = ctx.author
 
 		data = await self.get_lb()
 		if p := find(lambda i: i['user_id'] == member.id, data):
@@ -1051,28 +1078,28 @@ class QueueChannel:
 						change=("+" if c['rating_change'] >= 0 else "") + str(c['rating_change'])
 					) for c in changes))
 				)
-			await self.channel.send(embed=embed)
+			await ctx.channel.send(embed=embed)
 
 		else:
 			raise bot.Exc.ValueError(self.gt("No rating data found."))
 
-	async def _rl(self, message, args=None):
-		if (match := self.get_match(message.author)) is None:
+	async def _rl(self, ctx, message, args=None):
+		if (match := self.get_match(ctx.author)) is None:
 			raise bot.Exc.NotInMatchError(self.gt("You are not in an active match."))
-		await match.report_loss(message.author, draw_flag=False)
+		await match.report_loss(ctx.author, draw_flag=False)
 
-	async def _rd(self, message, args=None):
-		if (match := self.get_match(message.author)) is None:
+	async def _rd(self, ctx, message, args=None):
+		if (match := self.get_match(ctx.author)) is None:
 			raise bot.Exc.NotInMatchError(self.gt("You are not in an active match."))
-		await match.report_loss(message.author, draw_flag=1)
+		await match.report_loss(ctx.author, draw_flag=1)
 
-	async def _rc(self, message, args=None):
-		if (match := self.get_match(message.author)) is None:
+	async def _rc(self, ctx, message, args=None):
+		if (match := self.get_match(ctx.author)) is None:
 			raise bot.Exc.NotInMatchError(self.gt("You are not in an active match."))
-		await match.report_loss(message.author, draw_flag=2)
+		await match.report_loss(ctx.author, draw_flag=2)
 
-	async def _rw(self, message, args=""):
-		self._check_perms(message.author, 1)
+	async def _rw(self, ctx, message, args=""):
+		ctx.check_perms(Perms.MODERATOR)
 		args = args.split(" ", maxsplit=1)
 		if len(args) != 2 or not args[0].isdigit():
 			raise bot.Exc.SyntaxError(f"Usage: {self.cfg.prefix}rw __match_id__ __team_name__ or draw")
@@ -1082,12 +1109,12 @@ class QueueChannel:
 			))
 		await match.report_win(args[1])
 
-	async def _rs(self, message, args=""):
+	async def _rs(self, ctx, message, args=""):
 		def usage():
 			raise bot.Exc.SyntaxError(f"Usage: {self.cfg.prefix}rs [match_id] alpha_score:beta_score")
 
 		# Get match
-		self._check_perms(message.author, 1)
+		ctx.check_perms(Perms.MODERATOR)
 		args = args.split(" ")
 		if len(args) > 1:
 			if not args[0].isdigit():
@@ -1099,7 +1126,7 @@ class QueueChannel:
 					))
 			args = args[1:]
 		else:
-			if (match := self.get_match(message.author)) is None:
+			if (match := self.get_match(ctx.author)) is None:
 				raise bot.Exc.NotInMatchError(self.gt("You are not in an active match."))
 
 		# Get score
@@ -1110,25 +1137,25 @@ class QueueChannel:
 			raise bot.Exc.ValueError(self.gt("At least one team must have a positive score."))
 		await match.report_scores(scores)
 
-	async def _report_manual(self, message, args=""):
-		self._check_perms(message.author, 1)
+	async def _report_manual(self, ctx, message, args=""):
+		ctx.check_perms(Perms.MODERATOR)
 		args = args.split(" / ")
 		queue = find(lambda q: q.name.lower() == args[0].lower(), self.queues)
-		teams = [[self.get_member(p) for p in team.split(" ")] for team in args[1:]]
+		teams = [[self.get_member(ctx.channel.guild, p) for p in team.split(" ")] for team in args[1:]]
 		if queue is None or len(teams) != 2 or None in teams[0] or None in teams[1]:
 			raise bot.Exc.SyntaxError(
 				f"Usage: {self.cfg.prefix}report_manual __queue__ / __won_team_players__ / __lost_team_players__"
 			)
 		await queue.fake_ranked_match(teams[0], teams[1])
 
-	async def _expire(self, message, args=None):
+	async def _expire(self, ctx, message, args=None):
 		if not args:
-			if task := bot.expire.get(self, message.author):
-				await self.channel.send(self.gt("You have {duration} expire time left.").format(
+			if task := bot.expire.get(self, ctx.author):
+				await ctx.channel.send(self.gt("You have {duration} expire time left.").format(
 					duration=seconds_to_str(task.at-int(time.time()))
 				))
 			else:
-				await self.channel.send(self.gt("You don't have an expire timer set right now."))
+				await ctx.channel.send(self.gt("You don't have an expire timer set right now."))
 
 		else:
 			try:
@@ -1141,14 +1168,14 @@ class QueueChannel:
 					time=seconds_to_str(MAX_EXPIRE_TIME)
 				)))
 
-			bot.expire.set(self, message.author, secs)
-			await self.success(self.gt("Set your expire time to {duration}.").format(
+			bot.expire.set(self, ctx.author, secs)
+			await self.success(ctx, self.gt("Set your expire time to {duration}.").format(
 				duration=seconds_to_str(secs)
 			))
 
-	async def _default_expire(self, message, args=None):
+	async def _default_expire(self, ctx, message, args=None):
 		if not args:
-			data = await db.select_one(['expire'], 'players', where={'user_id': message.author.id})
+			data = await db.select_one(['expire'], 'players', where={'user_id': ctx.author.id})
 			expire = None if not data else data['expire']
 			modify = False
 		else:
@@ -1176,35 +1203,35 @@ class QueueChannel:
 			text = self.gt("Your default expire time is {time}.".format(time=seconds_to_str(expire)))
 
 		if not modify:
-			await self.channel.send(text)
+			await ctx.channel.send(text)
 		else:
 			try:
-				await db.insert('players', {'user_id': message.author.id, 'expire': expire})
+				await db.insert('players', {'user_id': ctx.author.id, 'expire': expire})
 			except db.errors.IntegrityError:
-				await db.update('players', {'expire': expire}, keys={'user_id': message.author.id})
-			await self.success(text)
+				await db.update('players', {'expire': expire}, keys={'user_id': ctx.author.id})
+			await self.success(ctx, text)
 
-	async def _allow_offline(self, message, args=None):
-		if message.author.id in bot.allow_offline:
-			bot.allow_offline.remove(message.author.id)
-			await self.success(self.gt("Your offline immunity is **off**."))
+	async def _allow_offline(self, ctx, message, args=None):
+		if ctx.author.id in bot.allow_offline:
+			bot.allow_offline.remove(ctx.author.id)
+			await self.success(ctx, self.gt("Your offline immunity is **off**."))
 		else:
-			bot.allow_offline.append(message.author.id)
-			await self.success(self.gt("Your offline immunity is **on** until the next match."))
+			bot.allow_offline.append(ctx.author.id)
+			await self.success(ctx, self.gt("Your offline immunity is **on** until the next match."))
 
-	async def _matches(self, message, args=0):
+	async def _matches(self, ctx, message, args=0):
 		try:
 			page = int(args)
 		except ValueError:
 			page = 0
 
-		matches = [m for m in bot.active_matches if m.qc.channel.id == self.channel.id]
+		matches = [m for m in bot.active_matches if m.qc.id == self.id]
 		if len(matches):
-			await self.channel.send("\n".join((m.print() for m in matches)))
+			await ctx.channel.send("\n".join((m.print() for m in matches)))
 		else:
-			await self.channel.send(self.gt("> no active matches"))
+			await ctx.channel.send(self.gt("> no active matches"))
 
-	async def _leaderboard(self, message, args=1):
+	async def _leaderboard(self, ctx, message, args=1):
 		try:
 			page = int(args)-1
 		except ValueError:
@@ -1213,7 +1240,7 @@ class QueueChannel:
 		data = (await self.get_lb())[page*10:(page+1)*10]
 
 		if len(data):
-			await self.channel.send(
+			await ctx.channel.send(
 				discord_table(
 					["№", "Rating〈Ξ〉", "Nickname", "Matches", "W/L/D"],
 					[[
@@ -1233,7 +1260,7 @@ class QueueChannel:
 		else:
 			raise bot.Exc.NotFoundError(self.gt("Leaderboard is empty."))
 
-	async def _promote(self, message, args=None):
+	async def _promote(self, ctx, message, args=None):
 		if not args:
 			if (queue := next(iter(
 					sorted((q for q in self.queues if q.length), key=lambda q: q.length, reverse=True)
@@ -1249,14 +1276,14 @@ class QueueChannel:
 				delay=seconds_to_str((self.cfg.promotion_delay+self.last_promote)-now)
 			)))
 
-		await queue.promote()
+		await queue.promote(ctx.channel)
 		self.last_promote = now
 
-	async def _rating_set(self, message, args=None):
-		self._check_perms(message.author, 1)
+	async def _rating_set(self, ctx, message, args=None):
+		ctx.check_perms(Perms.MODERATOR)
 		args = args.split(" ")
 		try:
-			if (member := self.get_member(args.pop(0))) is None:
+			if (member := self.get_member(ctx.channel.guild, args.pop(0))) is None:
 				raise ValueError()
 			rating = int(args.pop(0))
 			if not 0 < rating < 10000:
@@ -1270,13 +1297,13 @@ class QueueChannel:
 
 		await self.rating.set_rating(member, rating=rating, deviation=deviation, reason="manual seeding")
 		await self.update_rating_roles(member)
-		await self.success(self.gt("Done."))
+		await self.success(ctx, self.gt("Done."))
 
-	async def _rating_penality(self, message, args=None):
-		self._check_perms(message.author, 1)
+	async def _rating_penality(self, ctx, message, args=None):
+		ctx.check_perms(Perms.MODERATOR)
 		args = args.split(" ", maxsplit=2)
 		try:
-			if (member := self.get_member(args.pop(0))) is None:
+			if (member := self.get_member(ctx.channel.guild, args.pop(0))) is None:
 				raise ValueError()
 			penality = int(args.pop(0))
 			if abs(penality) > 10000:
@@ -1287,34 +1314,34 @@ class QueueChannel:
 		reason = "penality: " + args[0] if len(args) else "penality by a moderator"
 		await self.rating.set_rating(member, penality=penality, reason=reason)
 		await self.update_rating_roles(member)
-		await self.success(self.gt("Done."))
+		await self.success(ctx, self.gt("Done."))
 
-	async def _rating_hide(self, message, args=None):
-		self._check_perms(message.author, 1)
-		if (member := self.get_member(args)) is None:
+	async def _rating_hide(self, ctx, message, args=None):
+		ctx.check_perms(Perms.MODERATOR)
+		if (member := self.get_member(ctx.channel.guild, args)) is None:
 			raise bot.Exc.SyntaxError(f"Usage: {self.cfg.prefix}rating_hide __@user__")
 		await self.rating.hide_player(member.id)
-		await self.success(self.gt("Done."))
+		await self.success(ctx, self.gt("Done."))
 
-	async def _rating_unhide(self, message, args=None):
-		self._check_perms(message.author, 1)
-		if (member := self.get_member(args)) is None:
+	async def _rating_unhide(self, ctx, message, args=None):
+		ctx.check_perms(Perms.MODERATOR)
+		if (member := self.get_member(ctx.channel.guild, args)) is None:
 			raise bot.Exc.SyntaxError(f"Usage: {self.cfg.prefix}rating_unhide __@user__")
 		await self.rating.hide_player(member.id, hide=False)
-		await self.success(self.gt("Done."))
+		await self.success(ctx, self.gt("Done."))
 
-	async def _rating_reset(self, message, args=None):
-		self._check_perms(message.author, 2)
+	async def _rating_reset(self, ctx, message, args=None):
+		ctx.check_perms(Perms.ADMIN)
 		await self.rating.reset()
-		await self.success(self.gt("Done."))
+		await self.success(ctx, self.gt("Done."))
 
-	async def _rating_snap(self, message, args=None):
-		self._check_perms(message.author, 2)
+	async def _rating_snap(self, ctx, message, args=None):
+		ctx.check_perms(Perms.ADMIN)
 		await self.rating.snap_ratings(self._ranks_table)
-		await self.success(self.gt("Done."))
+		await self.success(ctx, self.gt("Done."))
 
-	async def _cancel_match(self, message, args=""):
-		self._check_perms(message.author, 1)
+	async def _cancel_match(self, ctx, message, args=""):
+		ctx.check_perms(Perms.MODERATOR)
 		if not args.isdigit():
 			raise bot.Exc.SyntaxError(f"Usage: {self.cfg.prefix}cancel_match __match_id__")
 
@@ -1327,69 +1354,69 @@ class QueueChannel:
 
 		await match.cancel()
 
-	async def _undo_match(self, message, args=""):
-		self._check_perms(message.author, 1)
+	async def _undo_match(self, ctx, message, args=""):
+		ctx.check_perms(Perms.MODERATOR)
 		if not args.isdigit():
 			raise bot.Exc.SyntaxError(f"Usage: {self.cfg.prefix}undo_match __match_id__")
 
 		result = await bot.stats.undo_match(int(args), self)
 		if result:
-			await self.success(self.gt("Done."))
+			await self.success(ctx, self.gt("Done."))
 		else:
 			raise bot.Exc.NotFoundError(self.gt("Could not find match with specified id. Check `{prefix}matches`.").format(
 				prefix=self.cfg.prefix
 			))
 
-	async def _switch_dms(self, message, args=""):
-		data = await db.select_one(('allow_dm', ), 'players', where={'user_id': message.author.id})
+	async def _switch_dms(self, ctx, message, args=""):
+		data = await db.select_one(('allow_dm', ), 'players', where={'user_id': ctx.author.id})
 		if data:
 			allow_dm = 1 if data['allow_dm'] == 0 else 0
-			await db.update('players', {'allow_dm': allow_dm}, keys={'user_id': message.author.id})
+			await db.update('players', {'allow_dm': allow_dm}, keys={'user_id': ctx.author.id})
 		else:
 			allow_dm = 0
-			await db.insert('players', {'allow_dm': allow_dm, 'user_id': message.author.id})
+			await db.insert('players', {'allow_dm': allow_dm, 'user_id': ctx.author.id})
 
 		if allow_dm:
-			await self.success(self.gt("Your DM notifications is now turned on."), reply_to=message.author)
+			await self.success(ctx, self.gt("Your DM notifications is now turned on."), reply=True)
 		else:
-			await self.success(self.gt("Your DM notifications is now turned off."), reply_to=message.author)
+			await self.success(ctx, self.gt("Your DM notifications is now turned off."), reply=True)
 
-	async def _start(self, message, args=None):
-		self._check_perms(message.author, 1)
+	async def _start(self, ctx, message, args=None):
+		ctx.check_perms(Perms.MODERATOR)
 		if not args:
 			raise bot.Exc.SyntaxError(f"Usage: {self.cfg.prefix}start __queue__")
 		if (queue := find(lambda q: q.name.lower() == args.lower(), self.queues)) is None:
 			raise bot.Exc.NotFoundError(self.gt("Specified queue not found."))
 		await queue.start()
 
-	async def _stats_reset(self, message, args=None):
-		self._check_perms(message.author, 2)
-		await bot.stats.reset_channel(self.channel.id)
+	async def _stats_reset(self, ctx, message, args=None):
+		ctx.check_perms(Perms.ADMIN)
+		await bot.stats.reset_channel(self.id)
 		await self.success(self.gt("Done."))
 
-	async def _stats_reset_player(self, message, args=None):
-		self._check_perms(message.author, 1)
-		if (member := self.get_member(args)) is None:
+	async def _stats_reset_player(self, ctx, message, args=None):
+		ctx.check_perms(Perms.MODERATOR)
+		if (member := self.get_member(ctx.channel.guild, args)) is None:
 			raise bot.Exc.SyntaxError(f"Usage: {self.cfg.prefix}stats_reset_player __@user__")
-		await bot.stats.reset_player(self.channel.id, member.id)
-		await self.success(self.gt("Done."))
+		await bot.stats.reset_player(self.id, member.id)
+		await self.success(ctx, self.gt("Done."))
 
-	async def _stats_replace_player(self, message, args=""):
-		self._check_perms(message.author, 1)
+	async def _stats_replace_player(self, ctx, message, args=""):
+		ctx.check_perms(Perms.MODERATOR)
 		if (args := args.split(" ")).__len__() != 2:
 			raise bot.Exc.SyntaxError(f"Usage: {self.cfg.prefix}stats_reset_player __@user1__ __@user2__")
-		if None in (members := [self.get_member(string) for string in args]):
+		if None in (members := [self.get_member(ctx.channel.guild, string) for string in args]):
 			raise bot.Exc.SyntaxError(f"Usage: {self.cfg.prefix}stats_reset_player __@user1__ __@user2__")
-		await bot.stats.replace_player(self.channel.id, members[0].id, members[1].id, get_nick(members[1]))
-		await self.success(self.gt("Done."))
+		await bot.stats.replace_player(self.id, members[0].id, members[1].id, get_nick(members[1]))
+		await self.success(ctx, self.gt("Done."))
 
-	async def _last_game(self, message, args=None):
+	async def _last_game(self, ctx, message, args=None):
 		if args:
 			if queue := find(lambda q: q.name.lower() == args.lower(), self.queues):
 				last_game = await db.select_one(
 					['*'], "qc_matches", where=dict(channel_id=self.id, queue_id=queue.id), order_by="match_id", limit=1
 				)
-			elif member := self.get_member(args):
+			elif member := self.get_member(ctx.channel.guild, args):
 				if match := await db.select_one(
 					['match_id'], "qc_player_matches", where=dict(channel_id=self.id, user_id=member.id), order_by="match_id", limit=1
 				):
@@ -1423,13 +1450,13 @@ class QueueChannel:
 			else:
 				winner = [last_game['alpha_name'], last_game['beta_name']][last_game['winner']]
 			embed.add_field(name=self.gt("Winner"), value=winner)
-		await self.channel.send(embed=embed)
+		await ctx.channel.send(embed=embed)
 
-	async def _commands(self, message, args=None):
-		await self.channel.send(f"<{cfg.COMMANDS_URL}>")
+	async def _commands(self, ctx, message, args=None):
+		await ctx.channel.send(f"<{cfg.COMMANDS_URL}>")
 
-	async def _reset(self, message, args=None):
-		self._check_perms(message.author, 1)
+	async def _reset(self, ctx, message, args=None):
+		ctx.check_perms(Perms.MODERATOR)
 		if not args:
 			for q in self.queues:
 				await q.reset()
@@ -1437,32 +1464,32 @@ class QueueChannel:
 			await q.reset()
 		else:
 			raise bot.Exc.NotFoundError(self.gt("Specified queue not found."))
-		await self.update_topic(force_announce=True)
+		await self.update_topic(ctx.channel, force_announce=True)
 
-	async def _remove_player(self, message, args=None):
-		self._check_perms(message.author, 1)
+	async def _remove_player(self, ctx, message, args=None):
+		ctx.check_perms(Perms.MODERATOR)
 		if not args:
 			raise bot.Exc.SyntaxError(f"Usage: {self.cfg.prefix}remove_player __@user__")
-		elif (member := self.get_member(args)) is None:
+		elif (member := self.get_member(ctx.channel.guild, args)) is None:
 			raise bot.Exc.SyntaxError(f"Usage: {self.cfg.prefix}remove_player __@user__")
-		await self.remove_members(member, reason="moderator")
+		await self.remove_members(ctx.channel, member, reason="moderator")
 
-	async def _add_player(self, message, args=""):
-		self._check_perms(message.author, 1)
+	async def _add_player(self, ctx, message, args=""):
+		ctx.check_perms(Perms.MODERATOR)
 		args = args.split(" ", maxsplit=1)
 		if len(args) != 2:
 			raise bot.Exc.SyntaxError(f"Usage: {self.cfg.prefix}add_player __queue__ __@user__")
 		elif (queue := find(lambda q: q.name.lower() == args[0].lower(), self.queues)) is None:
 			raise bot.Exc.SyntaxError(f"Usage: {self.cfg.prefix}add_player __queue__ __@user__")
-		elif (member := self.get_member(args[1])) is None:
+		elif (member := self.get_member(ctx.channel.guild, args[1])) is None:
 			raise bot.Exc.SyntaxError(f"Usage: {self.cfg.prefix}add_player __queue__ __@user__")
 
 		resp = await queue.add_member(member)
 		if resp == bot.Qr.Success:
 			await self.update_expire(member)
-			await self.update_topic()
+			await self.update_topic(ctx.channel)
 
-	async def subscribe(self, member, args, unsub=False):
+	async def subscribe(self, ctx, args, unsub=False):
 		if not args:
 			roles = [self.cfg.promotion_role] if self.cfg.promotion_role else []
 		else:
@@ -1472,30 +1499,30 @@ class QueueChannel:
 			))
 
 		if unsub:
-			roles = [r for r in roles if r in member.roles]
+			roles = [r for r in roles if r in ctx.author.roles]
 			if not len(roles):
 				raise bot.Exc.ValueError(self.gt("No changes to apply."))
-			await member.remove_roles(*roles, reason="subscribe command")
-			await self.success(self.gt("Removed `{count}` roles from you.").format(
+			await ctx.author.remove_roles(*roles, reason="subscribe command")
+			await self.success(ctx, self.gt("Removed `{count}` roles from you.").format(
 				count=len(roles)
 			))
 
 		else:
-			roles = [r for r in roles if r not in member.roles]
+			roles = [r for r in roles if r not in ctx.author.roles]
 			if not len(roles):
 				raise bot.Exc.ValueError(self.gt("No changes to apply."))
-			await member.add_roles(*roles, reason="subscribe command")
-			await self.success(self.gt("Added `{count}` roles to you.").format(
+			await ctx.author.add_roles(*roles, reason="subscribe command")
+			await self.success(ctx, self.gt("Added `{count}` roles to you.").format(
 				count=len(roles)
 			))
 
-	async def _subscribe(self, message, args=None):
-		await self.subscribe(message.author, args)
+	async def _subscribe(self, ctx, message, args=None):
+		await self.subscribe(ctx, args)
 
-	async def _unsubscribe(self, message, args=None):
-		await self.subscribe(message.author, args, unsub=True)
+	async def _unsubscribe(self, ctx, message, args=None):
+		await self.subscribe(ctx, args, unsub=True)
 
-	async def _server(self, message, args=""):
+	async def _server(self, ctx, message, args=""):
 		if len(self.queues) == 1:
 			q = self.queues[0]
 		elif (q := find(lambda q: q.name.lower() == args.lower(), self.queues)) is None:
@@ -1504,15 +1531,15 @@ class QueueChannel:
 			raise bot.Exc.NotFoundError(self.gt("Server for **{queue}** is not set.").format(
 				queue=q.name
 			))
-		await self.success(q.cfg.server, title=self.gt("Server for **{queue}**").format(
+		await self.success(ctx, q.cfg.server, title=self.gt("Server for **{queue}**").format(
 			queue=q.name
 		))
 
-	async def _stats(self, message, args=None):
+	async def _stats(self, ctx, message, args=None):
 		if not args:
 			stats = await bot.stats.qc_stats(self.id)
-			target = f"#{self.channel.name}"
-		elif member := self.get_member(args):
+			target = f"#{ctx.channel.name}"
+		elif member := self.get_member(ctx.channel.guild, args):
 			stats = await bot.stats.user_stats(self.id, member.id)
 			target = get_nick(member)
 		else:
@@ -1526,9 +1553,9 @@ class QueueChannel:
 		for q in stats['queues']:
 			embed.add_field(name=q['queue_name'], value=str(q['count']), inline=True)
 
-		await self.channel.send(embed=embed)
+		await ctx.channel.send(embed=embed)
 
-	async def _top(self, message, args=None):
+	async def _top(self, ctx, message, args=None):
 		args = args.lower().strip() if args else None
 		if args in ["day", self.gt("day")]:
 			time_gap = int(time.time()) - (60*60*24)
@@ -1554,9 +1581,9 @@ class QueueChannel:
 		)
 		for p in top['players']:
 			embed.add_field(name=p['nick'], value=str(p['count']), inline=True)
-		await self.channel.send(embed=embed)
+		await ctx.channel.send(embed=embed)
 
-	async def _cointoss(self, message, args=None):
+	async def _cointoss(self, ctx, message, args=None):
 		if not args or args.lower() in ["heads", self.gt("heads")]:
 			pick = 0
 		elif args.lower() in ["tails", self.gt("tails")]:
@@ -1569,23 +1596,23 @@ class QueueChannel:
 
 		result = randint(0, 1)
 		if pick == result:
-			await self.channel.send(self.gt("{member} won, its **{side}**!").format(
-				member=message.author.mention, side=self.gt(["heads", "tails"][result])
+			await ctx.channel.send(self.gt("{member} won, its **{side}**!").format(
+				member=ctx.author.mention, side=self.gt(["heads", "tails"][result])
 			))
 		else:
-			await self.channel.send(self.gt("{member} lost, its **{side}**!").format(
-				member=message.author.mention, side=self.gt(["heads", "tails"][result])
+			await ctx.channel.send(self.gt("{member} lost, its **{side}**!").format(
+				member=ctx.author.mention, side=self.gt(["heads", "tails"][result])
 			))
 
-	async def _help(self, message, args=None):
+	async def _help(self, ctx, message, args=None):
 		if args is None:
 			if self.cfg.description:
-				await self.channel.send(self.cfg.description)
+				await ctx.channel.send(self.cfg.description)
 		elif queue := find(lambda q: q.name.lower() == args.lower(), self.queues):
 			if queue.cfg.description:
-				await self.channel.send(queue.cfg.description)
+				await ctx.channel.send(queue.cfg.description)
 
-	async def maps(self, message, args="", random=False):
+	async def maps(self, ctx, message, args="", random=False):
 		if len(self.queues) == 1:
 			q = self.queues[0]
 		elif (q := find(lambda q: q.name.lower() == args.lower(), self.queues)) is None:
@@ -1596,9 +1623,10 @@ class QueueChannel:
 			))
 
 		if random:
-			await self.success(f"`{choice(q.cfg.tables.maps)['name']}`")
+			await self.success(ctx, f"`{choice(q.cfg.tables.maps)['name']}`")
 		else:
 			await self.success(
+				ctx,
 				", ".join((f"`{i['name']}`" for i in q.cfg.tables.maps)),
 				title=self.gt("Maps for **{queue}**").format(queue=q.name)
 			)
@@ -1609,7 +1637,7 @@ class QueueChannel:
 	async def _map(self, *args, **kwagrs):
 		await self.maps(*args, **kwagrs, random=True)
 
-	async def _noadds(self, message, args=None):
+	async def _noadds(self, ctx, message, args=None):
 		noadds = await bot.noadds.get_noadds(self)
 		now = int(time.time())
 		s = "```markdown\n"
@@ -1622,13 +1650,13 @@ class QueueChannel:
 			))
 		else:
 			s += self.gt("Noadds are empty.")
-		await self.channel.send(s+"\n```")
+		await ctx.channel.send(s+"\n```")
 
-	async def _noadd(self, message, args=""):
-		self._check_perms(message.author, 1)
+	async def _noadd(self, ctx, message, args=""):
+		ctx.check_perms(Perms.MODERATOR)
 		if len(args := args.split(" ", maxsplit=2)) < 2:
 			raise bot.Exc.SyntaxError(f"Usage: {self.cfg.prefix}noadd __@user__ __duration__ [__reason__]")
-		elif (member := self.get_member(args.pop(0))) is None:
+		elif (member := self.get_member(ctx.channel.guild, args.pop(0))) is None:
 			raise bot.Exc.SyntaxError(self.gt("Specified user not found."))
 
 		try:
@@ -1640,53 +1668,53 @@ class QueueChannel:
 			raise bot.Exc.ValueError(self.gt("Specified duration time is too long."))
 
 		reason = args.pop(0) if len(args) else None
-		await bot.noadds.noadd(self, member, secs, message.author, reason=reason)
-		await self.success(self.gt("Banned **{member}** for `{duration}`.").format(
+		await bot.noadds.noadd(self, member, secs, ctx.author, reason=reason)
+		await self.success(ctx, self.gt("Banned **{member}** for `{duration}`.").format(
 			member=get_nick(member),
 			duration=seconds_to_str(secs)
 		))
 
-	async def _forgive(self, message, args=None):
-		self._check_perms(message.author, 1)
+	async def _forgive(self, ctx, message, args=None):
+		ctx.check_perms(Perms.MODERATOR)
 		if not args:
 			raise bot.Exc.SyntaxError(f"Usage: {self.cfg.prefix}forgive __@user__")
-		elif (member := self.get_member(args)) is None:
+		elif (member := self.get_member(ctx.channel.guild, args)) is None:
 			raise bot.Exc.SyntaxError(self.gt("Specified user not found."))
 
-		if await bot.noadds.forgive(self, member, message.author):
-			await self.success(self.gt("Done."))
+		if await bot.noadds.forgive(self, member, ctx.author):
+			await self.success(ctx, self.gt("Done."))
 		else:
 			raise bot.Exc.NotFoundError(self.gt("Specified member is not banned."))
 
-	async def _phrases_add(self, message, args=""):
-		self._check_perms(message.author, 1)
+	async def _phrases_add(self, ctx, message, args=""):
+		ctx.check_perms(Perms.MODERATOR)
 		if len(args := args.split(" ", maxsplit=1)) != 2:
 			raise bot.Exc.SyntaxError(f"Usage: {self.cfg.prefix}phrases_add __@user__ __phrase__")
-		elif (member := self.get_member(args.pop(0))) is None:
+		elif (member := self.get_member(ctx.channel.guild, args.pop(0))) is None:
 			raise bot.Exc.SyntaxError(self.gt("Specified user not found."))
 
 		await bot.noadds.phrases_add(self, member, args.pop(0))
-		await self.success(self.gt("Done."))
+		await self.success(ctx, self.gt("Done."))
 
-	async def _phrases_clear(self, message, args=None):
-		self._check_perms(message.author, 1)
+	async def _phrases_clear(self, ctx, message, args=None):
+		ctx.check_perms(Perms.MODERATOR)
 		if args is None:
 			member = None
-		elif (member := self.get_member(args)) is None:
+		elif (member := self.get_member(ctx.channel.guild, args)) is None:
 			raise bot.Exc.SyntaxError(self.gt("Specified user not found."))
 		await bot.noadds.phrases_clear(self, member=member)
-		await self.success(self.gt("Done."))
+		await self.success(ctx, self.gt("Done."))
 
-	async def _set_nick(self, message, args=None):
+	async def _set_nick(self, ctx, message, args=None):
 		if args is None:
 			raise bot.Exc.SyntaxError(f"Usage: {self.cfg.prefix}nick __nickname__")
 		data = await db.select_one(
 			['rating'], 'qc_players',
-			where={'channel_id': self.id, 'user_id': message.author.id}
+			where={'channel_id': self.id, 'user_id': ctx.author.id}
 		)
 		if not data or data['rating'] is None:
 			rating = self.rating.init_rp
 		else:
 			rating = data['rating']
 
-		await message.author.edit(nick=f"[{rating}] " + args)
+		await ctx.author.edit(nick=f"[{rating}] " + args)

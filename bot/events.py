@@ -58,7 +58,7 @@ async def on_ready():
 			channel = dc.get_channel(channel_id)
 			if channel:
 				bot.queue_channels[channel_id] = await bot.QueueChannel.create(channel)
-				await bot.queue_channels[channel_id].update_info()
+				await bot.queue_channels[channel_id].update_info(channel)
 				log.info(f"\tInit channel {channel.guild.name}>#{channel.name} successful.")
 			else:
 				log.info(f"\tCould not reach a text channel with id {channel_id}.")
