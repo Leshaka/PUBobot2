@@ -384,7 +384,8 @@ class PickupQueue:
 
 	async def start(self):
 		if len(self.queue) < 2:
-			raise bot.Exc.PubobotException(self.qc.gt("Not enough players to start the queue."))
+			# raise bot.Exc.PubobotException(self.qc.gt("Not enough players to start the queue."))
+			return
 
 		players = list(self.queue)
 		dm_text = self.cfg.start_direct_msg or self.qc.gt("**{queue}** pickup has started @ {channel}!")
