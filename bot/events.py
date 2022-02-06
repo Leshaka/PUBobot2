@@ -1,4 +1,5 @@
 from discord import ChannelType, Activity, ActivityType
+from traceback import format_exc
 
 from core.client import dc
 from core.console import log
@@ -9,7 +10,13 @@ import bot
 @dc.event
 async def on_think(frame_time):
 	for match in bot.active_matches:
-		await match.think(frame_time)
+		try:
+			await match.think(frame_time)
+		except Exception as e:
+			log.error(f"Error at match.think(): {str(e)}. Match_id={match.id}. Traceback:")
+			log.error(str(format_exc()))
+			bot.active_matches.remove(match)
+			break
 	await bot.expire.think(frame_time)
 	await bot.noadds.think(frame_time)
 	await bot.stats.jobs.think(frame_time)
