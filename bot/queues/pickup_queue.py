@@ -430,7 +430,7 @@ class PickupQueue:
 		if self.cfg.autostart:
 			while len(self.queue) < self.cfg.size and len(old_players):
 				self.queue.append(old_players.pop(0))
-			if len(self.queue) <= self.cfg.size:
+			if len(self.queue) >= self.cfg.size:
 				await self.start()
 				self.queue = list(old_players)
 			else:
