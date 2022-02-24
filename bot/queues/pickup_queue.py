@@ -319,7 +319,7 @@ class PickupQueue:
 	def length(self):
 		return len(self.queue)
 
-	async def promote(self, channel):
+	async def promote(self, ctx):
 		promotion_role = self.cfg.promotion_role or self.qc.cfg.promotion_role
 		promotion_msg = self.cfg.promotion_msg or self.qc.gt("{role} Please add to **{name}** pickup, `{left}` players left!")
 		promotion_msg = promotion_msg.format(
@@ -330,11 +330,11 @@ class PickupQueue:
 
 		if (
 			promotion_role and not promotion_role.mentionable and
-			channel.guild.me and not channel.guild.me.guild_permissions.mention_everyone
+			ctx.channel.guild.me and not ctx.channel.guild.me.guild_permissions.mention_everyone
 		):
 			raise bot.Exc.PermissionError("Insufficient permissions to ping the promotion role.")
 		else:
-			await channel.send(promotion_msg)
+			await ctx.notice(promotion_msg)
 
 	async def reset(self):
 		self.queue = []
@@ -381,7 +381,7 @@ class PickupQueue:
 			self.queue.remove(m)
 		return members
 
-	async def start(self):
+	async def start(self, ctx):
 		if len(self.queue) < 2:
 			raise bot.Exc.PubobotException(self.qc.gt("Not enough players to start the queue."))
 
@@ -401,7 +401,7 @@ class PickupQueue:
 			team_size = int(self.cfg.size / 2)
 
 		await bot.Match.new(
-			self, self.qc, players,
+			ctx, self, players,
 			team_names=self.cfg.team_names.split(" ") if self.cfg.team_names else None,
 			team_emojis=self.cfg.team_emojis.split(" ") if self.cfg.team_emojis else None,
 			ranked=self.cfg.ranked, team_size=team_size, pick_captains=self.cfg.pick_captains,

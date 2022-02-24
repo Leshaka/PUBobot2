@@ -29,41 +29,6 @@ class Perms(Enum):
 	ADMIN = 2
 
 
-class Context:
-	"""
-	Generate universal context data for each type of interaction
-	such as text message, web interaction, slash command, button press etc
-	belonging to a QueueChannel object.
-	"""
-
-	@classmethod
-	def from_msg(cls, qc, message):
-		return cls(qc, message.channel, message.author)
-
-	def __init__(self, qc, channel, author):
-		self.qc = qc
-		self.channel = channel
-		self.author = author
-
-	@property
-	def access_level(self):
-		if (self.qc.cfg.admin_role in self.author.roles or
-					self.author.id == cfg.DC_OWNER_ID or
-					self.channel.permissions_for(self.author).administrator):
-			return 2
-		elif self.qc.cfg.moderator_role in self.author.roles:
-			return 1
-		else:
-			return 0
-
-	def _check_perms(self, req_perms):
-		if self.access_level < req_perms:
-			if req_perms == 2:
-				raise bot.Exc.PermissionError(self.qc.gt("You must possess admin permissions."))
-			else:
-				raise bot.Exc.PermissionError(self.qc.gt("You must possess moderator permissions."))
-
-
 class QueueChannel:
 
 	rating_names = {
@@ -356,6 +321,7 @@ class QueueChannel:
 	def __init__(self, text_channel, qc_cfg):
 		self.cfg = qc_cfg
 		self.id = text_channel.id
+		self.channel = text_channel
 		self.gt = locales[self.cfg.lang]
 		self.rating = self.rating_names[self.cfg.rating_system](
 			channel_id=(self.cfg.rating_channel or text_channel).id,
@@ -369,7 +335,6 @@ class QueueChannel:
 			ls_boost=self.cfg.rating_ls_boost
 		)
 		self.queues = []
-		self.topic = f"> {self.gt('no players')}"
 		self.last_promote = 0
 		self.commands = dict(
 			create_pickup=self._create_pickup,
@@ -506,7 +471,17 @@ class QueueChannel:
 		self.queues.append(q_obj)
 		return q_obj
 
-	async def update_topic(self, channel, force_announce=False, phrase=None):
+	@property
+	def topic(self):
+		populated = [q for q in self.queues if len(q.queue)]
+		if not len(populated):
+			return f"> {self.gt('no players')}"
+		elif len(populated) < 5:
+			return "\n".join([f"> **{q.name}** ({q.status}) | {q.who}" for q in populated])
+		else:
+			return "> [" + " | ".join([f"**{q.name}** ({q.status})" for q in populated]) + "]"
+
+	async def update_topic(self, force=False, phrase=None):
 		populated = [q for q in self.queues if len(q.queue)]
 		if not len(populated):
 			new_topic = f"> {self.gt('no players')}"
@@ -514,12 +489,12 @@ class QueueChannel:
 			new_topic = "\n".join([f"> **{q.name}** ({q.status}) | {q.who}" for q in populated])
 		else:
 			new_topic = "> [" + " | ".join([f"**{q.name}** ({q.status})" for q in populated]) + "]"
-		if new_topic != self.topic or force_announce:
+		if new_topic != self.topic or force:
 			self.topic = new_topic
 			if phrase:
-				await channel.send(phrase + "\n" + self.topic)
+				return phrase + "\n" + self.topic
 			else:
-				await channel.send(self.topic)
+				return self.topic
 
 	async def auto_remove(self, member):
 		if member.id in bot.allow_offline:
@@ -677,6 +652,7 @@ class QueueChannel:
 				await asyncio.sleep(1)
 
 	async def process_msg(self, message):
+		return
 		if not len(message.content) > 1:
 			return
 
@@ -978,7 +954,7 @@ class QueueChannel:
 		await match.draft.print()
 
 	async def _put(self, ctx, message, args=""):
-		self._check_perms(ctx.author, 1)
+		ctx.check_perms(Perms.MODERATOR)
 		args = args.split(" ")
 		if len(args) < 2:
 			raise bot.Exc.SyntaxError(f"Usage: {self.cfg.prefix}put __player__ __team__ [__match_id__]")

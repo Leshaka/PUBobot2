@@ -24,3 +24,7 @@ class Exceptions:
 
 	class NotFoundError(PubobotException):
 		pass
+
+	class NoEffect(PubobotException):
+		""" A command have been executed successfully, but had no effect. """
+		pass

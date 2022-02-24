@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import traceback
 import json
+from nextcord import Interaction
 
 from core.console import log
 from core.config import cfg

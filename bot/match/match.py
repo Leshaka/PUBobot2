@@ -55,11 +55,11 @@ class Match:
 				self.remove(p)
 
 	@classmethod
-	async def new(cls, queue, qc, players, **kwargs):
+	async def new(cls, ctx, queue, players, **kwargs):
 		# Create the Match object
-		ratings = {p['user_id']: p['rating'] for p in await qc.rating.get_players((p.id for p in players))}
+		ratings = {p['user_id']: p['rating'] for p in await ctx.qc.rating.get_players((p.id for p in players))}
 		bot.last_match_id += 1
-		match = cls(bot.last_match_id, queue, qc, players, ratings, **kwargs)
+		match = cls(bot.last_match_id, queue, ctx.qc, players, ratings, **kwargs)
 		# Prepare the Match object
 		match.maps = match.random_maps(match.cfg['maps'], match.cfg['map_count'], queue.last_maps)
 		match.init_captains(match.cfg['pick_captains'], match.cfg['captains_role_id'])
