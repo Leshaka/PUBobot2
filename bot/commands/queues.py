@@ -104,6 +104,8 @@ async def add_player(ctx, player: Member, queue: str):
 	if resp == bot.Qr.Success:
 		await ctx.qc.update_expire(p)
 		await ctx.reply(ctx.qc.topic)
+	elif resp == bot.Qr.QueueStarted:
+		await ctx.reply(ctx.qc.topic)
 	else:
 		await ctx.error(f"Got bad queue response: {resp.__name__}.")
 

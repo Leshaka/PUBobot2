@@ -124,7 +124,7 @@ class Draft:
 		self.m.ratings = {
 			p['user_id']: p['rating'] for p in await self.m.qc.rating.get_players((p.id for p in self.m.players))
 		}
-		await self.m.qc.remove_members(player2)
+		await self.m.qc.remove_members(player2, ctx=ctx)
 		await bot.remove_players(player2, reason="pickup started")
 
 		if self.m.state == self.m.CHECK_IN:

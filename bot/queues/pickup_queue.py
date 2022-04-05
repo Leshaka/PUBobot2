@@ -388,6 +388,7 @@ class PickupQueue:
 		players = list(self.queue)
 		dm_text = self.cfg.start_direct_msg or self.qc.gt("**{queue}** pickup has started @ {channel}!")
 		await self.qc.queue_started(
+			ctx,
 			members=players,
 			message=dm_text.format(
 				queue=self.name,

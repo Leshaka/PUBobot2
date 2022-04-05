@@ -29,10 +29,6 @@ async def on_message(message):
 	elif message.content == '!disable_pubobot':
 		await bot.disable_channel(message)
 
-	qc = bot.queue_channels.get(message.channel.id)
-	if qc:
-		await qc.process_msg(message)
-
 
 @dc.event
 async def on_reaction_add(reaction, user):
