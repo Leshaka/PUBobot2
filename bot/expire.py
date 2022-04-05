@@ -67,7 +67,8 @@ class ExpireTimer:
 			log.debug(f"EXPIRE TIMER TRIGGER > {task.member.name} ({task.qc.id}/{task.member.id})")
 			self._define_next()
 			if task.qc and task.member:
-				await task.qc.remove_members(task.member, reason="expire", highlight=True)
+				ctx = bot.SystemContext(task.qc)
+				await task.qc.remove_members(ctx, task.member, reason="expire", highlight=True)
 
 
 expire = ExpireTimer()

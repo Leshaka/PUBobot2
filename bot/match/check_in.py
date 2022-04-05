@@ -34,16 +34,16 @@ class CheckIn:
 		if self.timeout:
 			self.m.states.append(self.m.CHECK_IN)
 
-	async def think(self, frame_time):
+	async def think(self, ctx, frame_time):
 		if frame_time > self.m.start_time + self.timeout:
 			if self.allow_discard:
-				await self.abort_timeout()
+				await self.abort_timeout(ctx)
 			else:
-				await self.finish()
+				await self.finish(ctx)
 
-	async def start(self):
+	async def start(self, ctx):
 		text = f"!spawn message {self.m.id}"
-		self.message = await self.m.send(text)
+		self.message = await ctx.channel.send(text)
 
 		emojis = [self.READY_EMOJI, '🔸', self.NOT_READY_EMOJI] if self.allow_discard else [self.READY_EMOJI]
 		emojis += [self.INT_EMOJIS[n] for n in range(len(self.maps))]
@@ -53,9 +53,9 @@ class CheckIn:
 		except DiscordException:
 			pass
 		bot.waiting_reactions[self.message.id] = self.process_reaction
-		await self.refresh()
+		await self.refresh(ctx)
 
-	async def refresh(self):
+	async def refresh(self, ctx):
 		not_ready = list(filter(lambda m: m not in self.ready_players, self.m.players))
 		if len(not_ready):
 			try:
@@ -63,9 +63,9 @@ class CheckIn:
 			except DiscordException:
 				pass
 		else:
-			await self.finish()
+			await self.finish(ctx)
 
-	async def finish(self):
+	async def finish(self, ctx):
 		bot.waiting_reactions.pop(self.message.id)
 		self.ready_players = set()
 		if len(self.maps):
@@ -74,7 +74,7 @@ class CheckIn:
 			order.sort(key=lambda n: len(self.map_votes[n]), reverse=True)
 			self.m.maps = [self.maps[n] for n in order[:self.m.cfg['map_count']]]
 		await self.message.delete()
-		await self.m.next_state()
+		await self.m.next_state(ctx)
 
 	async def process_reaction(self, reaction, user, remove=False):
 		if self.m.state != self.m.CHECK_IN or user not in self.m.players:
@@ -89,41 +89,41 @@ class CheckIn:
 				else:
 					self.map_votes[idx].add(user.id)
 					self.ready_players.add(user)
-				await self.refresh()
+				await self.refresh(bot.SystemContext(self.m.queue.qc))
 
 		elif str(reaction) == self.READY_EMOJI:
 			if remove:
 				self.ready_players.discard(user)
 			else:
 				self.ready_players.add(user)
-			await self.refresh()
+			await self.refresh(bot.SystemContext(self.m.queue.qc))
 
 		elif str(reaction) == self.NOT_READY_EMOJI and self.allow_discard:
-			await self.abort_member(user)
+			await self.abort_member(bot.SystemContext(self.m.queue.qc), user)
 
-	async def set_ready(self, member, ready):
+	async def set_ready(self, ctx, member, ready):
 		if self.m.state != self.m.CHECK_IN:
 			raise bot.Exc.MatchStateError(self.m.gt("The match is not on the check-in stage."))
 		if ready:
 			self.ready_players.add(member)
-			await self.refresh()
+			await self.refresh(ctx)
 		elif not ready:
 			if not self.allow_discard:
 				raise bot.Exc.PermissionError(self.m.gt("Discarding check-in is not allowed."))
-			await self.abort_member(member)
+			await self.abort_member(ctx, member)
 
-	async def abort_member(self, member):
+	async def abort_member(self, ctx, member):
 		bot.waiting_reactions.pop(self.message.id)
 		await self.message.delete()
-		await self.m.send("\n".join((
+		await ctx.notice("\n".join((
 			self.m.gt("{member} has aborted the check-in.").format(member=f"<@{member.id}>"),
 			self.m.gt("Reverting {queue} to the gathering stage...").format(queue=f"**{self.m.queue.name}**")
 		)))
 
 		bot.active_matches.remove(self.m)
-		await self.m.queue.revert([member], [m for m in self.m.players if m != member])
+		await self.m.queue.revert(ctx, [member], [m for m in self.m.players if m != member])
 
-	async def abort_timeout(self):
+	async def abort_timeout(self, ctx):
 		not_ready = [m for m in self.m.players if m not in self.ready_players]
 		if self.message:
 			bot.waiting_reactions.pop(self.message.id, None)
@@ -134,9 +134,9 @@ class CheckIn:
 
 		bot.active_matches.remove(self.m)
 
-		await self.m.send("\n".join((
+		await ctx.notice("\n".join((
 			self.m.gt("{members} was not ready in time.").format(members=join_and([m.mention for m in not_ready])),
 			self.m.gt("Reverting {queue} to the gathering stage...").format(queue=f"**{self.m.queue.name}**")
 		)))
 
-		await self.m.queue.revert(not_ready, list(self.ready_players))
+		await self.m.queue.revert(ctx, not_ready, list(self.ready_players))

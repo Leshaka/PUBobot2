@@ -9,7 +9,7 @@ import bot
 @dc.event
 async def on_think(frame_time):
 	for match in bot.active_matches:
-		await match.think(frame_time)
+		await match.think(bot.SystemContext(match.queue.qc), frame_time)
 	await bot.expire.think(frame_time)
 	await bot.noadds.think(frame_time)
 	await bot.stats.jobs.think(frame_time)
@@ -66,27 +66,26 @@ async def on_ready():
 		await bot.load_state()
 	else:  # Reconnected, fetch new channel objects
 		log.info("Reconnected to discord.")
-		for qc in list(bot.queue_channels.values()):
-			if channel := dc.get_channel(qc.id) is not None:
-				qc.channel = channel
-			else:
-				bot.queue_channels.pop(qc.id)
-				log.error("ERROR! Channel missing after reconnect {}>#{} ({})!".format(
-					qc.cfg.cfg_info.get('guild_name'), qc.cfg.cfg_info.get('channel_name'), qc.id
-				))
 
 	log.info("Done.")
 
 
 @dc.event
 async def on_member_update(before, after):
-	if str(after.status) in ['idle', 'offline']:
-		if after.id not in bot.allow_offline:
-			for qc in filter(lambda i: i.channel and i.channel.guild.id == after.guild.id, bot.queue_channels.values()):
-				await qc.auto_remove(after)
+	if str(after.status) not in ['idle', 'offline']:
+		return
+	if after.id in bot.allow_offline:
+		return
+
+	for qc in filter(lambda i: i.id == after.guild.id, bot.queue_channels.values()):
+		if str(after.status) == "offline" and qc.cfg.remove_offline:
+			await qc.remove_members(after, reason="offline")
+
+		if str(after.status) == "idle" and qc.cfg.remove_afk and bot.expire.get(qc, after) is None:
+			await qc.remove_members(after, reason="afk", highlight=True)
 
 
 @dc.event
 async def on_member_remove(member):
-	for qc in filter(lambda i: i.channel and i.channel.guild.id == member.guild.id, bot.queue_channels.values()):
+	for qc in filter(lambda i: i.id == member.guild.id, bot.queue_channels.values()):
 		await qc.remove_members(member, reason="left guild")

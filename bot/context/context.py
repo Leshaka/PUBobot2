@@ -1,5 +1,5 @@
 from nextcord import abc
-from nextcord import Member, Embed, Message
+from nextcord import Member, Embed
 from enum import Enum
 import re
 
@@ -7,7 +7,8 @@ import bot
 
 from core.config import cfg
 from core.utils import error_embed, ok_embed, find
-from core.client import FakeMember
+from core.client import FakeMember, dc
+from core.console import log
 
 
 class Context:
@@ -28,7 +29,7 @@ class Context:
 		self.channel = channel
 		self.author = author
 
-	def get_member(self, mention):
+	async def get_member(self, mention):
 		if type(mention) is Member:
 			return mention
 		elif highlight := re.match(r"<@!?(\d+)>", mention):
@@ -45,6 +46,7 @@ class Context:
 
 	@property
 	def access_level(self):
+		""" Get the author permissions """
 		if (self.qc.cfg.admin_role in self.author.roles or
 					self.author.id == cfg.DC_OWNER_ID or
 					self.channel.permissions_for(self.author).administrator):
@@ -55,6 +57,7 @@ class Context:
 			return self.Perms.MEMBER
 
 	def check_perms(self, req_perms: Perms):
+		""" Raise PermissionError if specified permissions is not met by the author """
 		if self.access_level.value < req_perms.value:
 			if req_perms == 2:
 				raise bot.Exc.PermissionError(self.qc.gt("You must possess admin permissions."))
@@ -62,39 +65,63 @@ class Context:
 				raise bot.Exc.PermissionError(self.qc.gt("You must possess moderator permissions."))
 
 	async def reply(self, content: str = None, embed: Embed = None):
+		""" Reply in public chat """
 		pass
 
 	async def reply_dm(self, content: str = None, embed: Embed = None):
+		""" Reply in DM or only visibly by the author """
 		pass
 
 	async def notice(self, content: str = None, embed: Embed = None):
+		""" Send message in chat without replying if possible """
 		pass
 
-	async def no_effect(self, content: str = None, embed: Embed = None):
+	async def ignore(self, content: str = None, embed: Embed = None):
+		""" Send reply only if it's required to reply by the context class """
 		pass
 
 	async def error(self, content: str, title: str = None):
+		""" Reply an error embed """
 		pass
 
 	async def success(self, content: str, title: str = None):
+		""" Reply an ok embed """
 		pass
 
 
-class MessageContext(Context):
-	""" Context for the text message commands """
+class SystemContext(Context):
+	""" Context for background processes and console commands """
 
-	def __init__(self, qc: bot.QueueChannel, message: Message):
-		self.message = message
-		super().__init__(qc, message.channel, message.author)
+	def __init__(self, qc: bot.QueueChannel, thread_id=None):
+		if (channel := dc.get_channel(qc.id)) is None:
+			raise IndexError("Missing discord channel for {}>#{} ({}).".format(
+				qc.cfg.cfg_info.get('guild_name'), qc.cfg.cfg_info.get('channel_name'), qc.id
+			))
+		if thread_id:
+			self.thread = channel.get_thread(thread_id)
+		else:
+			self.thread = None
+		self.messagable = self.thread or channel
+		super().__init__(qc, channel, dc.user)
+
+	def check_perms(self, req_perms: Context.Perms):
+		pass
+
+	def access_level(self):
+		return Context.Perms.ADMIN
 
 	async def reply(self, content: str = None, embed: Embed = None):
-		await self.message.reply(content=content, embed=embed)
+		await self.messagable.send(content=content, embed=embed)
 
 	async def notice(self, content: str = None, embed: Embed = None):
-		await (self.message.thread or self.message.channel).send(content=content, embed=embed)
+		""" Send message in chat without replying if possible """
+		await self.messagable.send(content=content, embed=embed)
+
+	async def reply_dm(self, content: str = None, embed: Embed = None):
+		await self.messagable.send(content=content, embed=embed)
 
 	async def error(self, *args, **kwargs):
-		await self.message.reply(embed=error_embed(*args, **kwargs))
+		await self.messagable.send(embed=error_embed(*args, **kwargs))
 
 	async def success(self, *args, **kwargs):
-		await self.message.reply(embed=ok_embed(*args, **kwargs))
+		await self.messagable.send(embed=ok_embed(*args, **kwargs))

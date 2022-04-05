@@ -12,8 +12,14 @@ from .expire import expire
 from .stats import stats
 from .stats.noadds import noadds
 from .exceptions import Exceptions as Exc
-from .context import Context, SlashContext
+from .context import Context, SlashContext, SystemContext
 from . import commands
 
 from . import events
 from . import utils
+
+
+def background_context(coro):
+	async def wrapper(qc, *args, **kwargs):
+		await coro(SystemContext(qc=qc), *args, **kwargs)
+	return wrapper

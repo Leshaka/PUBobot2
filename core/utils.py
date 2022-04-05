@@ -112,7 +112,7 @@ def parse_duration(string):
 				duration += val * 365 * 24 * 60
 			else:
 				raise ValueError()
-		return int(duration)
+		return timedelta(seconds=int(duration))
 	else:
 		raise ValueError()
 

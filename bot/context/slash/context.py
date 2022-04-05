@@ -32,7 +32,7 @@ class SlashContext(Context):
 		else:
 			await self.interaction.channel.send(*args, **kwargs)
 
-	async def no_effect(self, *args, **kwargs):
+	async def ignore(self, *args, **kwargs):
 		if not self.interaction.response.is_done():
 			await self.interaction.response.send_message(*args, **kwargs, ephemeral=True)
 

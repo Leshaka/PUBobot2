@@ -20,24 +20,24 @@ class Draft:
 		if self.m.cfg['pick_teams'] == "draft":
 			self.m.states.append(self.m.DRAFT)
 
-	async def start(self):
-		await self.refresh()
+	async def start(self, ctx):
+		await self.refresh(ctx)
 
-	async def print(self):
+	async def print(self, ctx):
 		try:
-			await self.m.send(embed=self.m.embeds.draft())
+			await ctx.notice(embed=self.m.embeds.draft())
 		except DiscordException:
 			pass
 
-	async def refresh(self):
+	async def refresh(self, ctx):
 		if self.m.state != self.m.DRAFT:
-			await self.print()
+			await self.print(ctx)
 		elif len(self.m.teams[2]) and any((len(t) < self.m.cfg['team_size'] for t in self.m.teams)):
-			await self.print()
+			await self.print(ctx)
 		else:
-			await self.m.next_state()
+			await self.m.next_state(ctx)
 
-	async def cap_for(self, author, team_name):
+	async def cap_for(self, ctx, author, team_name):
 		if self.m.state != self.m.DRAFT:
 			raise bot.Exc.MatchStateError(self.m.gt("The match is not on the draft stage."))
 		elif self.captains_role_id and self.captains_role_id not in (r.id for r in author.roles):
@@ -51,9 +51,9 @@ class Draft:
 
 		find(lambda t: author in t, self.m.teams).remove(author)
 		team.insert(0, author)
-		await self.print()
+		await self.print(ctx)
 
-	async def pick(self, author, players):
+	async def pick(self, ctx, author, players):
 		for player in players:
 			pick_step = max(0, (len(self.m.teams[0]) + len(self.m.teams[1]) - 2))
 			picker_team = self.m.teams[self.pick_order[pick_step]] if pick_step < len(self.pick_order) - 1 else None
@@ -79,9 +79,9 @@ class Draft:
 					picker_team.extend(self.m.teams[2])
 					self.m.teams[2].clear()
 
-		await self.refresh()
+		await self.refresh(ctx)
 
-	async def put(self, player, team_name):
+	async def put(self, ctx, player, team_name):
 		if (team := find(lambda t: t.name.lower() == team_name.lower(), self.m.teams)) is None:
 			raise bot.Exc.SyntaxError(self.m.gt("Specified team name not found."))
 		if self.m.state not in [self.m.DRAFT, self.m.WAITING_REPORT]:
@@ -96,20 +96,20 @@ class Draft:
 			}
 
 		team.append(player)
-		await self.refresh()
+		await self.refresh(ctx)
 
-	async def sub_me(self, author):
+	async def sub_me(self, ctx, author):
 		if self.m.state not in [self.m.DRAFT, self.m.WAITING_REPORT]:
 			raise bot.Exc.MatchStateError(self.m.gt("The match must be on the draft or waiting report stage."))
 
 		if author in self.sub_queue:
 			self.sub_queue.remove(author)
-			await self.m.qc.success(self.m.gt("You have stopped looking for a substitute."))
+			await ctx.success(self.m.gt("You have stopped looking for a substitute."))
 		else:
 			self.sub_queue.append(author)
-			await self.m.qc.success(self.m.gt("You are now looking for a substitute."))
+			await ctx.success(self.m.gt("You are now looking for a substitute."))
 
-	async def sub_for(self, player1, player2, force=False):
+	async def sub_for(self, ctx, player1, player2, force=False):
 		if self.m.state not in [self.m.CHECK_IN, self.m.DRAFT, self.m.WAITING_REPORT]:
 			raise bot.Exc.MatchStateError(self.m.gt("The match must be on the check-in, draft or waiting report stage."))
 		elif not force and player1 not in self.sub_queue:
@@ -130,6 +130,6 @@ class Draft:
 		if self.m.state == self.m.CHECK_IN:
 			await self.m.check_in.refresh()
 		elif self.m.state == self.m.WAITING_REPORT:
-			await self.m.send(embed=self.m.embeds.final_message())
+			await ctx.notice(embed=self.m.embeds.final_message())
 		else:
-			await self.print()
+			await self.print(ctx)

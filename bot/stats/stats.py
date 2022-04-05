@@ -98,7 +98,7 @@ async def last_match_id():
 	return m['match_id'] if m else 0
 
 
-async def register_match_unranked(m):
+async def register_match_unranked(ctx, m):
 	await db.insert('qc_matches', dict(
 		match_id=m.id, channel_id=m.qc.channel.id, queue_id=m.queue.cfg.p_key, queue_name=m.queue.name,
 		alpha_name=m.teams[0].name, beta_name=m.teams[1].name,
@@ -131,7 +131,7 @@ async def register_match_unranked(m):
 		)
 
 
-async def register_match_ranked(m):
+async def register_match_ranked(ctx, m):
 	await db.insert('qc_matches', dict(
 		match_id=m.id, channel_id=m.qc.channel.id, queue_id=m.queue.cfg.p_key, queue_name=m.queue.name,
 		alpha_name=m.teams[0].name, beta_name=m.teams[1].name,
@@ -202,7 +202,7 @@ async def register_match_ranked(m):
 		))
 
 	await m.qc.update_rating_roles(*m.players)
-	await m.print_rating_results(before, after)
+	await m.print_rating_results(ctx, before, after)
 
 
 async def undo_match(match_id, qc):

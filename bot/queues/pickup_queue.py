@@ -350,7 +350,7 @@ class PickupQueue:
 				self.qc.gt("You are not allowed to add to {queues} queues.".format(queues=self.name))
 			)
 
-	async def add_member(self, member):
+	async def add_member(self, ctx, member):
 		if (
 			self.cfg.blacklist_role and self.cfg.blacklist_role in member.roles
 			or self.cfg.whitelist_role and self.cfg.whitelist_role not in member.roles
@@ -364,7 +364,7 @@ class PickupQueue:
 				bot.active_queues.append(self)
 
 			if len(self.queue) == self.cfg.size and self.cfg.autostart:
-				await self.start()
+				await self.start(ctx)
 				return bot.Qr.QueueStarted
 
 			return bot.Qr.Success

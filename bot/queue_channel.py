@@ -496,25 +496,19 @@ class QueueChannel:
 			else:
 				return self.topic
 
-	async def auto_remove(self, member):
-		if member.id in bot.allow_offline:
-			return
-		if bot.expire.get(self, member) is None:
-			if str(member.status) == "idle" and self.cfg.remove_afk:
-				await self.remove_members(member, reason="afk", highlight=True)
-		if str(member.status) == "offline" and self.cfg.remove_offline:
-			await self.remove_members(member, reason="offline")
-
-	async def remove_members(self, channel, *members, reason=None, highlight=False):
+	async def remove_members(self, ctx, *members, reason=None, highlight=False):
 		affected = set()
 		for q in (q for q in self.queues if q.length):
 			affected.update(q.pop_members(*members))
 
 		if len(affected):
+			if not ctx:
+				ctx = bot.SystemContext(self)
+
 			for m in affected:
 				bot.expire.cancel(self, m)
-			await self.update_topic()
 			if reason:
+				await self.update_topic()
 				if highlight:
 					mention = join_and([m.mention for m in affected])
 				else:
@@ -533,15 +527,17 @@ class QueueChannel:
 					reason = self.gt("removed by a moderator")
 
 				if len(affected) == 1:
-					await channel.send(self.gt("{member} were removed from all queues ({reason}).").format(
+					await ctx.notice(self.gt("{member} were removed from all queues ({reason}).").format(
 						member=mention,
 						reason=reason
 					))
 				else:
-					await channel.send(self.gt("{members} were removed from all queues ({reason}).").format(
+					await ctx.notice(self.gt("{members} were removed from all queues ({reason}).").format(
 						members=mention,
 						reason=reason
 					))
+		elif reason and ctx:
+			await ctx.ignore(self.gt("Action had no effect"))
 
 	async def error(self, ctx, content, title=None, reply=False):
 		title = title or self.gt("Error")
@@ -769,7 +765,7 @@ class QueueChannel:
 
 		qr = dict()  # get queue responses
 		for q in t_queues:
-			qr[q] = await q.add_member(ctx.author)
+			qr[q] = await q.add_member(ctx, ctx.author)
 			if qr[q] == bot.Qr.QueueStarted:
 				return
 

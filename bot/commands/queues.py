@@ -1,12 +1,13 @@
-__all__ = ['add', 'remove', 'who', 'add_player', 'promote', 'start']
+__all__ = ['add', 'remove', 'who', 'add_player', 'promote', 'start', 'reset', 'subscribe', 'server', 'maps']
 
 import time
+from random import choice
 from nextcord import Member
 from core.utils import error_embed, join_and, find, seconds_to_str
 import bot
 
 
-async def add(ctx: bot.Context, queues: str = None):
+async def add(ctx, queues: str = None):
 	""" add author to channel queues """
 	phrase = await ctx.qc.check_allowed_to_add(ctx.author)
 
@@ -29,8 +30,9 @@ async def add(ctx: bot.Context, queues: str = None):
 
 	qr = dict()  # get queue responses
 	for q in t_queues:
-		qr[q] = await q.add_member(ctx.author)
+		qr[q] = await q.add_member(ctx, ctx.author)
 		if qr[q] == bot.Qr.QueueStarted:
+			await ctx.notice(ctx.qc.topic)
 			return
 
 	if len(not_allowed := [q for q in qr.keys() if qr[q] == bot.Qr.NotAllowed]):
@@ -44,10 +46,10 @@ async def add(ctx: bot.Context, queues: str = None):
 			await ctx.reply(phrase)
 		await ctx.notice(ctx.qc.topic)
 	else:  # have to give some response for slash commands
-		await ctx.no_effect(content=ctx.qc.topic, embed=error_embed(ctx.qc.gt("Action had no effect."), title=None))
+		await ctx.ignore(content=ctx.qc.topic, embed=error_embed(ctx.qc.gt("Action had no effect."), title=None))
 
 
-async def remove(ctx: bot.Context, queues: str = None):
+async def remove(ctx, queues: str = None):
 	""" add author from channel queues """
 	targets = queues.lower().split(" ") if queues else []
 
@@ -67,12 +69,12 @@ async def remove(ctx: bot.Context, queues: str = None):
 		if not any((q.is_added(ctx.author) for q in ctx.qc.queues)):
 			bot.expire.cancel(ctx.qc, ctx.author)
 
-		await ctx.reply(ctx.qc.topic)
+		await ctx.notice(ctx.qc.topic)
 	else:
-		await ctx.no_effect(content=ctx.qc.topic, embed=error_embed(ctx.qc.gt("Action had no effect."), title=None))
+		await ctx.ignore(content=ctx.qc.topic, embed=error_embed(ctx.qc.gt("Action had no effect."), title=None))
 
 
-async def who(ctx: bot.Context, queues: str = None):
+async def who(ctx, queues: str = None):
 	""" List added players """
 	targets = queues.lower().split(" ") if queues else []
 
@@ -90,21 +92,33 @@ async def who(ctx: bot.Context, queues: str = None):
 		await ctx.reply("\n".join([f"> **{q.name}** ({q.status}) | {q.who}" for q in t_queues]))
 
 
-async def add_player(ctx: bot.Context, player: Member, queue: str):
+async def add_player(ctx, player: Member, queue: str):
 	""" Add a player to a queue """
 	ctx.check_perms(ctx.Perms.MODERATOR)
+	if (p := await ctx.get_member(player)) is None:
+		raise bot.Exc.SyntaxError(ctx.qc.gt("Specified user not found."))
 	if (q := find(lambda i: i.name.lower() == queue.lower(), ctx.qc.queues)) is None:
 		raise bot.Exc.SyntaxError(f"Queue '{queue}' not found on the channel.")
 
-	resp = await q.add_member(player)
+	resp = await q.add_member(ctx, p)
 	if resp == bot.Qr.Success:
-		await ctx.qc.update_expire(player)
+		await ctx.qc.update_expire(p)
 		await ctx.reply(ctx.qc.topic)
 	else:
 		await ctx.error(f"Got bad queue response: {resp.__name__}.")
 
 
-async def promote(ctx: bot.Context, queue: str = None):
+async def remove_player(ctx, player: Member, queues: str):
+	""" Remove a player from queues """
+	ctx.check_perms(ctx.Perms.MODERATOR)
+
+	if (p := await ctx.get_member(player)) is None:
+		raise bot.Exc.SyntaxError(ctx.qc.gt("Specified user not found."))
+	ctx.author = p
+	await remove(ctx, queues)
+
+
+async def promote(ctx, queue: str = None):
 	""" Promote a queue """
 	if not queue:
 		if (q := next(iter(sorted(
@@ -126,10 +140,80 @@ async def promote(ctx: bot.Context, queue: str = None):
 	ctx.qc.last_promote = now
 
 
-async def start(ctx: bot.Context, queue: str = None):
+async def start(ctx, queue: str = None):
 	""" Manually start a queue """
 	ctx.check_perms(ctx.Perms.MODERATOR)
 	if (q := find(lambda i: i.name.lower() == queue.lower(), ctx.qc.queues)) is None:
-		raise bot.Exc.NotFoundError(ctx.qc.gt("Specified queue not found."))
-	await ctx.reply(f"Starting **{q.name}** queue...")
+		raise bot.Exc.SyntaxError(f"Queue '{queue}' not found on the channel.")
+	await ctx.ignore(f"Starting **{q.name}** queue...")
 	await q.start(ctx)
+
+
+async def reset(ctx, queue: str = None):
+	""" Reset all or specified queue """
+	ctx.check_perms(ctx.Perms.MODERATOR)
+	if queue:
+		if (q := find(lambda i: i.name.lower() == queue.lower(), ctx.qc.queues)) is None:
+			raise bot.Exc.SyntaxError(f"Queue '{queue}' not found on the channel.")
+		await q.reset()
+	else:
+		for q in ctx.qc.queues:
+			await q.reset()
+	await ctx.reply(ctx.qc.topic)
+
+
+async def subscribe(ctx, queues: str = None, unsub: bool = False):
+	if not queues:
+		roles = [ctx.qc.cfg.promotion_role] if ctx.qc.cfg.promotion_role else []
+	else:
+		queues = queues.split(" ")
+		roles = (q.cfg.promotion_role for q in ctx.qc.queues if q.cfg.promotion_role and any(
+			(t == q.name.lower() or t in (a["alias"].lower() for a in q.cfg.tables.aliases) for t in queues)
+		))
+
+	if unsub:
+		roles = [r for r in roles if r in ctx.author.roles]
+		if not len(roles):
+			raise bot.Exc.ValueError(ctx.qc.gt("No changes to apply."))
+		await ctx.author.remove_roles(*roles, reason="subscribe command")
+		await ctx.success(ctx.qc.gt("Removed `{count}` roles from you.").format(
+			count=len(roles)
+		))
+
+	else:
+		roles = [r for r in roles if r not in ctx.author.roles]
+		if not len(roles):
+			raise bot.Exc.ValueError(ctx.qc.gt("No changes to apply."))
+		await ctx.author.add_roles(*roles, reason="subscribe command")
+		await ctx.success(ctx.qc.gt("Added `{count}` roles to you.").format(
+			count=len(roles)
+		))
+
+
+async def server(ctx, queue: str):
+	if (q := find(lambda i: i.name.lower() == queue.lower(), ctx.qc.queues)) is None:
+		raise bot.Exc.SyntaxError(f"Queue '{queue}' not found on the channel.")
+	if not q.cfg.server:
+		raise bot.Exc.NotFoundError(ctx.qc.gt("Server for **{queue}** is not set.").format(
+			queue=q.name
+		))
+	await ctx.success(ctx, q.cfg.server, title=ctx.qc.gt("Server for **{queue}**").format(
+		queue=q.name
+	))
+
+
+async def maps(ctx, queue: str, one: bool = False):
+	if (q := find(lambda i: i.name.lower() == queue.lower(), ctx.qc.queues)) is None:
+		raise bot.Exc.SyntaxError(f"Queue '{queue}' not found on the channel.")
+	if not len(q.cfg.tables.maps):
+		raise bot.Exc.NotFoundError(ctx.qc.gt("No maps is set for **{queue}**.").format(
+			queue=q.name
+		))
+
+	if one:
+		await ctx.success(f"`{choice(q.cfg.tables.maps)['name']}`")
+	else:
+		await ctx.success(
+			", ".join((f"`{i['name']}`" for i in q.cfg.tables.maps)),
+			title=ctx.qc.gt("Maps for **{queue}**").format(queue=q.name)
+		)
