@@ -220,14 +220,15 @@ class Match:
 			self.teams[1].set([p for p in self.players if p not in self.teams[0]][:self.cfg['team_size']])
 			self.teams[2].set([p for p in self.players if p not in [*self.teams[0], *self.teams[1]]])
 
-	async def think(self, ctx, frame_time):
+	async def think(self, frame_time):
 		if self.state == self.INIT:
-			await self.next_state(ctx)
+			await self.next_state(bot.SystemContext(self.qc))
 
 		elif self.state == self.CHECK_IN:
-			await self.check_in.think(ctx, frame_time)
+			await self.check_in.think(frame_time)
 
 		elif frame_time > self.lifetime + self.start_time:
+			ctx = bot.SystemContext(self.qc)
 			try:
 				await ctx.error(self.gt("Match {queue} ({id}) has timed out.").format(
 					queue=self.queue.name,

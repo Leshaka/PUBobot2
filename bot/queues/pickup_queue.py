@@ -423,14 +423,14 @@ class PickupQueue:
 			team_names=self.cfg.team_names.split(" ") if self.cfg.team_names else None,
 		)
 
-	async def revert(self, not_ready, ready):
+	async def revert(self, ctx, not_ready, ready):
 		old_players = list(self.queue)
 		self.queue = list(ready)
 		if self.cfg.autostart:
 			while len(self.queue) < self.cfg.size and len(old_players):
 				self.queue.append(old_players.pop(0))
-			if len(self.queue) <= self.cfg.size:
-				await self.start()
+			if len(self.queue) >= self.cfg.size:
+				await self.start(ctx)
 				self.queue = list(old_players)
 			else:
 				for p in ready:
@@ -440,6 +440,6 @@ class PickupQueue:
 			for p in ready:
 				await self.qc.update_expire(p)
 
-		await self.qc.update_topic(force_announce=True)
+		await ctx.notice(self.qc.topic)
 		if self not in bot.active_queues and self.length:
 			bot.active_queues.append(self)

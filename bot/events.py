@@ -9,7 +9,7 @@ import bot
 @dc.event
 async def on_think(frame_time):
 	for match in bot.active_matches:
-		await match.think(bot.SystemContext(match.queue.qc), frame_time)
+		await match.think(frame_time)
 	await bot.expire.think(frame_time)
 	await bot.noadds.think(frame_time)
 	await bot.stats.jobs.think(frame_time)

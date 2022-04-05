@@ -470,7 +470,7 @@ class DurationVar(Variable):
 			return None
 
 		try:
-			return parse_duration(string)
+			return parse_duration(string).total_seconds()
 		except ValueError:
 			raise ValueError("Invalid duration format.")
 
