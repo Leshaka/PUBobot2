@@ -1,6 +1,6 @@
 from nextcord import abc
 from nextcord import Member, Embed
-from enum import Enum
+from enum import IntEnum
 import re
 
 import bot
@@ -18,7 +18,7 @@ class Context:
 	belonging to a QueueChannel object.
 	"""
 
-	class Perms(Enum):
+	class Perms(IntEnum):
 		USER = 0
 		MEMBER = 1
 		MODERATOR = 2
@@ -125,3 +125,17 @@ class SystemContext(Context):
 
 	async def success(self, *args, **kwargs):
 		await self.messagable.send(embed=ok_embed(*args, **kwargs))
+
+
+class WebContext(Context):
+	""" Context for actions within the web interface """
+
+	def __init__(self, user_id: int, channel_id: int):
+		if (qc := bot.queue_channels.get(channel_id)) is None:
+			raise bot.Exc.NotFoundError(f"QueueChannel with id {channel_id} is not found.")
+		if (channel := dc.get_channel(channel_id)) is None:
+			raise bot.Exc.NotFoundError(f"Discord Channel object with id {channel_id} is not reachable.")
+		if (author := channel.guild.get_member(user_id)) is None:
+			raise bot.Exc.NotFoundError(f"You are not a member of requested guild.")
+
+		super().__init__(qc, channel, author)

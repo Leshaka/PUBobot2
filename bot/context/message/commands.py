@@ -4,7 +4,7 @@ from typing import Callable
 
 from core.client import dc
 from core.console import log
-from core.utils import get_nick, error_embed, ok_embed
+from core.utils import get_nick, parse_duration
 
 import bot
 
@@ -114,7 +114,7 @@ async def _sub_me(ctx: MessageContext, args: str = None):
 async def _sub_for(ctx: MessageContext, args: str = None):
 	if not args:
 		raise bot.Exc.SyntaxError(f"Usage: {ctx.qc.cfg.prefix}sub_for __@player__")
-	elif (player := ctx.qc.get_member(ctx.channel.guild, args)) is None:
+	elif (player := await ctx.get_member(args)) is None:
 		raise bot.Exc.SyntaxError(ctx.qc.gt("Specified user not found."))
 
 	await bot.commands.sub_for(ctx, player=player)
@@ -153,3 +153,30 @@ async def _rd(ctx: MessageContext, args: str = None):
 @message_command('report_cancel', 'rc')
 async def _rc(ctx: MessageContext, args: str = None):
 	await bot.commands.report(ctx, result='abort')
+
+
+@message_command('allow_offline', 'ao')
+async def _ao(ctx: MessageContext, args: str = None):
+	await bot.commands.allow_offline(ctx)
+
+
+@message_command('expire')
+async def _expire(ctx: MessageContext, args: str = None):
+	duration = None
+	if args:
+		try:
+			duration = parse_duration(args)
+		except ValueError:
+			raise bot.Exc.SyntaxError(ctx.qc.gt("Invalid duration format. Syntax: 3h2m1s or 03:02:01."))
+	await bot.commands.expire(ctx, duration=duration)
+
+
+@message_command('auto_ready', 'ar')
+async def _auto_ready(ctx: MessageContext, args: str = None):
+	duration = None
+	if args:
+		try:
+			duration = parse_duration(args)
+		except ValueError:
+			raise bot.Exc.SyntaxError(ctx.qc.gt("Invalid duration format. Syntax: 3h2m1s or 03:02:01."))
+	await bot.commands.auto_ready(ctx, duration=duration)

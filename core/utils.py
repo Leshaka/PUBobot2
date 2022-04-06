@@ -90,7 +90,7 @@ def parse_duration(string):
 
 	if re.match(r"^\d\d:\d\d:\d\d$", string):
 		x = sum(x * int(t) for x, t in zip([3600, 60, 1], string.split(":")))
-		return x
+		return timedelta(seconds=x)
 
 	elif re.match(r"^([\d\.]+\w *)+$", string):
 		duration = 0
