@@ -6,6 +6,7 @@ import json
 from datetime import datetime
 
 from core.database import db
+from core.client import dc
 from core.utils import format_emoji, parse_duration, seconds_to_str
 from core.console import log
 
@@ -95,25 +96,30 @@ class Config:
 		# Wrap database data into useful objects and update self attributes
 		for var in self._factory.variables.values():
 			try:
-				obj = await var.wrap(row[var.name], self._guild)
+				obj = await var.wrap(row[var.name], guild)
 			except Exception as e:
 				log.error("Failed to wrap variable '{}': {}".format(var.name, str(e)))
-				obj = await var.wrap(var.default, self._guild)
+				obj = await var.wrap(var.default, guild)
 			setattr(self, var.name, obj)
 
 		for table in self._factory.tables.values():
 			objects = []
 			for row in await db.select(table.variables.keys(), table.table, {self._factory.p_key: self.p_key}):
 				try:
-					objects.append(await table.wrap_row(row, self._guild))
+					objects.append(await table.wrap_row(row, guild))
 				except Exception as e:
 					log.error("Failed to wrap a table row '{}' from '{}': {}".format(row, table.name, str(e)))
 			setattr(self.tables, table.name, objects)
 
 		return self
 
+	def _get_guild(self):
+		if (guild := dc.get_guild(self._guild_id)) is None:
+			raise ValueError(f"Guild with id {self._guild_id} for config {self.cfg_info} is not found.")
+		return guild
+
 	def __init__(self, cfg_factory, row, guild):
-		self._guild = guild
+		self._guild_id = guild.id
 		self._factory = cfg_factory
 		self.cfg_info = json.loads(row.pop("cfg_info"))
 		self.p_key = row.pop(cfg_factory.p_key)
@@ -121,6 +127,7 @@ class Config:
 		self.tables = SimpleNamespace()
 
 	async def update(self, data):
+		guild = self._get_guild()
 		tables = data.pop('tables') if 'tables' in data.keys() else {}
 
 		objects = dict()
@@ -130,16 +137,16 @@ class Config:
 			if key not in self._factory.variables.keys():
 				raise KeyError("Variable '{}' not found.".format(key))
 			vo = self._factory.variables[key]
-			data[key] = await vo.validate(value, self._guild)
-			objects[key] = await vo.wrap(data[key], self._guild)
+			data[key] = await vo.validate(value, guild)
+			objects[key] = await vo.wrap(data[key], guild)
 			vo.verify(objects[key])
 
 		for key, value in tables.items():
 			if key not in self._factory.tables.keys():
 				raise KeyError("Table '{}' not found.".format(key))
 			vo = self._factory.tables[key]
-			tables[key] = await vo.validate(value, self._guild)
-			table_objects[key] = await vo.wrap(tables[key], self._guild)
+			tables[key] = await vo.validate(value, guild)
+			table_objects[key] = await vo.wrap(tables[key], guild)
 			vo.verify(table_objects[key])
 
 		# Update useful objects and push to database
@@ -154,7 +161,7 @@ class Config:
 
 		for key, value in tables.items():
 			vo = self._factory.tables[key]
-			setattr(self.tables, key, await vo.wrap(value, self._guild))
+			setattr(self.tables, key, await vo.wrap(value, guild))
 			await db.delete(vo.table, where={self._factory.p_key: self.p_key})
 			for row in value:
 				await db.insert(vo.table, {self._factory.p_key: self.p_key, **row})
@@ -347,13 +354,13 @@ class RoleVar(Variable):
 		if mention:
 			role_id = int(mention.group(1))
 			if not guild.get_role(role_id):
-				raise ValueError("User '{}' not found on the dc guild.".format(string))
+				raise ValueError("Role '{}' not found on the dc guild.".format(string))
 
 		else:
 			try:
 				role_id = next((role for role in guild.roles if role.name == string or str(role.id) == string)).id
 			except StopIteration:
-				raise ValueError("User '{}' not found on the dc guild.".format(string))
+				raise ValueError("Role '{}' not found on the dc guild.".format(string))
 
 		return role_id
 
