@@ -1,4 +1,6 @@
-__all__ = ['add', 'remove', 'who', 'add_player', 'promote', 'start', 'reset', 'subscribe', 'server', 'maps']
+__all__ = [
+	'add', 'remove', 'who', 'add_player', 'remove_player', 'promote', 'start', 'reset', 'subscribe', 'server', 'maps'
+]
 
 import time
 from random import choice
@@ -110,14 +112,14 @@ async def add_player(ctx, player: Member, queue: str):
 		await ctx.error(f"Got bad queue response: {resp.__name__}.")
 
 
-async def remove_player(ctx, player: Member, queues: str):
+async def remove_player(ctx, player: Member, queues: str = None):
 	""" Remove a player from queues """
 	ctx.check_perms(ctx.Perms.MODERATOR)
 
 	if (p := await ctx.get_member(player)) is None:
 		raise bot.Exc.SyntaxError(ctx.qc.gt("Specified user not found."))
 	ctx.author = p
-	await remove(ctx, queues)
+	await remove(ctx, queues=queues)
 
 
 async def promote(ctx, queue: str = None):

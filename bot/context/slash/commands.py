@@ -118,7 +118,7 @@ async def remove_player(
 	interaction: Interaction,
 	player: Member = SlashOption(name="player", description="Member to remove from the queues", verify=False),
 	queues: str = SlashOption(name="queues", description="Queues to remove the player from.", required=False)
-): await run_slash(commands.add_player, interaction=interaction, player=player, queue=queues)
+): await run_slash(commands.remove_player, interaction=interaction, player=player, queues=queues)
 
 
 @dc.slash_command(name='set', description='Configure a channel variable.', guild_ids=[GUILD_ID])
