@@ -346,3 +346,32 @@ msgstr "cara"
 
 msgid "tails"
 msgstr "cruz"
+
+# updates
+
+msgid "!auto_ready command is turned off on this channel."
+msgstr "La commande !auto_ready a été désactivée sur ce channel."
+
+msgid "Maximum auto_ready duration is {duration}."
+msgstr "La durée maximale de l'auto_ready est de {duration}."
+
+msgid "Your automatic ready confirmation is now turned off."
+msgstr "Vous avez désactivé la confirmation automatique de votre présence."
+
+msgid "During next {duration} your match participation will be confirmed automatically."
+msgstr "Pendant {duration}, votre présence sera confirmée automatiquement pour vos prochains matchs."
+
+msgid "At least one team must have a positive score."
+msgstr "Au moins une des deux équipes doit avoir un score positif."
+
+msgid "{players} were removed from the match."
+msgstr "{players} ont été retirés du match."
+
+msgid "Player streams"
+msgstr "Ces joueurs jouent le match en direct"
+
+msgid "Winner"
+msgstr "Vainqueur"
+
+msgid "Discarding check-in is not allowed."
+msgstr "Vous ne pouvez plus effectuer cette action durant cette phase de la partie."
