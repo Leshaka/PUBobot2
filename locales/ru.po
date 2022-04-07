@@ -313,6 +313,9 @@ msgstr "Трансляции игроков"
 msgid "Winner"
 msgstr "Победитель"
 
+msgid "Draw"
+msgstr "Ничья"
+
 # bot/match/draft.py
 
 msgid "The match is not on the draft stage."

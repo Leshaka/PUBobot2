@@ -414,12 +414,12 @@ class PickupQueue:
 			start_msg=self.cfg.start_msg, server=self.cfg.server
 		)
 
-	async def fake_ranked_match(self, winners, losers, draw=False):
+	async def fake_ranked_match(self, ctx, winners, losers, draw=False):
 		if not self.cfg.ranked:
 			raise bot.Exc.ValueError("Specified queue is not ranked.")
 
 		await bot.Match.fake_ranked_match(
-			self, self.qc, winners, losers, draw=draw,
+			ctx, self, self.qc, winners, losers, draw=draw,
 			team_names=self.cfg.team_names.split(" ") if self.cfg.team_names else None,
 		)
 

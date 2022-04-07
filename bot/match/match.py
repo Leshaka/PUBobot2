@@ -69,7 +69,7 @@ class Match:
 		bot.active_matches.append(match)
 
 	@classmethod
-	async def fake_ranked_match(cls, queue, qc, winners, losers, draw=False, **kwargs):
+	async def fake_ranked_match(cls, ctx, queue, qc, winners, losers, draw=False, **kwargs):
 		players = winners + losers
 		if len(set(players)) != len(players):
 			raise bot.Exc.ValueError("Players list can not contains duplicates.")
@@ -79,7 +79,7 @@ class Match:
 		match.teams[0].set(winners)
 		match.teams[1].set(losers)
 		match.winner = None if draw else 0
-		await bot.stats.register_match_ranked(match)
+		await bot.stats.register_match_ranked(ctx, match)
 
 	def serialize(self):
 		return dict(

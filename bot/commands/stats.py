@@ -54,7 +54,7 @@ async def last_game(ctx, queue: str = None, player: Member = None, match_id: int
 		embed.add_field(name=ctx.qc.gt("Players"), value="`" + ", ".join(team) + "`")
 	if lg['ranked']:
 		if lg['winner'] is None:
-			winner = 'Draw'
+			winner = ctx.qc.gt('Draw')
 		else:
 			winner = [lg['alpha_name'], lg['beta_name']][lg['winner']]
 		embed.add_field(name=ctx.qc.gt("Winner"), value=winner)

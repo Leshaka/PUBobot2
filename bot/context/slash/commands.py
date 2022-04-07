@@ -509,3 +509,20 @@ async def _nick(
 		interaction: Interaction,
 		nick: str
 ): await run_slash(commands.set_nick, interaction=interaction, nick=nick)
+
+
+@dc.slash_command(name='report_manual', description='Report a rating match manually.', guild_ids=[GUILD_ID])
+async def _report_manual(
+		interaction: Interaction,
+		queue: str,
+		winners: str = SlashOption(description="List of won team players separated by space."),
+		losers: str = SlashOption(description="List of lost team players separated by space."),
+		draw: bool = SlashOption(required=False)
+):
+	async def _run(ctx, *args, _winners, _losers, **kwargs):
+		_winners = [await ctx.get_member(i) for i in _winners.split(" ")]
+		_losers = [await ctx.get_member(i) for i in _losers.split(" ")]
+		if None in _winners or None in _losers:
+			raise Exc.ValueError("Failed to parse teams arguments.")
+		await commands.report_manual(ctx, *args, winners=_winners, losers=_losers, **kwargs)
+	await run_slash(_run, interaction=interaction, queue=queue, _winners=winners, _losers=losers, draw=draw)

@@ -1,9 +1,10 @@
 __all__ = [
 	'show_matches', 'show_teams', 'set_ready', 'sub_me', 'sub_for',
-	'sub_force', 'cap_for', 'pick', 'report_admin', 'report'  # 'report_score', 'report_manual'
+	'sub_force', 'cap_for', 'pick', 'report_admin', 'report', 'report_manual'
 ]
 
 from nextcord import Member
+from typing import List
 
 from core.utils import get, find
 
@@ -92,3 +93,17 @@ async def report(ctx, match: bot.Match, result):
 		await match.report_loss(ctx, ctx.author, draw_flag=2)
 	else:
 		raise bot.Exc.ValueError("Invalid result value.")
+
+
+async def report_manual(ctx, queue: str, winners: List[Member], losers: List[Member], draw: bool = False):
+	""" Report a fake match """
+	ctx.check_perms(ctx.Perms.MODERATOR)
+	if (q := find(lambda i: i.name.lower() == queue.lower(), ctx.qc.queues)) is None:
+		raise bot.Exc.SyntaxError(f"Queue '{queue}' not found on the channel.")
+	if any((winners.count(p) != 1 or p in losers for p in winners)):
+		raise bot.Exc.ValueError(f"Teams can not contain duplicate players.")
+	if any((losers.count(p) != 1 or p in winners for p in losers)):
+		raise bot.Exc.ValueError(f"Teams can not contain duplicate players.")
+	if not len(winners) or not len(losers):
+		raise bot.Exc.ValueError(f"Teams can not be empty.")
+	await q.fake_ranked_match(ctx, winners, losers, draw=draw)
