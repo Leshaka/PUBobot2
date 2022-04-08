@@ -137,7 +137,7 @@ async def _pick(ctx: MessageContext, args: str = None):
 	if None in members:
 		raise bot.Exc.SyntaxError(ctx.qc.gt("Specified user not found."))
 
-	await bot.commands.pick(ctx, *members)
+	await bot.commands.pick(ctx, players=members)
 
 
 @message_command('report_loss', 'rl')

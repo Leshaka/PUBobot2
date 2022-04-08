@@ -1,5 +1,5 @@
 __all__ = [
-	'show_matches', 'show_teams', 'set_ready', 'sub_me', 'sub_for',
+	'show_matches', 'show_teams', 'set_ready', 'sub_me', 'sub_for', 'put',
 	'sub_force', 'cap_for', 'pick', 'report_admin', 'report', 'report_manual'
 ]
 
@@ -65,8 +65,16 @@ async def cap_for(ctx, match: bot.Match, team_name: str):
 
 
 @author_match
-async def pick(ctx, match: bot.Match, *players: Member):
+async def pick(ctx, match: bot.Match, players: List[Member]):
 	await match.draft.pick(ctx, ctx.author, players)
+
+
+async def put(ctx, match_id: int, player: Member, team_name: str):
+	if (match := find(lambda m: m.qc == ctx.qc and m.id == match_id, bot.active_matches)) is None:
+		raise bot.Exc.NotFoundError(ctx.qc.gt("Could not find match with specified id. Check `{prefix}matches`.").format(
+			prefix=ctx.qc.cfg.prefix
+		))
+	await match.draft.put(ctx, player, team_name)
 
 
 async def report_admin(ctx, match_id: int, winner_team=None, draw=False, abort=False):

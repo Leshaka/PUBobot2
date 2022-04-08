@@ -96,6 +96,7 @@ class Draft:
 			}
 
 		team.append(player)
+		await self.m.qc.remove_members(player, ctx=ctx)
 		await self.refresh(ctx)
 
 	async def sub_me(self, ctx, author):
