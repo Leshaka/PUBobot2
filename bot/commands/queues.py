@@ -1,5 +1,6 @@
 __all__ = [
-	'add', 'remove', 'who', 'add_player', 'remove_player', 'promote', 'start', 'reset', 'subscribe', 'server', 'maps'
+	'add', 'remove', 'who', 'add_player', 'remove_player', 'promote', 'start', 'split',
+	'reset', 'subscribe', 'server', 'maps'
 ]
 
 import time
@@ -149,8 +150,17 @@ async def start(ctx, queue: str = None):
 	ctx.check_perms(ctx.Perms.MODERATOR)
 	if (q := find(lambda i: i.name.lower() == queue.lower(), ctx.qc.queues)) is None:
 		raise bot.Exc.SyntaxError(f"Queue '{queue}' not found on the channel.")
-	await ctx.ignore(f"Starting **{q.name}** queue...")
 	await q.start(ctx)
+	await ctx.reply(ctx.qc.topic)
+
+
+async def split(ctx, queue: str, group_size: int = None, sort_by_rating: bool = False):
+	""" Split queue players into X separate matches """
+	ctx.check_perms(ctx.Perms.MODERATOR)
+	if (q := find(lambda i: i.name.lower() == queue.lower(), ctx.qc.queues)) is None:
+		raise bot.Exc.SyntaxError(f"Queue '{queue}' not found on the channel.")
+	await q.split(ctx, group_size=group_size, sort_by_rating=sort_by_rating)
+	await ctx.reply(ctx.qc.topic)
 
 
 async def reset(ctx, queue: str = None):

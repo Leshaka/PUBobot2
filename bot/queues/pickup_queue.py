@@ -319,6 +319,19 @@ class PickupQueue:
 	def length(self):
 		return len(self.queue)
 
+	def _match_cfg(self):
+		return dict(
+			team_names=self.cfg.team_names.split(" ") if self.cfg.team_names else None,
+			team_emojis=self.cfg.team_emojis.split(" ") if self.cfg.team_emojis else None,
+			ranked=self.cfg.ranked, pick_captains=self.cfg.pick_captains,
+			captains_role_id=self.cfg.captains_role.id if self.cfg.captains_role else None,
+			pick_teams=self.cfg.pick_teams, pick_order=self.cfg.pick_order,
+			maps=[i['name'] for i in self.cfg.tables.maps], vote_maps=self.cfg.vote_maps,
+			map_count=self.cfg.map_count, check_in_timeout=self.cfg.check_in_timeout,
+			check_in_discard=self.cfg.check_in_discard, match_lifetime=self.cfg.match_lifetime,
+			start_msg=self.cfg.start_msg, server=self.cfg.server
+		)
+
 	async def promote(self, ctx):
 		promotion_role = self.cfg.promotion_role or self.qc.cfg.promotion_role
 		promotion_msg = self.cfg.promotion_msg or self.qc.gt("{role} Please add to **{name}** pickup, `{left}` players left!")
@@ -401,18 +414,32 @@ class PickupQueue:
 		else:
 			team_size = int(self.cfg.size / 2)
 
-		await bot.Match.new(
-			ctx, self, players,
-			team_names=self.cfg.team_names.split(" ") if self.cfg.team_names else None,
-			team_emojis=self.cfg.team_emojis.split(" ") if self.cfg.team_emojis else None,
-			ranked=self.cfg.ranked, team_size=team_size, pick_captains=self.cfg.pick_captains,
-			captains_role_id=self.cfg.captains_role.id if self.cfg.captains_role else None,
-			pick_teams=self.cfg.pick_teams, pick_order=self.cfg.pick_order,
-			maps=[i['name'] for i in self.cfg.tables.maps], vote_maps=self.cfg.vote_maps,
-			map_count=self.cfg.map_count, check_in_timeout=self.cfg.check_in_timeout,
-			check_in_discard=self.cfg.check_in_discard, match_lifetime=self.cfg.match_lifetime,
-			start_msg=self.cfg.start_msg, server=self.cfg.server
-		)
+		await bot.Match.new(ctx, self, players, team_size=team_size, **self._match_cfg())
+
+	async def split(self, ctx, group_size: int = None, sort_by_rating: bool = False):
+		group_size = group_size or len(self.queue)//2
+
+		if len(self.queue) < group_size or group_size < 2:
+			raise bot.Exc.PubobotException(self.qc.gt("Not enough players to start the queue."))
+
+		if sort_by_rating:
+			ratings = {p['user_id']: p['rating'] for p in await ctx.qc.rating.get_players((p.id for p in self.queue))}
+			self.queue = sorted(self.queue, key=lambda p: ratings[p.id], reverse=True)
+
+		for n in range(1, (len(self.queue)//group_size)+1):
+			players = self.queue[(n-1)*group_size:n*group_size]
+			dm_text = self.cfg.start_direct_msg or self.qc.gt("**{queue}** pickup has started @ {channel}!")
+			await self.qc.queue_started(
+				ctx,
+				members=players,
+				message=dm_text.format(
+					queue=self.name,
+					channel=self.qc.channel.mention,
+					server=self.cfg.server
+				)
+			)
+
+			await bot.Match.new(ctx, self, players, team_size=group_size//2, **self._match_cfg())
 
 	async def fake_ranked_match(self, ctx, winners, losers, draw=False):
 		if not self.cfg.ranked:

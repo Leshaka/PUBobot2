@@ -127,6 +127,15 @@ async def _start_queue(
 _start_queue.on_autocomplete("queue")(autocomplete.queues)
 
 
+@groups.admin_queue.subcommand(name='split', description='Split the queue into N separate matches.')
+async def _split_queue(
+	interaction: Interaction,
+	queue: str = SlashOption(),
+	group_size: int = SlashOption(description="Amount of players per match", required=False),
+	sort_by_rating: bool = SlashOption(description="Sort groups by players ratings", required=False)
+): await run_slash(commands.split, interaction=interaction, queue=queue, group_size=group_size, sort_by_rating=sort_by_rating)
+_split_queue.on_autocomplete("queue")(autocomplete.queues)
+
 # channel -> ...
 
 @groups.admin_channel.subcommand(name='enable', description='Enable the bot on this channel.')
