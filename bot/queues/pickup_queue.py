@@ -426,12 +426,12 @@ class PickupQueue:
 			ratings = {p['user_id']: p['rating'] for p in await ctx.qc.rating.get_players((p.id for p in self.queue))}
 			self.queue = sorted(self.queue, key=lambda p: ratings[p.id], reverse=True)
 
-		for n in range(1, (len(self.queue)//group_size)+1):
-			players = self.queue[(n-1)*group_size:n*group_size]
+		groups = [self.queue[i-group_size:i] for i in range(group_size, len(self.queue)+1, group_size)]
+		for group in groups:
 			dm_text = self.cfg.start_direct_msg or self.qc.gt("**{queue}** pickup has started @ {channel}!")
 			await self.qc.queue_started(
 				ctx,
-				members=players,
+				members=group,
 				message=dm_text.format(
 					queue=self.name,
 					channel=self.qc.channel.mention,
@@ -439,7 +439,7 @@ class PickupQueue:
 				)
 			)
 
-			await bot.Match.new(ctx, self, players, team_size=group_size//2, **self._match_cfg())
+			await bot.Match.new(ctx, self, group, team_size=group_size//2, **self._match_cfg())
 
 	async def fake_ranked_match(self, ctx, winners, losers, draw=False):
 		if not self.cfg.ranked:
