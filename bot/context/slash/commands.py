@@ -5,13 +5,15 @@ import traceback
 from core.client import dc
 from core.utils import error_embed, ok_embed, parse_duration
 from core.console import log
+from core.config import cfg
 
 from bot import queue_channels, Exc, QueueChannel
 from bot import commands
 
 from . import SlashContext, autocomplete, groups
 
-GUILD_ID = 745999774649679923
+
+guild_kwargs = dict(guild_ids=cfg.DC_SLASH_SERVERS) if len(cfg.DC_SLASH_SERVERS) else dict()
 
 
 def _parse_duration(ctx: SlashContext, s: str):
@@ -349,7 +351,7 @@ async def _stats_replace_player(
 
 # root commands
 
-@dc.slash_command(name='add', description='Add yourself to the channel queues.', guild_ids=[GUILD_ID])
+@dc.slash_command(name='add', description='Add yourself to the channel queues.', **guild_kwargs)
 async def _add(
 	interaction: Interaction,
 	queues: str = SlashOption(
@@ -360,7 +362,7 @@ async def _add(
 _add.on_autocomplete("queues")(autocomplete.queues)
 
 
-@dc.slash_command(name='remove', description='Remove yourself from the channel queues.', guild_ids=[GUILD_ID])
+@dc.slash_command(name='remove', description='Remove yourself from the channel queues.', **guild_kwargs)
 async def _remove(
 	interaction: Interaction,
 	queues: str = SlashOption(
@@ -371,7 +373,7 @@ async def _remove(
 _remove.on_autocomplete("queues")(autocomplete.queues)
 
 
-@dc.slash_command(name='who', description='List added players.', guild_ids=[GUILD_ID])
+@dc.slash_command(name='who', description='List added players.', **guild_kwargs)
 async def _who(
 	interaction: Interaction,
 	queues: str = SlashOption(
@@ -382,7 +384,7 @@ async def _who(
 _who.on_autocomplete("queues")(autocomplete.queues)
 
 
-@dc.slash_command(name='promote', description='Promote a queue.', guild_ids=[GUILD_ID])
+@dc.slash_command(name='promote', description='Promote a queue.', **guild_kwargs)
 async def promote(
 		interaction: Interaction,
 		queue: str
@@ -390,7 +392,7 @@ async def promote(
 promote.on_autocomplete("queue")(autocomplete.queues)
 
 
-@dc.slash_command(name='subscribe', description='Subscribe to a queue promotion role.', guild_ids=[GUILD_ID])
+@dc.slash_command(name='subscribe', description='Subscribe to a queue promotion role.', **guild_kwargs)
 async def subscribe(
 		interaction: Interaction,
 		queues: str
@@ -398,7 +400,7 @@ async def subscribe(
 subscribe.on_autocomplete("queues")(autocomplete.queues)
 
 
-@dc.slash_command(name='unsubscribe', description='Unsubscribe from a queue promotion role.', guild_ids=[GUILD_ID])
+@dc.slash_command(name='unsubscribe', description='Unsubscribe from a queue promotion role.', **guild_kwargs)
 async def unsubscribe(
 		interaction: Interaction,
 		queues: str
@@ -406,7 +408,7 @@ async def unsubscribe(
 unsubscribe.on_autocomplete("queues")(autocomplete.queues)
 
 
-@dc.slash_command(name='server', description='Show queue server.', guild_ids=[GUILD_ID])
+@dc.slash_command(name='server', description='Show queue server.', **guild_kwargs)
 async def server(
 		interaction: Interaction,
 		queue: str
@@ -414,7 +416,7 @@ async def server(
 server.on_autocomplete("queue")(autocomplete.queues)
 
 
-@dc.slash_command(name='maps', description='List a queue maps.', guild_ids=[GUILD_ID])
+@dc.slash_command(name='maps', description='List a queue maps.', **guild_kwargs)
 async def maps(
 		interaction: Interaction,
 		queue: str
@@ -422,7 +424,7 @@ async def maps(
 maps.on_autocomplete("queue")(autocomplete.queues)
 
 
-@dc.slash_command(name='map', description='Print a random map.', guild_ids=[GUILD_ID])
+@dc.slash_command(name='map', description='Print a random map.', **guild_kwargs)
 async def _map(
 		interaction: Interaction,
 		queue: str
@@ -430,44 +432,44 @@ async def _map(
 _map.on_autocomplete("queue")(autocomplete.queues)
 
 
-@dc.slash_command(name='matches', description='Show active matches on the channel.', guild_ids=[GUILD_ID])
+@dc.slash_command(name='matches', description='Show active matches on the channel.', **guild_kwargs)
 async def _matches(
 		interaction: Interaction
 ): await run_slash(commands.show_matches, interaction=interaction)
 
 
-@dc.slash_command(name='teams', description='Show teams on your current match.', guild_ids=[GUILD_ID])
+@dc.slash_command(name='teams', description='Show teams on your current match.', **guild_kwargs)
 async def _teams(
 		interaction: Interaction
 ): await run_slash(commands.show_teams, interaction=interaction)
 
 
-@dc.slash_command(name='ready', description='Confirm participation during the check-in stage.', guild_ids=[GUILD_ID])
+@dc.slash_command(name='ready', description='Confirm participation during the check-in stage.', **guild_kwargs)
 async def _ready(
 		interaction: Interaction
 ): await run_slash(commands.set_ready, interaction=interaction, is_ready=True)
 
 
-@dc.slash_command(name='notready', description='Abort participation during the check-in stage.', guild_ids=[GUILD_ID])
+@dc.slash_command(name='notready', description='Abort participation during the check-in stage.', **guild_kwargs)
 async def _not_ready(
 		interaction: Interaction
 ): await run_slash(commands.set_ready, interaction=interaction, is_ready=False)
 
 
-@dc.slash_command(name='subme', description='Request a substitute', guild_ids=[GUILD_ID])
+@dc.slash_command(name='subme', description='Request a substitute', **guild_kwargs)
 async def _sub_me(
 		interaction: Interaction
 ): await run_slash(commands.sub_me, interaction=interaction)
 
 
-@dc.slash_command(name='subfor', description='Become a substitute', guild_ids=[GUILD_ID])
+@dc.slash_command(name='subfor', description='Become a substitute', **guild_kwargs)
 async def _sub_for(
 		interaction: Interaction,
 		player: Member = SlashOption(name="player", description="The player to substitute for.", verify=False)
 ): await run_slash(commands.sub_for, interaction=interaction, player=player)
 
 
-@dc.slash_command(name='capfor', description='Become a captain', guild_ids=[GUILD_ID])
+@dc.slash_command(name='capfor', description='Become a captain', **guild_kwargs)
 async def _cap_for(
 		interaction: Interaction,
 		team: str
@@ -475,21 +477,21 @@ async def _cap_for(
 
 
 # TODO: make possible to pick multiple players within singe command
-@dc.slash_command(name='pick', description='Pick a player.', guild_ids=[GUILD_ID])
+@dc.slash_command(name='pick', description='Pick a player.', **guild_kwargs)
 async def _pick(
 		interaction: Interaction,
 		player: Member = SlashOption(name="player", verify=False),
 ): await run_slash(commands.pick, interaction=interaction, players=[player])
 
 
-@dc.slash_command(name='report', description='Report match result.', guild_ids=[GUILD_ID])
+@dc.slash_command(name='report', description='Report match result.', **guild_kwargs)
 async def _report(
 		interaction: Interaction,
 		result: str = SlashOption(choices=['loss', 'draw', 'abort'])
 ): await run_slash(commands.report, interaction=interaction, result=result)
 
 
-@dc.slash_command(name='lastgame', description='Show last game details.', guild_ids=[GUILD_ID])
+@dc.slash_command(name='lastgame', description='Show last game details.', **guild_kwargs)
 async def _last_game(
 		interaction: Interaction,
 		queue: str = SlashOption(required=False),
@@ -499,35 +501,35 @@ async def _last_game(
 _last_game.on_autocomplete("queue")(autocomplete.queues)
 
 
-@dc.slash_command(name='top', description='Show top players on the channel.', guild_ids=[GUILD_ID])
+@dc.slash_command(name='top', description='Show top players on the channel.', **guild_kwargs)
 async def _top(
 		interaction: Interaction,
 		period: str = SlashOption(required=False, choices=['day', 'week', 'month', 'year']),
 ): await run_slash(commands.top, interaction=interaction, period=period)
 
 
-@dc.slash_command(name='rank', description='Show rating profile.', guild_ids=[GUILD_ID])
+@dc.slash_command(name='rank', description='Show rating profile.', **guild_kwargs)
 async def _rank(
 		interaction: Interaction,
 		player: Member = SlashOption(required=False, verify=False),
 ): await run_slash(commands.rank, interaction=interaction, player=player)
 
 
-@dc.slash_command(name='leaderboard', description='Show rating leaderboard.', guild_ids=[GUILD_ID])
+@dc.slash_command(name='leaderboard', description='Show rating leaderboard.', **guild_kwargs)
 async def _leaderboard(
 		interaction: Interaction,
 		page: int = SlashOption(required=False),
 ): await run_slash(commands.leaderboard, interaction=interaction, page=page)
 
 
-@dc.slash_command(name='rating_unhide', description='Unhide player from the leaderboard.', guild_ids=[GUILD_ID])
+@dc.slash_command(name='rating_unhide', description='Unhide player from the leaderboard.', **guild_kwargs)
 async def _rating_hide(
 		interaction: Interaction,
 		player: Member = SlashOption(verify=False)
 ): await run_slash(commands.rating_hide, interaction=interaction, player=player, hide=False)
 
 
-@dc.slash_command(name='auto_ready', description='Confirm next match check-in automatically.', guild_ids=[GUILD_ID])
+@dc.slash_command(name='auto_ready', description='Confirm next match check-in automatically.', **guild_kwargs)
 async def _auto_ready(
 		interaction: Interaction,
 		duration: str = SlashOption(required=False),
@@ -540,7 +542,7 @@ async def _auto_ready(
 	await run_slash(_run, interaction=interaction, _duration=duration)
 
 
-@dc.slash_command(name='expire', description='Set or show your current expire timer.', guild_ids=[GUILD_ID])
+@dc.slash_command(name='expire', description='Set or show your current expire timer.', **guild_kwargs)
 async def _expire(
 		interaction: Interaction,
 		duration: str = SlashOption(required=False)
@@ -553,7 +555,7 @@ async def _expire(
 	await run_slash(_run, interaction=interaction, _duration=duration)
 
 
-@dc.slash_command(name='expire_default', description='Set or show your default expire timer.', guild_ids=[GUILD_ID])
+@dc.slash_command(name='expire_default', description='Set or show your default expire timer.', **guild_kwargs)
 async def _default_expire(
 		interaction: Interaction,
 		duration: str = SlashOption(required=False),
@@ -568,26 +570,26 @@ async def _default_expire(
 	await run_slash(_run, interaction=interaction, _duration=duration, afk=afk, clear=clear)
 
 
-@dc.slash_command(name='allow_offline', description='Switch your offline status immunity.', guild_ids=[GUILD_ID])
+@dc.slash_command(name='allow_offline', description='Switch your offline status immunity.', **guild_kwargs)
 async def _allow_offline(
 		interaction: Interaction,
 ): await run_slash(commands.allow_offline, interaction=interaction)
 
 
-@dc.slash_command(name='switch_dms', description='Toggles DMs on queue start.', guild_ids=[GUILD_ID])
+@dc.slash_command(name='switch_dms', description='Toggles DMs on queue start.', **guild_kwargs)
 async def _switch_dms(
 		interaction: Interaction,
 ): await run_slash(commands.switch_dms, interaction=interaction)
 
 
-@dc.slash_command(name='cointoss', description='Toss a coin.', guild_ids=[GUILD_ID])
+@dc.slash_command(name='cointoss', description='Toss a coin.', **guild_kwargs)
 async def _cointoss(
 		interaction: Interaction,
 		side: str = SlashOption(choices=['heads', 'tails'], required=False)
 ): await run_slash(commands.cointoss, interaction=interaction, side=side)
 
 
-@dc.slash_command(name='help', description='Show channel or queue help.', guild_ids=[GUILD_ID])
+@dc.slash_command(name='help', description='Show channel or queue help.', **guild_kwargs)
 async def _help(
 		interaction: Interaction,
 		queue: str = SlashOption(name="queue", required=False)
@@ -595,7 +597,7 @@ async def _help(
 _help.on_autocomplete("queue")(autocomplete.queues)
 
 
-@dc.slash_command(name='nick', description='Change your nickname with the rating prefix.', guild_ids=[GUILD_ID])
+@dc.slash_command(name='nick', description='Change your nickname with the rating prefix.', **guild_kwargs)
 async def _nick(
 		interaction: Interaction,
 		nick: str
