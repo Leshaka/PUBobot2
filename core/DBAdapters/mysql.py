@@ -150,9 +150,10 @@ class Adapter:
 
 	async def _ensure_table(self, table):
 		table = {**table_blank, **table}
-		columns = await self.fetchall(
-			"SELECT COLUMN_NAME, DATA_TYPE FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '{}'".format(table['tname'])
-		)
+		columns = await self.fetchall("\n".join((
+			"SELECT COLUMN_NAME, DATA_TYPE FROM INFORMATION_SCHEMA.COLUMNS",
+			"WHERE TABLE_NAME = '{}' AND TABLE_SCHEMA = '{}'".format(table['tname'], self.dbName)
+		)))
 		columns = {i['COLUMN_NAME']: i['DATA_TYPE'] for i in columns}
 
 		# Create table if not exist
