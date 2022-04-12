@@ -66,6 +66,7 @@
 | /queue remove_player  | Remove a player from all or selected queue              |
 | /queue clear          | Remove all players from all or selected queue           |
 | /queue start          | Manually start a queue                                  |
+| /queue split          | Split queue into multiple matches                       |
 |-                      |                                                         |
 | /match report         | Report an ongoing match result as a moderator           |
 | /match create         | Manually create a rating match result                   |
