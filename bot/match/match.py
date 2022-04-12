@@ -58,8 +58,8 @@ class Match:
 	async def new(cls, ctx, queue, players, **kwargs):
 		# Create the Match object
 		ratings = {p['user_id']: p['rating'] for p in await ctx.qc.rating.get_players((p.id for p in players))}
-		bot.last_match_id += 1
-		match = cls(bot.last_match_id, queue, ctx.qc, players, ratings, **kwargs)
+		match_id = await bot.stats.next_match()
+		match = cls(match_id, queue, ctx.qc, players, ratings, **kwargs)
 		# Prepare the Match object
 		match.maps = match.random_maps(match.cfg['maps'], match.cfg['map_count'], queue.last_maps)
 		match.init_captains(match.cfg['pick_captains'], match.cfg['captains_role_id'])
@@ -74,8 +74,8 @@ class Match:
 		if len(set(players)) != len(players):
 			raise bot.Exc.ValueError("Players list can not contains duplicates.")
 		ratings = {p['user_id']: p['rating'] for p in await qc.rating.get_players((p.id for p in players))}
-		bot.last_match_id += 1
-		match = cls(bot.last_match_id, queue, qc, players, ratings, pick_teams="premade", **kwargs)
+		match_id = await bot.stats.next_match()
+		match = cls(match_id, queue, qc, players, ratings, pick_teams="premade", **kwargs)
 		match.teams[0].set(winners)
 		match.teams[1].set(losers)
 		match.winner = None if draw else 0
@@ -110,8 +110,8 @@ class Match:
 
 		# Create the Match object
 		ratings = {p['user_id']: p['rating'] for p in await qc.rating.get_players((p.id for p in data['players']))}
-		bot.last_match_id += 1
-		match = cls(bot.last_match_id, queue, qc, data['players'], ratings, **data['cfg'])
+		match_id = await bot.stats.next_match()
+		match = cls(match_id, queue, qc, data['players'], ratings, **data['cfg'])
 
 		# Set state data
 		for i in range(len(match.teams)):

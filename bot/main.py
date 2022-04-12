@@ -14,7 +14,6 @@ active_queues = []
 active_matches = []
 waiting_reactions = dict()  # {message.id: function}
 allow_offline = []  # [user_id]
-last_match_id = None
 auto_ready = dict()  # {user.id: timestamp}
 
 

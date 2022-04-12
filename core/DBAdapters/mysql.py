@@ -124,10 +124,11 @@ class Adapter:
 
 	@staticmethod
 	def _mysql_update(table, columns, keys):
-		return "UPDATE {table} SET {columns} WHERE {keys}".format(
+		where = " WHERE {}".format(" AND ".join(["`{}`=%s".format(i) for i in keys])) if len(keys) else ""
+		return "UPDATE {table} SET {columns}{where}".format(
 			table=table,
 			columns=",".join(["`{}`=%s".format(i) for i in columns]),
-			keys=" AND ".join(["`{}`=%s".format(i) for i in keys])
+			where=where
 		)
 
 	async def create_table(self, table):
@@ -214,7 +215,8 @@ class Adapter:
 		request = self._mysql_insert(d.keys(), table, on_dublicate)
 		await self.execute(request, list(d.values()))
 
-	async def update(self, table, d, keys):
+	async def update(self, table, d, keys=None):
+		keys = keys or {}
 		request = self._mysql_update(table, d.keys(), keys.keys())
 		await self.execute(request, list(d.values()) + list(keys.values()))
 

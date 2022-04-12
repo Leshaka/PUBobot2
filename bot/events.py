@@ -7,6 +7,11 @@ import bot
 
 
 @dc.event
+async def on_init():
+	await bot.stats.check_match_id_counter()
+
+
+@dc.event
 async def on_think(frame_time):
 	for match in bot.active_matches:
 		await match.think(frame_time)
@@ -47,7 +52,6 @@ async def on_ready():
 	await dc.change_presence(activity=Activity(type=ActivityType.watching, name=cfg.STATUS))
 	if not dc.was_ready:  # Connected for the first time, load everything
 		dc.was_ready = True
-		bot.last_match_id = await bot.stats.last_match_id()
 		log.info(f"Logged in discord as '{dc.user.name}#{dc.user.discriminator}'.")
 		log.info("Loading queue channels...")
 		for channel_id in await bot.QueueChannel.cfg_factory.p_keys():

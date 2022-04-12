@@ -72,6 +72,13 @@ db.ensure_table(dict(
 ))
 
 db.ensure_table(dict(
+	tname="qc_match_id_counter",
+	columns=[
+		dict(cname="next_id", ctype=db.types.int)
+	]
+))
+
+db.ensure_table(dict(
 	tname="qc_player_matches",
 	columns=[
 		dict(cname="match_id", ctype=db.types.int),
@@ -92,10 +99,25 @@ db.ensure_table(dict(
 ))
 
 
-async def last_match_id():
+async def check_match_id_counter():
+	"""
+	Set to current max match_id+1 if not persist or less
+	"""
 	m = await db.select_one(('match_id',), 'qc_matches', order_by='match_id', limit=1)
-	print(m)
-	return m['match_id'] if m else 0
+	next_known_match = m['match_id']+1 if m else 0
+	counter = await db.select_one(('next_id',), 'qc_match_id_counter')
+	if counter is None:
+		await db.insert('qc_match_id_counter', dict(next_id=next_known_match))
+	elif next_known_match > counter['next_id']:
+		await db.update('qc_match_id_counter', dict(next_id=next_known_match))
+
+
+async def next_match():
+	""" Increase match_id counter, return current match_id """
+	counter = await db.select_one(('next_id',), 'qc_match_id_counter')
+	await db.update('qc_match_id_counter', dict(next_id=counter['next_id']+1))
+	log.debug(f"Current match_id is {counter['next_id']}")
+	return counter['next_id']
 
 
 async def register_match_unranked(ctx, m):
