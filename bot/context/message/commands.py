@@ -133,7 +133,7 @@ async def _pick(ctx: MessageContext, args: str = None):
 	if not args:
 		raise bot.Exc.SyntaxError(f"Usage: {ctx.qc.cfg.prefix}pick __player__")
 
-	members = [ctx.get_member(i.strip()) for i in args.strip().split(" ")]
+	members = [await ctx.get_member(i.strip()) for i in args.strip().split(" ")]
 	if None in members:
 		raise bot.Exc.SyntaxError(ctx.qc.gt("Specified user not found."))
 
@@ -180,3 +180,38 @@ async def _auto_ready(ctx: MessageContext, args: str = None):
 		except ValueError:
 			raise bot.Exc.SyntaxError(ctx.qc.gt("Invalid duration format. Syntax: 3h2m1s or 03:02:01."))
 	await bot.commands.auto_ready(ctx, duration=duration)
+
+
+@message_command('rank')
+async def _rank(ctx: MessageContext, args: str = None):
+	if not args:
+		await bot.commands.rank(ctx, player=None)
+		return
+	member = await ctx.get_member(args)
+	await bot.commands.rank(ctx, player=member)
+
+
+@message_command('leaderboard', 'lb')
+async def _leaderboard(ctx: MessageContext, args: str = None):
+	page = int(args) if args else None
+	await bot.commands.leaderboard(ctx, page=page)
+
+
+@message_command('lastgame', 'lg')
+async def _lastgame(ctx: MessageContext, args: str = None):
+	""" Guess parameter name on the supplied value type :peka5: """
+	if not args:
+		await bot.commands.last_game(ctx)
+	elif args.isdigit():
+		await bot.commands.last_game(ctx, match_id=int(args))
+	elif (member := await ctx.get_member(args)) is not None:
+		await bot.commands.last_game(ctx, player=member)
+	else:
+		await bot.commands.last_game(ctx, queue=args)
+
+
+@message_command('cancel_match')
+async def _cancel_match(ctx: MessageContext, args: str = None):
+	if not args or not args.isdigit():
+		raise bot.Exc.SyntaxError(f"Usage: {ctx.qc.cfg.prefix}cancel_match __match_id__")
+	await bot.commands.report_admin(ctx, match_id=int(args), abort=True)
