@@ -215,3 +215,8 @@ async def _cancel_match(ctx: MessageContext, args: str = None):
 	if not args or not args.isdigit():
 		raise bot.Exc.SyntaxError(f"Usage: {ctx.qc.cfg.prefix}cancel_match __match_id__")
 	await bot.commands.report_admin(ctx, match_id=int(args), abort=True)
+
+
+@message_command('promote')
+async def _promote(ctx: MessageContext, args: str = None):
+	await bot.commands.promote(ctx, args)
