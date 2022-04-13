@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import time
 import datetime
-from asyncio import sleep as asleep
+import asyncio
 import bot
 from core.console import log
 from core.database import db
@@ -368,13 +368,17 @@ class StatsJobs:
 		d += datetime.timedelta(days=1)
 		return d
 
+	@staticmethod
+	async def apply_rating_decays():
+		log.info("--- Applying weekly deviation decays ---")
+		for qc in bot.queue_channels.values():
+			await qc.apply_rating_decay()
+			await asyncio.sleep(1)
+
 	async def think(self, frame_time):
 		if frame_time > self.next_decay_at:
 			self.next_decay_at = int(self.next_monday().timestamp())
-			log.info("--- Applying weekly deviation decays ---")
-			for qc in bot.queue_channels.values():
-				await qc.apply_rating_decay()
-				await asleep(1)
+			asyncio.create_task(self.apply_rating_decays())
 
 
 jobs = StatsJobs()

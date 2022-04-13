@@ -22,7 +22,6 @@ class CheckIn:
 
 		for p in (p for p in self.m.players if p.id in bot.auto_ready.keys()):
 			self.ready_players.add(p)
-			bot.auto_ready.pop(p.id)
 
 		if len(self.m.cfg['maps']) > 1 and self.m.cfg['vote_maps']:
 			self.maps = self.m.random_maps(self.m.cfg['maps'], self.m.cfg['vote_maps'], self.m.queue.last_maps)
@@ -75,6 +74,10 @@ class CheckIn:
 			order.sort(key=lambda n: len(self.map_votes[n]), reverse=True)
 			self.m.maps = [self.maps[n] for n in order[:self.m.cfg['map_count']]]
 		await self.message.delete()
+
+		for p in (p for p in self.m.players if p.id in bot.auto_ready.keys()):
+			bot.auto_ready.pop(p.id)
+
 		await self.m.next_state(ctx)
 
 	async def process_reaction(self, reaction, user, remove=False):
