@@ -223,7 +223,7 @@ class Variable:
 
 	def verify(self, obj):
 		""" optional verification of generated object """
-		if obj and not self.verify_f(obj):
+		if obj is not None and not self.verify_f(obj):
 			raise(VerifyError(self.verify_message))
 
 
