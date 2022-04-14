@@ -207,6 +207,7 @@ async def _report_admin(
 ): await run_slash(
 	commands.report_admin, interaction=interaction, match_id=match_id, winner_team=winner_team, draw=draw, abort=abort
 )
+_report_admin.on_autocomplete('winner_team')(autocomplete.teams_by_match_id)
 
 
 @groups.admin_match.subcommand(name='create', description='Report a rating match manually.')
@@ -241,6 +242,7 @@ async def _put(
 		player: Member,
 		team_name: str = SlashOption(name='team', description='Team name or unpicked')
 ): await run_slash(commands.put, interaction=interaction, match_id=match_id, player=player, team_name=team_name)
+_put.on_autocomplete('team_name')(autocomplete.teams_by_match_id)
 
 
 # noadds -> ...
@@ -491,6 +493,7 @@ async def _cap_for(
 		interaction: Interaction,
 		team: str
 ): await run_slash(commands.cap_for, interaction=interaction, team_name=team)
+_cap_for.on_autocomplete('team')(autocomplete.teams_by_author)
 
 
 # TODO: make possible to pick multiple players within singe command
