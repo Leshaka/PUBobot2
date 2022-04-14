@@ -359,6 +359,13 @@ async def _stats_replace_player(
 ): await run_slash(commands.stats_replace_player, interaction=interaction, player1=player1, player2=player2)
 
 
+@groups.admin_stats.subcommand(name='undo_match', description='Undo a finished match.')
+async def _stats_undo_match(
+		interaction: Interaction,
+		match_id: int
+): await run_slash(commands.undo_match, interaction=interaction, match_id=match_id)
+
+
 # root commands
 
 @dc.slash_command(name='add', description='Add yourself to the channel queues.', **guild_kwargs)
