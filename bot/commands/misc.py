@@ -6,6 +6,7 @@ from random import randint
 
 from core.utils import seconds_to_str, find
 from core.database import db
+from core.config import cfg
 
 import bot
 
@@ -130,7 +131,10 @@ async def cointoss(ctx, side: str = None):
 
 async def show_help(ctx, queue: str = None):
 	if queue is None:
-		await ctx.reply_dm(ctx.qc.cfg.description or ctx.qc.gt('This channel has no help answer set.'))
+		if not ctx.qc.cfg.description:
+			await ctx.reply_dm(cfg.HELP+"\nYou can edit this message with command `/channel set description`.")
+		else:
+			await ctx.reply_dm(ctx.qc.cfg.description)
 		return
 	if (q := find(lambda i: i.name.lower() == queue.lower(), ctx.qc.queues)) is None:
 		raise bot.Exc.SyntaxError(f"Queue '{queue}' not found on the channel.")

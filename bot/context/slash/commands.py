@@ -617,6 +617,12 @@ async def _help(
 _help.on_autocomplete("queue")(autocomplete.queues)
 
 
+@dc.slash_command(name='commands', description='Show commands list.', **guild_kwargs)
+async def _commands(
+		interaction: Interaction,
+): await interaction.response.send_message(cfg.COMMANDS_URL, ephemeral=True)
+
+
 @dc.slash_command(name='nick', description='Change your nickname with the rating prefix.', **guild_kwargs)
 async def _nick(
 		interaction: Interaction,
