@@ -322,7 +322,7 @@ async def top(channel_id, time_gap=None):
 	)
 
 	data = await db.fetchall(
-		"SELECT pm.nick as nick, COUNT(*) as count FROM `qc_player_matches` AS pm " +
+		"SELECT p.nick as nick, COUNT(*) as count FROM `qc_player_matches` AS pm " +
 		"JOIN `qc_players` AS p ON pm.user_id=p.user_id AND pm.channel_id=p.channel_id " +
 		"JOIN `qc_matches` AS m ON pm.match_id=m.match_id " +
 		"WHERE pm.channel_id=%s " +
