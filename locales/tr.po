@@ -3,99 +3,103 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 
 msgid "_lang"
-msgstr "ru"
+msgstr "tr"
 
 # bot/queue_channel.py
 
 msgid "no players"
-msgstr "нет игроков"
+msgstr "Oyuncu yok."
 
 msgid "You must possess admin permissions."
-msgstr "Необходимы права администратора."
+msgstr "Admin yetkiniz olması gerekir."
 
 msgid "You must possess moderator permissions."
-msgstr "Необходимы права модератора."
+msgstr "Moderatör yetkiniz olmasaı gerekir."
 
 msgid "expire time ran off"
-msgstr "время expire истекло"
+msgstr "zaman aşımına uğradı"
 
 msgid "member offline"
-msgstr "пользователь оффлайн"
+msgstr "üye çevrimdışı"
 
 msgid "member AFK"
-msgstr "пользователь AFK"
+msgstr "üye AFK"
 
 msgid "member left the guild"
-msgstr "пользователь покинул гильдию"
+msgstr "üye sunucudan ayrıldı"
 
 msgid "queue started on another channel"
-msgstr "начался пикап на другом канале"
+msgstr "başka bir kanalda maç başladı"
+# Used maç = match instead of sıra = line/queue
 
 msgid "removed by a moderator"
-msgstr "удалён модератором"
+msgstr "moderatör tarafından çıkarıldı"
 
 msgid "{member} were removed from all queues ({reason})."
-msgstr "{member} был удален из всех очередей ({reason})."
+msgstr "{member} tüm sıralardan çıkartıldı ({reason})."
 
 msgid "{members} were removed from all queues ({reason})."
 msgstr "{members} были удалены из всех очередей ({reason})."
 
 msgid "Success"
-msgstr "Успешно"
+msgstr "Başarılı"
 
 msgid "Error"
-msgstr "Ошибка"
+msgstr "Hata"
 
 msgid "You are not allowed to add to queues on this channel."
-msgstr "Вам не разрешено добавлятся в очереди на этом канале."
+msgstr "Bu kanalda sıraya girmeye izniniz yok."
 
 msgid "You are not allowed to add to {queues} queues."
-msgstr "Вам не разрешено добавлятся в очереди {queues}."
+msgstr "{queues} sıralarına girmeye izniniz yok."
 
 msgid "You are already in an active match."
-msgstr "Вы уже находитесь в активном матче."
+msgstr "Zaten aktif bir maçtasınız."
 
 msgid "You are not in an active match."
-msgstr "Вы не в активном матче."
+msgstr "Aktif bir maçta değilsiniz."
 
 msgid "Specified user not found."
-msgstr "Указанный пользователь не найден."
+msgstr "Belirtilen kullanıcı bulunamadı."
 
 msgid "Specified user is not in a match."
-msgstr "Указанный пользователь не находится в матче."
+msgstr "Belirtilen kullanıcı maçta değil."
 
 msgid "Specified user is in an active match."
-msgstr "Указанный пользователь уже находится в матче."
+msgstr "Belirtilen kullanıcı aktif bir maçta."
 
 msgid "Matches"
-msgstr "Матчей"
+msgstr "Maçlar"
 
 msgid "Rank"
-msgstr "Ранг"
+msgstr "Rütbe"
 
 msgid "Rating"
-msgstr "Рейтинг"
+msgstr "Derece"
 
 msgid "Winrate"
-msgstr "Винрейт"
+msgstr "Kazanma Oranı"
 
 msgid "Last changes:"
-msgstr "Последние изменения:"
+msgstr "Son değişiklikler:"
 
 msgid "No rating data found."
-msgstr "Нет данных рейтинга."
+msgstr "Derece verisi bulunamadı."
 
 msgid "Could not find match with specified id. Check `{prefix}matches`."
-msgstr "Матч с указаным id не найден. Проверьте `{prefix}matches`."
+msgstr "Belirtilen numaraya ait bir maç bulunamadı. `{prefix}matches` yazarak kontrol edebilirsiniz."
+# Used "number" instead of "ID", because "ID" doesn't translate well.
 
 msgid "You have {duration} expire time left."
-msgstr "У вас осталось {duration} времени expire."
+msgstr "Zaman aşımınızın bitmesine {duration} kaldı."
 
 msgid "You don't have an expire timer set right now."
-msgstr "У вас не установлен таймер expire."
+msgstr "Zaman aşımı için kurulu sayacınız yok."
+# Might come back to this later. "Zaman aşımı" = "time out".
 
 msgid "Invalid duration format. Syntax: 3h2m1s or 03:02:01."
-msgstr "Неверный формат времени. Пример: 3h2m1s или 03:02:01."
+msgstr "Geçersiz süre biçimi. Sözdizimi: 3h2m1s veya 03:02:01."
+# Apparently "syntax" translates to "sözdizimi".
 
 msgid "Expire time must be less than {time}."
 msgstr "Время expire должно быть меньше {time}."
