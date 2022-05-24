@@ -314,6 +314,7 @@ class QueueChannel:
 	def __init__(self, text_channel, qc_cfg):
 		self.cfg = qc_cfg
 		self.id = text_channel.id
+		self.guild_id = text_channel.guild.id
 		self.channel = text_channel
 		self.gt = locales[self.cfg.lang]
 		self.rating = self.rating_names[self.cfg.rating_system](

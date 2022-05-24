@@ -71,17 +71,17 @@ async def on_ready():
 
 
 @dc.event
-async def on_member_update(before, after):
-	if str(after.status) not in ['idle', 'offline']:
+async def on_presence_update(before, after):
+	if after.raw_status not in ['idle', 'offline']:
 		return
 	if after.id in bot.allow_offline:
 		return
 
-	for qc in filter(lambda i: i.id == after.guild.id, bot.queue_channels.values()):
-		if str(after.status) == "offline" and qc.cfg.remove_offline:
+	for qc in filter(lambda i: i.guild_id == after.guild.id, bot.queue_channels.values()):
+		if after.raw_status == "offline" and qc.cfg.remove_offline:
 			await qc.remove_members(after, reason="offline")
 
-		if str(after.status) == "idle" and qc.cfg.remove_afk and bot.expire.get(qc, after) is None:
+		if after.raw_status == "idle" and qc.cfg.remove_afk and bot.expire.get(qc, after) is None:
 			await qc.remove_members(after, reason="afk", highlight=True)
 
 
