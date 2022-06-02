@@ -70,6 +70,7 @@ async def pick(ctx, match: bot.Match, players: List[Member]):
 
 
 async def put(ctx, match_id: int, player: Member, team_name: str):
+	ctx.check_perms(ctx.Perms.MODERATOR)
 	if (match := find(lambda m: m.qc == ctx.qc and m.id == match_id, bot.active_matches)) is None:
 		raise bot.Exc.NotFoundError(ctx.qc.gt("Could not find match with specified id. Check `{prefix}matches`.").format(
 			prefix=ctx.qc.cfg.prefix
@@ -78,6 +79,7 @@ async def put(ctx, match_id: int, player: Member, team_name: str):
 
 
 async def report_admin(ctx, match_id: int, winner_team=None, draw=False, abort=False):
+	ctx.check_perms(ctx.Perms.MODERATOR)
 	if (match := find(lambda m: m.qc == ctx.qc and m.id == match_id, bot.active_matches)) is None:
 		raise bot.Exc.NotFoundError(ctx.qc.gt("Could not find match with specified id. Check `{prefix}matches`.").format(
 			prefix=ctx.qc.cfg.prefix
