@@ -88,7 +88,7 @@ msgstr "Derece verisi bulunamadı."
 
 msgid "Could not find match with specified id. Check `{prefix}matches`."
 msgstr "Belirtilen numaraya ait bir maç bulunamadı. `{prefix}matches` yazarak kontrol edebilirsiniz."
-# Used "number" instead of "ID", because "ID" doesn't translate well.
+# Used "numara" = "number" instead of "ID", because "ID" doesn't translate well.
 
 msgid "You have {duration} expire time left."
 msgstr "Zaman aşımınızın bitmesine {duration} kaldı."
@@ -98,282 +98,292 @@ msgstr "Zaman aşımı için kurulu sayacınız yok."
 # Might come back to this later. "Zaman aşımı" = "time out".
 
 msgid "Invalid duration format. Syntax: 3h2m1s or 03:02:01."
-msgstr "Geçersiz süre biçimi. Sözdizimi: 3h2m1s veya 03:02:01."
-# Apparently "syntax" translates to "sözdizimi".
+msgstr "Geçersiz süre biçimi. Biçim: 3h2m1s veya 03:02:01."
+# Apparently "syntax" translates to "sözdizimi", but "biçim" = "format" sounds better.
 
 msgid "Expire time must be less than {time}."
-msgstr "Время expire должно быть меньше {time}."
+msgstr "Zaman aşımı süresi {time}'den az olmalıdır."
 
 msgid "Set your expire time to {duration}."
-msgstr "Ваш таймер expire сработает через {duration}."
+msgstr "Zaman aşımı süreniz {duration} olarak ayarlandı."
 
 msgid "Invalid duration format. Syntax: 3h2m1s or 03:02:01 or AFK."
-msgstr "Неверный формат времени. Пример: 3h2m1s или 03:02:01 или AFK."
+msgstr "Geçersiz süre biçimi. Biçim: 3h2m1s veya 03:02:01 veya AFK."
 
 msgid "You will be removed from queues on AFK status by default."
-msgstr "Вас будет удалять из очередей по AFK статусу."
+msgstr "AFK olduğunuzda sıralardan otomatik olarak çıkarılacaksınız."
 
 msgid "Your expire time value will fallback to guild's settings."
-msgstr "Ваш таймер expire будет использовать настройки гильдии."
+msgstr "Zaman aşımı ayarınız sunucununkiyle aynı olacak şekilde değiştirildi."
 
 msgid "Your default expire time is {time}."
-msgstr "Ваш expire таймер установлен на {time}."
+msgstr "Varsayılan zaman aşımı süreniz {time}."
 
 msgid "Your offline immunity is **off**."
-msgstr "Ваш иммунитет оффлайн статуса **выключен**."
+msgstr "Çevrimdışı korunmanız **kapalı**."
 
 msgid "Your offline immunity is **on** until the next match."
-msgstr "Ваш иммунитет оффлайн статуса **включен** до следующего матча."
+msgstr "Çevrimdışı korunmanız bir sonraki maça kadar **açık**."
 
 msgid "> no active matches"
-msgstr "> нет активных матчей"
+msgstr "> aktif maç yok"
 
 msgid "Nothing to promote."
-msgstr "Нет цели для promote."
+msgstr "Terfi edecek bir şey yok."
 
 msgid "Specified queue not found."
-msgstr "Указанная очередь не найдена."
+msgstr "Belirtilen sıra bulunamadı."
 
 msgid "You're promoting too often, please wait `{delay}` until next promote."
-msgstr "Слишком часто, подождите `{delay}` до следующего раза."
+msgstr "Çok sık terfi ediyorsunuz, lütfen bir sonraki terfi için `{delay}` kadar bekleyin."
 
 msgid "Done."
-msgstr "Готово."
+msgstr "Tamamlandı."
 
 msgid "Your DM notifications is now turned off."
-msgstr "Ваши DM оповещения выключены."
+msgstr "DM bildirimleriniz kapatıldı."
 
 msgid "Your DM notifications is now turned on."
-msgstr "Ваши DM оповещения включены."
+msgstr "DM bildirimleriniz açıldı."
 
 msgid "Leaderboard is empty."
-msgstr "Таблица лидеров пуста"
+msgstr "Liderler sıralaması boş."
 
 msgid "Nothing found"
-msgstr "Нет результатов"
+msgstr "Hiçbir şey bulunamadı"
 
 msgid "Banned **{member}** for `{duration}`."
-msgstr "Забанил **{member}** на `{duration}`."
+msgstr "**{member}** `{duration}` boyunca yasaklandı."
 
 msgid "Specified member is not banned."
-msgstr "Указаный пользователь не забанен."
+msgstr "Belirtilen üyenin yasağı yok."
 
 msgid " ID | Prisoner | Left | Reason"
-msgstr " ID | Заключенный | Осталось | Основание"
+msgstr " ID | Mahkûm | Kalan | Sebep"
 
 msgid "You have been banned, `{duration}` left."
-msgstr "Вы забанены, осталось `{duration}`."
+msgstr "Yasağınızın bitmesine `{duration}` kaldı."
 
 msgid "Noadds are empty."
-msgstr "Список пуст."
+msgstr "Yasaklı üye yok."
+# Translated "There are no banned members."
 
 msgid "!auto_ready command is turned off on this channel."
-msgstr "Команда !auto_ready выключена на этом канале."
+msgstr "!auto_ready komutu bu kanal için kapalı."
 
 msgid "Maximum auto_ready duration is {duration}."
-msgstr "Максимальное допустимое значение для автоматического подтверждения - {duration}."
+msgstr "Azami auto_ready süresi: {duration}."
 
 msgid "Your automatic ready confirmation is now turned off."
-msgstr "Ваше автоматическое подтверждение выключено."
+msgstr "Otomatik hazır onayı verme ayarınız kapatıldı."
 
 msgid "During next {duration} your match participation will be confirmed automatically."
-msgstr "В течение {duration} ваше участие будет подтверждено автоматически."
+msgstr "Önümüzdeki {duration} boyunca maç katılımlarınız otomatik olarak onaylanacak."
 
 # bot/queues/pickup_queue.py
 
 msgid "{role} Please add to **{name}** pickup, `{left}` players left!"
-msgstr "{role} Добавляйтесь в **{name}** пикап, осталось `{left}` игроков!"
+msgstr "{role} Lütfen **{name}** maçına ekleyin, `{left}` oyuncu kaldı!"
+# Used "maç" = "pickup", because there is no translation for it in Turkish.
 
 msgid "Not enough players to start the queue."
-msgstr "Недостаточно участников для старта."
+msgstr "Maçı başlatmak için yeterince oyuncu yok."
+# Translated "maç" = "queue", because it makes more sense than "sıra".
 
 msgid "**{queue}** pickup has started @ {channel}!"
-msgstr "**{queue}** пикап начался @ {channel}!"
+msgstr "**{queue}** maçı {channel} kanalında başladı!"
 
 msgid "Server for **{queue}** is not set."
-msgstr "Сервер для **{queue}** не указан."
+msgstr "**{queue}** için sunucu ayarlanmadı."
 
 msgid "Server for **{queue}**"
-msgstr "Сервер для **{queue}**"
+msgstr "**{queue}** için sunucu"
 
 msgid "Maps for **{queue}**"
-msgstr "Карты для **{queue}**"
+msgstr "**{queue}** için haritalar"
 
 msgid "Stats for __{target}__"
-msgstr "Статистика для __{target}__"
+msgstr "__{target}__ istatistikleri"
+# Not sure what the target is here. Assumed it's for a queue considering the next message. If it's for a player, it could be changed to "target'ın".
 
 msgid "Top 10 players for __{target}__"
-msgstr "ТОП 10 игроков для __{target}__"
+msgstr "En iyi 10 __{target}__ oyuncuları"
 
 msgid "day"
-msgstr "день"
+msgstr "gün"
 
 msgid "week"
-msgstr "неделя"
+msgstr "hafta"
 
 msgid "month"
-msgstr "месяц"
+msgstr "ay"
 
 msgid "year"
-msgstr "год"
+msgstr "yıl"
 
 msgid "**Total matches: {count}**"
-msgstr "**Всего матчей: {count}**"
+msgstr "**Toplam maç: {count}**"
 
 msgid "At least one team must have a positive score."
-msgstr "Хотя бы одна команда должна иметь положительный счет."
+msgstr "En az bir takımın pozitif skoru olmalı."
 
 # bot/match/match.py
 
 msgid "The match must be on the waiting report stage."
-msgstr "Матч должен быть на стадии ожидания результата."
+msgstr "Maç rapor bekleme aşamasında olmalı."
 
 msgid "You must be a team captain to report a loss or draw."
-msgstr "Необходимо быть капитаном команды."
+msgstr "Mağlubiyet veya berabere raporlamak için takım kaptanı olmanız gerekir."
 
 msgid "{self} is calling a draw, waiting for {enemy} to type `{prefix}rd`."
-msgstr "{self} предлагает ничью, ожидаем `{prefix}rd` от {enemy}."
+msgstr "{self} berabere istiyor, {enemy}'nin `{prefix}rd` yazması bekleniyor."
 
 msgid "{self} offers to cancel the match, waiting for {enemy} to type `{prefix}rc`."
-msgstr "{self} предлагает отмену матча, ожидаем `{prefix}rc` от {enemy}."
+msgstr "{self} maçı iptal etmek istiyor, {enemy}'nin `{prefix}rc` yazması bekleniyor."
 
 msgid "Specified team name not found."
-msgstr "Указанная команда не найдена."
+msgstr "Belirtilen takım ismi bulunamadı."
 
 msgid "Match {queue} ({id}) has timed out."
-msgstr "Истекло время ожидания для матча {queue} ({id})."
+msgstr "{queue} ({id}) maçı zaman aşımına uğradı."
 
 msgid "{players} your match has been canceled."
-msgstr "{players} ваш матч был отменен."
+msgstr "{players} maçınız iptal edildi."
 
 msgid "No changes to apply."
-msgstr "Нет изменений."
+msgstr "Uygulanacak değişiklik yok."
 
 msgid "Removed `{count}` roles from you."
-msgstr "С Вас снято `{count}` ролей."
+msgstr "`{count}` rol sizden kaldırıldı."
 
 msgid "Added `{count}` roles to you."
-msgstr "Вам добавлено `{count}` ролей."
+msgstr "`{count}` rol size eklendi"
 
 msgid "{players} were removed from the match."
-msgstr "{players} были сняты с матча."
+msgstr "{players} maçtan çıkartıldı."
 
 # bot/match/embeds.py
 
 msgid "__**{queue}** is now on the check-in stage!__"
-msgstr "__**{queue}** на стадии подтверждения участников!__"
+msgstr "__**{queue}** şu an onay aşamasında!__"
 
 msgid "Waiting on:"
-msgstr "Ожидаем:"
+msgstr "Beklenenler:"
 
 msgid "Please react with {ready_emoji} to **check-in** or {not_ready_emoji} to **abort**!"
-msgstr "Нажмите {ready_emoji} чтобы **подтвердить** или {not_ready_emoji} чтобы **отменить** участие!"
+msgstr "Lütfen hazır olduğunuzu {ready_emoji} tepkisiyle **onaylayın** veya {not_ready_emoji} tepkisiyle **reddedin**!"
+# Translated to "React with {ready_emoji} if you're ready and {not_ready_emoji} if you're not ready!".
+# Translated "reddedin" = "abort". "Reddedin" means "reject", but makes more sense to accept it as an answer if they're not ready.
 
 msgid "Please react with {ready_emoji} or vote for a map to **check-in**."
-msgstr "Нажмите {ready_emoji} или проголосуйте за карту чтобы **подтвердить** участие."
+msgstr "Lütfen {ready_emoji} tepkisine tıklayarak veya bir harita için oy vererek katılacağınızı **onaylayın**."
 
 msgid "React with {not_ready_emoji} to **abort**!"
-msgstr "Нажмите {not_ready_emoji} чтобы **abort** участие!"
+msgstr "{not_ready_emoji} tepkisine tıklayarak maçı **iptal edin**!"
+# Translated "iptal edin" = "abort". "İptal edin" means "cancel", but made more sense to use it here.
 
 msgid "__**{queue}** is now on the draft stage!__"
-msgstr "__**{queue}** на стадии драфта!__"
+msgstr "__**{queue}** şu an seçim aşamasında!__"
 
 msgid "empty"
-msgstr "пусто"
+msgstr "boş"
 
 msgid "Unpicked:"
-msgstr "Кандидаты:"
+msgstr "Seçilmeyenler:"
 
 msgid "Pick players with `{prefix}pick @player` command."
-msgstr "Выбирайте участников с помощью `{prefix}pick @player`."
+msgstr "`{prefix}pick @player` komutuyla oyuncu seçin."
 
 msgid "{member}'s turn to pick!"
-msgstr "Черёд выбирать {member}!"
+msgstr "Seçme sırası {member}'da!"
 
 msgid "Type {cmd} to become a captain and start picking teams."
-msgstr "Используйте {cmd} чтобы стать капитаном и начать выбирать игроков."
+msgstr "Kaptan olup oyuncu seçmek için {cmd} komutunu kullanabilirsiniz."
 
 msgid "__**{queue}** has started!__"
-msgstr "__**{queue}** начался!__"
+msgstr "__**{queue}** başladı!__"
 
 msgid "Players"
-msgstr "Участники"
+msgstr "Oyuncular"
 
 msgid "Captains"
-msgstr "Капитаны"
+msgstr "Kaptanlar"
 
 msgid "Map"
-msgstr "Карта"
+msgstr "Harita"
 
 msgid "Maps"
-msgstr "Карты"
+msgstr "Haritalar"
 
 msgid "Server"
-msgstr "Сервер"
+msgstr "Sunucu"
 
 msgid "Player streams"
-msgstr "Трансляции игроков"
+msgstr "Oyuncu yayınları"
 
 msgid "Winner"
-msgstr "Победитель"
+msgstr "Kazanan"
 
 # bot/match/draft.py
 
 msgid "The match is not on the draft stage."
-msgstr "Матч не на стадии драфта."
+msgstr "Maç seçim aşamasında değil."
 
 msgid "You must possess the captain's role."
-msgstr "Необходимо иметь роль капитана."
+msgstr "Kaptan rolünüz olmalı."
+# If this is a response to someone trying to pick a player while they're not a captain, this could be changed to "Seçim yapmak için kaptan olmanız gerekir.".
 
 msgid "Team {name} already have a captain."
-msgstr "Команда {name} уже имеет капитана."
+msgstr "{name} takımının zaten kaptanı var."
 
 msgid "You are not a captain."
-msgstr "Вы не являетесь капитаном команды."
+msgstr "Kaptan değilsiniz."
 
 msgid "Not your turn to pick."
-msgstr "Не ваша очередь выбирать."
+msgstr "Seçme sırası sizde değil."
 
 msgid "Specified player not in the unpicked list."
-msgstr "Указанный участник не в списке кандидатов."
+msgstr "Belirtilen oyuncu seçilmeyenler listesinde değil."
 
 msgid "The match must be on the check-in, draft or waiting report stage."
-msgstr "Матч должен быть на стадии подтверждения участников, драфта или ожидания результата."
+msgstr "Maç onay, seçim veya rapor bekleme aşamasında olmalı."
 
 msgid "You have stopped looking for a substitute."
-msgstr "Вы больше не ищете замену."
+msgstr "Yedek aramayı bıraktınız."
 
 msgid "You are now looking for a substitute."
-msgstr "Вы ищете замену."
+msgstr "Yedek aramaya başladınız."
 
 msgid "Specified player is not looking for a substitute."
-msgstr "Указаный участник не ищет замену."
+msgstr "Belirtilen oyuncu yedek aramıyor."
 
 # bot/match/check_in.py
 
 msgid "The match is not on the check-in stage."
-msgstr "Матч не на стадии подтверждения участников."
+msgstr "Maç onay aşamasında değil."
 
 msgid "Discarding check-in is not allowed."
-msgstr "Отмена участия запрещена."
+msgstr "Onay aşamasını iptal edilemez."
+# Not sure what is meant with this. Tried to translate it to "Check-in stage cannot be canceled.".
 
 msgid "{member} has aborted the check-in."
-msgstr "{member} отменил свое участие."
+msgstr "{member} maçı reddetti."
+# Translated to "{member} rejected the match.".
 
 msgid "Reverting {queue} to the gathering stage..."
-msgstr "Возвращаем {queue} на стадию сбора..."
+msgstr "{queue} sırası toplama aşamasına geri çeviriliyor..."
 
 msgid "{members} was not ready in time."
-msgstr "Не подтвердили участие: {members}."
+msgstr "{members} zamanında hazır değildi."
 
 msgid "{member} won, its **{side}**!"
-msgstr "{member} выиграл, выпадает **{side}**!"
+msgstr "**{side}** geldi, {member} kazandı!"
 
 msgid "{member} lost, its **{side}**!"
 msgstr "{member} проиграл, выпадает **{side}**!"
 
 msgid "heads"
-msgstr "орёл"
+msgstr "tura"
 
 msgid "tails"
-msgstr "решка"
+msgstr "yazı"
