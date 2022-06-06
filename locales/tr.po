@@ -36,10 +36,10 @@ msgid "removed by a moderator"
 msgstr "moderatör tarafından çıkarıldı"
 
 msgid "{member} were removed from all queues ({reason})."
-msgstr "{member} tüm sıralardan çıkartıldı ({reason})."
+msgstr "{member} tüm sıralardan çıkarıldı ({reason})."
 
 msgid "{members} were removed from all queues ({reason})."
-msgstr "{members} были удалены из всех очередей ({reason})."
+msgstr "{members} tüm sıralardan çıkarıldı ({reason})."
 
 msgid "Success"
 msgstr "Başarılı"
