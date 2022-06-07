@@ -380,7 +380,7 @@ msgid "{member} won, its **{side}**!"
 msgstr "**{side}** geldi, {member} kazandı!"
 
 msgid "{member} lost, its **{side}**!"
-msgstr "{member} проиграл, выпадает **{side}**!"
+msgstr "**{side}** geldi, {member} kaybetti!"
 
 msgid "heads"
 msgstr "tura"
