@@ -1,0 +1,389 @@
+msgid ""
+msgstr ""
+"Content-Type: text/plain; charset=UTF-8\n"
+
+msgid "_lang"
+msgstr "tr"
+
+# bot/queue_channel.py
+
+msgid "no players"
+msgstr "Oyuncu yok."
+
+msgid "You must possess admin permissions."
+msgstr "Admin yetkiniz olması gerekir."
+
+msgid "You must possess moderator permissions."
+msgstr "Moderatör yetkiniz olmasaı gerekir."
+
+msgid "expire time ran off"
+msgstr "zaman aşımına uğradı"
+
+msgid "member offline"
+msgstr "üye çevrimdışı"
+
+msgid "member AFK"
+msgstr "üye AFK"
+
+msgid "member left the guild"
+msgstr "üye sunucudan ayrıldı"
+
+msgid "queue started on another channel"
+msgstr "başka bir kanalda maç başladı"
+# Used maç = match instead of sıra = line/queue
+
+msgid "removed by a moderator"
+msgstr "moderatör tarafından çıkarıldı"
+
+msgid "{member} were removed from all queues ({reason})."
+msgstr "{member} tüm sıralardan çıkarıldı ({reason})."
+
+msgid "{members} were removed from all queues ({reason})."
+msgstr "{members} tüm sıralardan çıkarıldı ({reason})."
+
+msgid "Success"
+msgstr "Başarılı"
+
+msgid "Error"
+msgstr "Hata"
+
+msgid "You are not allowed to add to queues on this channel."
+msgstr "Bu kanalda sıraya girmeye izniniz yok."
+
+msgid "You are not allowed to add to {queues} queues."
+msgstr "{queues} sıralarına girmeye izniniz yok."
+
+msgid "You are already in an active match."
+msgstr "Zaten aktif bir maçtasınız."
+
+msgid "You are not in an active match."
+msgstr "Aktif bir maçta değilsiniz."
+
+msgid "Specified user not found."
+msgstr "Belirtilen kullanıcı bulunamadı."
+
+msgid "Specified user is not in a match."
+msgstr "Belirtilen kullanıcı maçta değil."
+
+msgid "Specified user is in an active match."
+msgstr "Belirtilen kullanıcı aktif bir maçta."
+
+msgid "Matches"
+msgstr "Maçlar"
+
+msgid "Rank"
+msgstr "Rütbe"
+
+msgid "Rating"
+msgstr "Derece"
+
+msgid "Winrate"
+msgstr "Kazanma Oranı"
+
+msgid "Last changes:"
+msgstr "Son değişiklikler:"
+
+msgid "No rating data found."
+msgstr "Derece verisi bulunamadı."
+
+msgid "Could not find match with specified id. Check `{prefix}matches`."
+msgstr "Belirtilen numaraya ait bir maç bulunamadı. `{prefix}matches` yazarak kontrol edebilirsiniz."
+# Used "numara" = "number" instead of "ID", because "ID" doesn't translate well.
+
+msgid "You have {duration} expire time left."
+msgstr "Zaman aşımınızın bitmesine {duration} kaldı."
+
+msgid "You don't have an expire timer set right now."
+msgstr "Zaman aşımı için kurulu sayacınız yok."
+# Might come back to this later. "Zaman aşımı" = "time out".
+
+msgid "Invalid duration format. Syntax: 3h2m1s or 03:02:01."
+msgstr "Geçersiz süre biçimi. Biçim: 3h2m1s veya 03:02:01."
+# Apparently "syntax" translates to "sözdizimi", but "biçim" = "format" sounds better.
+
+msgid "Expire time must be less than {time}."
+msgstr "Zaman aşımı süresi {time}'den az olmalıdır."
+
+msgid "Set your expire time to {duration}."
+msgstr "Zaman aşımı süreniz {duration} olarak ayarlandı."
+
+msgid "Invalid duration format. Syntax: 3h2m1s or 03:02:01 or AFK."
+msgstr "Geçersiz süre biçimi. Biçim: 3h2m1s veya 03:02:01 veya AFK."
+
+msgid "You will be removed from queues on AFK status by default."
+msgstr "AFK olduğunuzda sıralardan otomatik olarak çıkarılacaksınız."
+
+msgid "Your expire time value will fallback to guild's settings."
+msgstr "Zaman aşımı ayarınız sunucununkiyle aynı olacak şekilde değiştirildi."
+
+msgid "Your default expire time is {time}."
+msgstr "Varsayılan zaman aşımı süreniz {time}."
+
+msgid "Your offline immunity is **off**."
+msgstr "Çevrimdışı korunmanız **kapalı**."
+
+msgid "Your offline immunity is **on** until the next match."
+msgstr "Çevrimdışı korunmanız bir sonraki maça kadar **açık**."
+
+msgid "> no active matches"
+msgstr "> aktif maç yok"
+
+msgid "Nothing to promote."
+msgstr "Terfi edecek bir şey yok."
+
+msgid "Specified queue not found."
+msgstr "Belirtilen sıra bulunamadı."
+
+msgid "You're promoting too often, please wait `{delay}` until next promote."
+msgstr "Çok sık terfi ediyorsunuz, lütfen bir sonraki terfi için `{delay}` kadar bekleyin."
+
+msgid "Done."
+msgstr "Tamamlandı."
+
+msgid "Your DM notifications is now turned off."
+msgstr "DM bildirimleriniz kapatıldı."
+
+msgid "Your DM notifications is now turned on."
+msgstr "DM bildirimleriniz açıldı."
+
+msgid "Leaderboard is empty."
+msgstr "Liderler sıralaması boş."
+
+msgid "Nothing found"
+msgstr "Hiçbir şey bulunamadı"
+
+msgid "Banned **{member}** for `{duration}`."
+msgstr "**{member}** `{duration}` boyunca yasaklandı."
+
+msgid "Specified member is not banned."
+msgstr "Belirtilen üyenin yasağı yok."
+
+msgid " ID | Prisoner | Left | Reason"
+msgstr " ID | Mahkûm | Kalan | Sebep"
+
+msgid "You have been banned, `{duration}` left."
+msgstr "Yasağınızın bitmesine `{duration}` kaldı."
+
+msgid "Noadds are empty."
+msgstr "Yasaklı üye yok."
+# Translated "There are no banned members."
+
+msgid "!auto_ready command is turned off on this channel."
+msgstr "!auto_ready komutu bu kanal için kapalı."
+
+msgid "Maximum auto_ready duration is {duration}."
+msgstr "Azami auto_ready süresi: {duration}."
+
+msgid "Your automatic ready confirmation is now turned off."
+msgstr "Otomatik hazır onayı verme ayarınız kapatıldı."
+
+msgid "During next {duration} your match participation will be confirmed automatically."
+msgstr "Önümüzdeki {duration} boyunca maç katılımlarınız otomatik olarak onaylanacak."
+
+# bot/queues/pickup_queue.py
+
+msgid "{role} Please add to **{name}** pickup, `{left}` players left!"
+msgstr "{role} Lütfen **{name}** maçına ekleyin, `{left}` oyuncu kaldı!"
+# Used "maç" = "pickup", because there is no translation for it in Turkish.
+
+msgid "Not enough players to start the queue."
+msgstr "Maçı başlatmak için yeterince oyuncu yok."
+# Translated "maç" = "queue", because it makes more sense than "sıra".
+
+msgid "**{queue}** pickup has started @ {channel}!"
+msgstr "**{queue}** maçı {channel} kanalında başladı!"
+
+msgid "Server for **{queue}** is not set."
+msgstr "**{queue}** için sunucu ayarlanmadı."
+
+msgid "Server for **{queue}**"
+msgstr "**{queue}** için sunucu"
+
+msgid "Maps for **{queue}**"
+msgstr "**{queue}** için haritalar"
+
+msgid "Stats for __{target}__"
+msgstr "__{target}__ istatistikleri"
+# Not sure what the target is here. Assumed it's for a queue considering the next message. If it's for a player, it could be changed to "target'ın".
+
+msgid "Top 10 players for __{target}__"
+msgstr "En iyi 10 __{target}__ oyuncuları"
+
+msgid "day"
+msgstr "gün"
+
+msgid "week"
+msgstr "hafta"
+
+msgid "month"
+msgstr "ay"
+
+msgid "year"
+msgstr "yıl"
+
+msgid "**Total matches: {count}**"
+msgstr "**Toplam maç: {count}**"
+
+msgid "At least one team must have a positive score."
+msgstr "En az bir takımın pozitif skoru olmalı."
+
+# bot/match/match.py
+
+msgid "The match must be on the waiting report stage."
+msgstr "Maç rapor bekleme aşamasında olmalı."
+
+msgid "You must be a team captain to report a loss or draw."
+msgstr "Mağlubiyet veya berabere raporlamak için takım kaptanı olmanız gerekir."
+
+msgid "{self} is calling a draw, waiting for {enemy} to type `{prefix}rd`."
+msgstr "{self} berabere istiyor, {enemy}'nin `{prefix}rd` yazması bekleniyor."
+
+msgid "{self} offers to cancel the match, waiting for {enemy} to type `{prefix}rc`."
+msgstr "{self} maçı iptal etmek istiyor, {enemy}'nin `{prefix}rc` yazması bekleniyor."
+
+msgid "Specified team name not found."
+msgstr "Belirtilen takım ismi bulunamadı."
+
+msgid "Match {queue} ({id}) has timed out."
+msgstr "{queue} ({id}) maçı zaman aşımına uğradı."
+
+msgid "{players} your match has been canceled."
+msgstr "{players} maçınız iptal edildi."
+
+msgid "No changes to apply."
+msgstr "Uygulanacak değişiklik yok."
+
+msgid "Removed `{count}` roles from you."
+msgstr "`{count}` rol sizden kaldırıldı."
+
+msgid "Added `{count}` roles to you."
+msgstr "`{count}` rol size eklendi"
+
+msgid "{players} were removed from the match."
+msgstr "{players} maçtan çıkartıldı."
+
+# bot/match/embeds.py
+
+msgid "__**{queue}** is now on the check-in stage!__"
+msgstr "__**{queue}** şu an onay aşamasında!__"
+
+msgid "Waiting on:"
+msgstr "Beklenenler:"
+
+msgid "Please react with {ready_emoji} to **check-in** or {not_ready_emoji} to **abort**!"
+msgstr "Lütfen hazır olduğunuzu {ready_emoji} tepkisiyle **onaylayın** veya {not_ready_emoji} tepkisiyle **reddedin**!"
+# Translated to "React with {ready_emoji} if you're ready and {not_ready_emoji} if you're not ready!".
+# Translated "reddedin" = "abort". "Reddedin" means "reject", but makes more sense to accept it as an answer if they're not ready.
+
+msgid "Please react with {ready_emoji} or vote for a map to **check-in**."
+msgstr "Lütfen {ready_emoji} tepkisine tıklayarak veya bir harita için oy vererek katılacağınızı **onaylayın**."
+
+msgid "React with {not_ready_emoji} to **abort**!"
+msgstr "{not_ready_emoji} tepkisine tıklayarak maçı **iptal edin**!"
+# Translated "iptal edin" = "abort". "İptal edin" means "cancel", but made more sense to use it here.
+
+msgid "__**{queue}** is now on the draft stage!__"
+msgstr "__**{queue}** şu an seçim aşamasında!__"
+
+msgid "empty"
+msgstr "boş"
+
+msgid "Unpicked:"
+msgstr "Seçilmeyenler:"
+
+msgid "Pick players with `{prefix}pick @player` command."
+msgstr "`{prefix}pick @player` komutuyla oyuncu seçin."
+
+msgid "{member}'s turn to pick!"
+msgstr "Seçme sırası {member}'da!"
+
+msgid "Type {cmd} to become a captain and start picking teams."
+msgstr "Kaptan olup oyuncu seçmek için {cmd} komutunu kullanabilirsiniz."
+
+msgid "__**{queue}** has started!__"
+msgstr "__**{queue}** başladı!__"
+
+msgid "Players"
+msgstr "Oyuncular"
+
+msgid "Captains"
+msgstr "Kaptanlar"
+
+msgid "Map"
+msgstr "Harita"
+
+msgid "Maps"
+msgstr "Haritalar"
+
+msgid "Server"
+msgstr "Sunucu"
+
+msgid "Player streams"
+msgstr "Oyuncu yayınları"
+
+msgid "Winner"
+msgstr "Kazanan"
+
+# bot/match/draft.py
+
+msgid "The match is not on the draft stage."
+msgstr "Maç seçim aşamasında değil."
+
+msgid "You must possess the captain's role."
+msgstr "Kaptan rolünüz olmalı."
+# If this is a response to someone trying to pick a player while they're not a captain, this could be changed to "Seçim yapmak için kaptan olmanız gerekir.".
+
+msgid "Team {name} already have a captain."
+msgstr "{name} takımının zaten kaptanı var."
+
+msgid "You are not a captain."
+msgstr "Kaptan değilsiniz."
+
+msgid "Not your turn to pick."
+msgstr "Seçme sırası sizde değil."
+
+msgid "Specified player not in the unpicked list."
+msgstr "Belirtilen oyuncu seçilmeyenler listesinde değil."
+
+msgid "The match must be on the check-in, draft or waiting report stage."
+msgstr "Maç onay, seçim veya rapor bekleme aşamasında olmalı."
+
+msgid "You have stopped looking for a substitute."
+msgstr "Yedek aramayı bıraktınız."
+
+msgid "You are now looking for a substitute."
+msgstr "Yedek aramaya başladınız."
+
+msgid "Specified player is not looking for a substitute."
+msgstr "Belirtilen oyuncu yedek aramıyor."
+
+# bot/match/check_in.py
+
+msgid "The match is not on the check-in stage."
+msgstr "Maç onay aşamasında değil."
+
+msgid "Discarding check-in is not allowed."
+msgstr "Onay aşamasını iptal edilemez."
+# Not sure what is meant with this. Tried to translate it to "Check-in stage cannot be canceled.".
+
+msgid "{member} has aborted the check-in."
+msgstr "{member} maçı reddetti."
+# Translated to "{member} rejected the match.".
+
+msgid "Reverting {queue} to the gathering stage..."
+msgstr "{queue} sırası toplama aşamasına geri çeviriliyor..."
+
+msgid "{members} was not ready in time."
+msgstr "{members} zamanında hazır değildi."
+
+msgid "{member} won, its **{side}**!"
+msgstr "**{side}** geldi, {member} kazandı!"
+
+msgid "{member} lost, its **{side}**!"
+msgstr "**{side}** geldi, {member} kaybetti!"
+
+msgid "heads"
+msgstr "tura"
+
+msgid "tails"
+msgstr "yazı"
