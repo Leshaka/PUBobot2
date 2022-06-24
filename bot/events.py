@@ -1,3 +1,4 @@
+import traceback
 from nextcord import ChannelType, Activity, ActivityType
 
 from core.client import dc
@@ -14,7 +15,16 @@ async def on_init():
 @dc.event
 async def on_think(frame_time):
 	for match in bot.active_matches:
-		await match.think(frame_time)
+		try:
+			await match.think(frame_time)
+		except Exception as e:
+			log.error("\n".join([
+				f"Error at Match.think().",
+				f"match_id: {match.id}).",
+				f"{str(e)}. Traceback:\n{traceback.format_exc()}=========="
+			]))
+			bot.active_matches.remove(match)
+			break
 	await bot.expire.think(frame_time)
 	await bot.noadds.think(frame_time)
 	await bot.stats.jobs.think(frame_time)
