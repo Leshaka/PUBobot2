@@ -288,7 +288,7 @@ class PickupQueue:
 	async def from_json(self, data):
 		players = [self.qc.channel.guild.get_member(user_id) for user_id in data['players']]
 		if None in players:
-			await self.qc.error(f"Unable to load queue **{self.cfg.name}**, error fetching guild members.")
+			log.error(f"Unable to load queue **{self.cfg.name}**, error fetching guild members.")
 			return
 		self.queue = players
 		if self.length:

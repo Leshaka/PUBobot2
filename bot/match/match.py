@@ -6,6 +6,7 @@ from nextcord import DiscordException
 
 import bot
 from core.utils import find, get, iter_to_dict, join_and, get_nick
+from core.console import log
 from core.client import dc
 
 from .check_in import CheckIn
@@ -100,7 +101,7 @@ class Match:
 		# Prepare discord objects
 		data['players'] = [qc.channel.guild.get_member(user_id) for user_id in data['players']]
 		if None in data['players']:
-			await qc.error(f"Unable to load match {data['match_id']}, error fetching guild members.")
+			log.error(f"Unable to load match {data['match_id']}, error fetching guild members.")
 			return
 
 		# Fill data with discord objects
