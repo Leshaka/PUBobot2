@@ -27,11 +27,9 @@ async def queue_variables(interaction: Interaction, variable: str) -> List[str]:
 
 
 async def match_ids(interaction: Interaction, match_id: str) -> List[int]:
-	# Does not work properly
-	# FIXME: https://github.com/nextcord/nextcord/issues/576
 	if (qc := queue_channels.get(interaction.channel_id)) is None:
 		return []
-	return [m.id for m in active_matches if m.qc == qc and str(m.id).startswith(match_id)]
+	return [m.id for m in active_matches if m.qc == qc]
 
 
 async def teams_by_author(interaction: Interaction, name: str) -> List[str]:

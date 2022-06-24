@@ -208,6 +208,7 @@ async def _report_admin(
 	commands.report_admin, interaction=interaction, match_id=match_id, winner_team=winner_team, draw=draw, abort=abort
 )
 _report_admin.on_autocomplete('winner_team')(autocomplete.teams_by_match_id)
+_report_admin.on_autocomplete('match_id')(autocomplete.match_ids)
 
 
 @groups.admin_match.subcommand(name='create', description='Report a rating match manually.')
@@ -243,7 +244,7 @@ async def _put(
 		team_name: str = SlashOption(name='team', description='Team name or unpicked')
 ): await run_slash(commands.put, interaction=interaction, match_id=match_id, player=player, team_name=team_name)
 _put.on_autocomplete('team_name')(autocomplete.teams_by_match_id)
-
+_put.on_autocomplete('match_id')(autocomplete.match_ids)
 
 # noadds -> ...
 
