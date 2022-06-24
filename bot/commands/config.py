@@ -22,7 +22,7 @@ async def delete_queue(ctx, queue: str):
 	if (q := get(ctx.qc.queues, name=queue)) is None:
 		raise bot.Exc.NotFoundError(f"Queue '{queue}' not found on the channel..")
 	await q.cfg.delete()
-	ctx.qc.queues.remove(queue)
+	ctx.qc.queues.remove(q)
 	await show_queues(ctx)
 
 
