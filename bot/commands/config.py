@@ -1,4 +1,7 @@
-__all__ = ['create_pickup', 'delete_queue', 'show_queues', 'set_qc', 'set_queue', 'cfg_qc', 'cfg_queue']
+__all__ = [
+	'create_pickup', 'delete_queue', 'show_queues', 'set_qc', 'set_queue', 'cfg_qc', 'cfg_queue',
+	'set_qc_cfg', 'set_queue_cfg'
+]
 
 import json
 from core.utils import find, get
@@ -90,7 +93,7 @@ async def set_qc_cfg(ctx, cfg):
 		await ctx.success(f"Channel configuration updated.")
 
 
-async def _set_queue_cfg(ctx, queue: str, cfg: str):
+async def set_queue_cfg(ctx, queue: str, cfg: str):
 	""" Update queue configuration via JSON string """
 	ctx.check_perms(ctx.Perms.ADMIN)
 	if (q := find(lambda i: i.name.lower() == queue.lower(), ctx.qc.queues)) is None:

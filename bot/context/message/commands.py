@@ -220,3 +220,17 @@ async def _cancel_match(ctx: MessageContext, args: str = None):
 @message_command('promote')
 async def _promote(ctx: MessageContext, args: str = None):
 	await bot.commands.promote(ctx, args)
+
+
+@message_command('set_channel_cfg')
+async def _set_qc_cfg(ctx: MessageContext, args: str = None):
+	if not args:
+		raise bot.Exc.SyntaxError(f"Usage: {ctx.qc.cfg.prefix}set_channel_cfg __json__")
+	await bot.commands.set_qc_cfg(ctx, args.strip())
+
+
+@message_command('set_queue_cfg')
+async def _set_queue_cfg(ctx: MessageContext, args: str = ""):
+	if len(args := args.split(" ", maxsplit=1)) != 2:
+		raise bot.Exc.SyntaxError(f"Usage: {ctx.qc.cfg.prefix}set_queue_cfg __queue__ __json__")
+	await bot.commands.set_queue_cfg(ctx, args[0], args[1].strip())

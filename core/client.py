@@ -84,5 +84,6 @@ intents = nextcord.Intents.default()
 intents.typing = False
 intents.presences = True
 intents.members = True
+intents.message_content = True
 intents.bans = False
 dc = DiscordClient(intents=intents)
