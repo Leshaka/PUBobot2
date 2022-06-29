@@ -122,7 +122,8 @@ class Match:
 		match.state = data['state']
 		match.states = data['states']
 		if match.state == match.CHECK_IN:
-			await match.check_in.start()  # Spawn a new check_in message
+			ctx = bot.SystemContext(qc)
+			await match.check_in.start(ctx)  # Spawn a new check_in message
 
 		bot.active_matches.append(match)
 
