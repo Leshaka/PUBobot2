@@ -2,14 +2,15 @@ from asyncio import sleep as asleep
 from asyncio import create_task
 from nextcord import DiscordException
 
-from bot import queue_channels
 from core.client import dc
 from core.console import log
+
+import bot
 
 
 async def _leave_empty_guilds():
 	""" Leave all guilds which does not have any QueueChannels """
-	used_ids = set((qc.channel.guild.id for qc in queue_channels.values()))
+	used_ids = set((qc.channel.guild.id for qc in bot.queue_channels.values()))
 	used_ids.add(110373943822540800)  # Discord bots guild
 	for guild in dc.guilds:
 		if guild.id not in used_ids:
@@ -28,7 +29,7 @@ async def leave_empty_guilds():
 
 async def _notice(text):
 	""" Send a text notification to all QueueChannels """
-	for qc in queue_channels.values():
+	for qc in bot.queue_channels.values():
 		log.info(f"...Sending notice to {qc.channel.guild.name}>{qc.channel.name}...")
 		try:
 			await qc.channel.send(text)

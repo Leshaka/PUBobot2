@@ -57,6 +57,11 @@ async def on_message(message):
 		log.command("{} | #{} | {}: {}".format(
 			ctx.channel.guild.name, ctx.channel.name, get_nick(message.author), message.content
 		))
+
+		if not bot.bot_ready:
+			await ctx.error("Bot is under connection, please try agian later...", title="Error")
+			return
+
 		try:
 			await f(ctx, *args)
 		except bot.Exc.PubobotException as e:
