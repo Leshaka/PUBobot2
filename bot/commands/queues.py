@@ -22,7 +22,7 @@ async def add(ctx, queues: str = None):
 	# select queues requested by user
 	elif len(targets):
 		t_queues = [q for q in ctx.qc.queues if any(
-			(t == q.name.lower() or t in (a["alias"].lower() for a in q.cfg.tables.aliases) for t in targets)
+			(t == q.name.lower() or t in (a["alias"].lower() for a in q.cfg.aliases) for t in targets)
 		)]
 
 	# select active queues or default queues if no active queues
@@ -61,7 +61,7 @@ async def remove(ctx, queues: str = None):
 	else:
 		t_queues = [
 			q for q in ctx.qc.queues if
-			any((t == q.name.lower() or t in (a["alias"].lower() for a in q.cfg.tables.aliases) for t in targets)) and
+			any((t == q.name.lower() or t in (a["alias"].lower() for a in q.cfg.aliases) for t in targets)) and
 			q.is_added(ctx.author)
 		]
 
@@ -84,7 +84,7 @@ async def who(ctx, queues: str = None):
 	if len(targets):
 		t_queues = [
 			q for q in ctx.qc.queues if
-			any((t == q.name.lower() or t in (a["alias"].lower() for a in q.cfg.tables.aliases) for t in targets))
+			any((t == q.name.lower() or t in (a["alias"].lower() for a in q.cfg.aliases) for t in targets))
 		]
 	else:
 		t_queues = [q for q in ctx.qc.queues if len(q.queue)]
@@ -182,7 +182,7 @@ async def subscribe(ctx, queues: str = None, unsub: bool = False):
 	else:
 		queues = queues.split(" ")
 		roles = (q.cfg.promotion_role for q in ctx.qc.queues if q.cfg.promotion_role and any(
-			(t == q.name.lower() or t in (a["alias"].lower() for a in q.cfg.tables.aliases) for t in queues)
+			(t == q.name.lower() or t in (a["alias"].lower() for a in q.cfg.aliases) for t in queues)
 		))
 
 	if unsub:
@@ -219,15 +219,15 @@ async def server(ctx, queue: str):
 async def maps(ctx, queue: str, one: bool = False):
 	if (q := find(lambda i: i.name.lower() == queue.lower(), ctx.qc.queues)) is None:
 		raise bot.Exc.SyntaxError(f"Queue '{queue}' not found on the channel.")
-	if not len(q.cfg.tables.maps):
+	if not len(q.cfg.maps):
 		raise bot.Exc.NotFoundError(ctx.qc.gt("No maps is set for **{queue}**.").format(
 			queue=q.name
 		))
 
 	if one:
-		await ctx.success(f"`{choice(q.cfg.tables.maps)['name']}`")
+		await ctx.success(f"`{choice(q.cfg.maps)['name']}`")
 	else:
 		await ctx.success(
-			", ".join((f"`{i['name']}`" for i in q.cfg.tables.maps)),
+			", ".join((f"`{i['name']}`" for i in q.cfg.maps)),
 			title=ctx.qc.gt("Maps for **{queue}**").format(queue=q.name)
 		)

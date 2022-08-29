@@ -4,6 +4,7 @@ import json
 from nextcord import Interaction
 
 from core.console import log
+from core.database import db
 from core.config import cfg
 from core.utils import error_embed, ok_embed, get
 

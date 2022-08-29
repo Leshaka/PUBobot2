@@ -319,7 +319,7 @@ async def _rating_penality(
 ): await run_slash(bot.commands.rating_penality, interaction=interaction, player=player, penality=points, reason=reason)
 
 
-@groups.admin_rating.subcommand(name='rating_hide', description='Hide player from the leaderboard.')
+@groups.admin_rating.subcommand(name='hide_player', description='Hide player from the leaderboard.')
 async def _rating_hide(
 		interaction: Interaction,
 		player: Member = SlashOption(verify=False)
@@ -549,8 +549,8 @@ async def _leaderboard(
 ): await run_slash(bot.commands.leaderboard, interaction=interaction, page=page)
 
 
-@dc.slash_command(name='rating_unhide', description='Unhide player from the leaderboard.', **guild_kwargs)
-async def _rating_hide(
+@groups.admin_rating.subcommand(name='unhide_player', description='Unhide player from the leaderboard.')
+async def _rating_unhide(
 		interaction: Interaction,
 		player: Member = SlashOption(verify=False)
 ): await run_slash(bot.commands.rating_hide, interaction=interaction, player=player, hide=False)

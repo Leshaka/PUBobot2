@@ -4,7 +4,7 @@ import asyncio
 from enum import Enum
 from nextcord import Forbidden
 
-from core.cfg_factory import CfgFactory, Variables, VariableTable
+from core.cfg_factory import FactoryTable, CfgFactory, Variables, VariableTable
 from core.locales import locales
 from core.utils import join_and, seconds_to_str, get_nick
 from core.database import db
@@ -31,8 +31,8 @@ class QueueChannel:
 	}
 
 	cfg_factory = CfgFactory(
-		"qc_configs",
-		p_key="channel_id",
+		table=FactoryTable(name='qc_configs', p_key="channel_id"),
+		name="qc_config",
 		sections=["General", "Auto-remove", "Rating", "Leaderboard"],
 		variables=[
 			Variables.StrVar(
@@ -272,9 +272,7 @@ class QueueChannel:
 				description="Add [rating] prefix to guild members nicknames.",
 				default=0,
 				notnull=True
-			)
-		],
-		tables=[
+			),
 			VariableTable(
 				'ranks', display="Rating ranks", section="Leaderboard",
 				variables=[
@@ -362,9 +360,9 @@ class QueueChannel:
 	@property
 	def _ranks_table(self):
 		if self.cfg.rating_channel:
-			return (bot.queue_channels.get(self.cfg.rating_channel.id) or self).cfg.tables.ranks
+			return (bot.queue_channels.get(self.cfg.rating_channel.id) or self).cfg.ranks
 		else:
-			return self.cfg.tables.ranks
+			return self.cfg.ranks
 
 	async def new_queue(self, name, size, kind):
 		kind.validate_name(name)

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from core.console import log
-from core.cfg_factory import CfgFactory, Variables, VariableTable
+from core.cfg_factory import FactoryTable, CfgFactory, Variables, VariableTable
 from core.utils import get_nick
 
 import bot
@@ -10,11 +10,10 @@ import bot
 class PickupQueue:
 
 	cfg_factory = CfgFactory(
-		"pq_configs",
-		p_key="pq_id",
-		f_key="channel_id",
-		icon="pq.png",
+		table=FactoryTable(name="pq_configs", p_key="pq_id", f_key="channel_id"),
+		name="pq_config",
 		sections=["General", "Teams", "Appearance", "Maps"],
+		icon='pq.png',
 		variables=[
 			Variables.StrVar(
 				"name",
@@ -246,9 +245,7 @@ class PickupQueue:
 				verify=lambda n: 2 <= n <= 9,
 				verify_message="Vote maps number must be between 2 and 9.",
 				description="Set to enable map voting, this requires check-in timeout to be set."
-			)
-		],
-		tables=[
+			),
 			VariableTable(
 				"aliases", display="Aliases", section="General",
 				description="Other names for this queue, you can also group queues by giving them a same alias.",
@@ -326,7 +323,7 @@ class PickupQueue:
 			ranked=self.cfg.ranked, pick_captains=self.cfg.pick_captains,
 			captains_role_id=self.cfg.captains_role.id if self.cfg.captains_role else None,
 			pick_teams=self.cfg.pick_teams, pick_order=self.cfg.pick_order,
-			maps=[i['name'] for i in self.cfg.tables.maps], vote_maps=self.cfg.vote_maps,
+			maps=[i['name'] for i in self.cfg.maps], vote_maps=self.cfg.vote_maps,
 			map_count=self.cfg.map_count, check_in_timeout=self.cfg.check_in_timeout,
 			check_in_discard=self.cfg.check_in_discard, match_lifetime=self.cfg.match_lifetime,
 			start_msg=self.cfg.start_msg, server=self.cfg.server

@@ -12,6 +12,7 @@ class Types:
 	float = "FLOAT"
 	str = "VARCHAR(191)"
 	text = "VARCHAR(2000)"
+	dict = "MEDIUMTEXT"
 
 
 reference_options = dict(
@@ -62,6 +63,7 @@ class Adapter:
 			async with conn.cursor() as cur:
 				try:
 					await cur.execute(*args)
+					return cur.lastrowid
 				except Exception as e:
 					self.wrap_exc(e)
 
@@ -214,7 +216,7 @@ class Adapter:
 
 	async def insert(self, table, d, on_dublicate=None):
 		request = self._mysql_insert(d.keys(), table, on_dublicate)
-		await self.execute(request, list(d.values()))
+		return await self.execute(request, list(d.values()))
 
 	async def update(self, table, d, keys=None):
 		keys = keys or {}
