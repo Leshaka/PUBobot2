@@ -44,7 +44,10 @@ async def main():
 	qc_cfgs = await db.select(['*'], 'qc_configs')
 	for qc in qc_cfgs:
 		config = {name: val for name, val in qc.items() if name not in ['channel_id', 'cfg_name', 'cfg_info', 'cfg_data']}
-		await db.update('qc_configs', {'factory_version': 1, 'cfg_name': 'qc_config', 'cfg_data': json.dumps(config)})
+		await db.update(
+			'qc_configs', {'factory_version': 1, 'cfg_name': 'qc_config', 'cfg_data': json.dumps(config)},
+			{'channel_id': qc['channel_id']}
+		)
 	if config:
 		for name in config.keys():
 			log.info(f'DROPPING COLUMN `{name}` in `qc_configs`...')
@@ -53,9 +56,12 @@ async def main():
 
 	config = None
 	pq_cfgs = await db.select(['*'], 'pq_configs')
-	for qc in pq_cfgs:
-		config = {name: val for name, val in qc.items() if name not in ['pq_id', 'channel_id', 'cfg_name', 'cfg_info', 'cfg_data']}
-		await db.update('pq_configs', {'factory_version': 1, 'cfg_name': 'pq_config', 'cfg_data': json.dumps(config)})
+	for pq in pq_cfgs:
+		config = {name: val for name, val in pq.items() if name not in ['pq_id', 'channel_id', 'cfg_name', 'cfg_info', 'cfg_data']}
+		await db.update(
+			'pq_configs', {'factory_version': 1, 'cfg_name': 'pq_config', 'cfg_data': json.dumps(config)},
+			{'pq_id': pq['pq_id']}
+		)
 	if config:
 		for name in config.keys():
 			log.info(f'DROPPING COLUMN `{name}` in `pq_configs`...')
