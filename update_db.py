@@ -17,6 +17,7 @@ db.ensure_table(dict(
 	tname='qc_configs',
 	columns=[
 		dict(cname='channel_id', ctype=db.types.int, notnull=True),
+		dict(cname='factory_version', ctype=db.types.int),
 		dict(cname='cfg_name', ctype=db.types.str),
 		dict(cname='cfg_info', ctype=db.types.text, default="{}"),
 		dict(cname='cfg_data', ctype=db.types.dict, default="{}")
@@ -29,6 +30,7 @@ db.ensure_table(dict(
 	columns=[
 		dict(cname='pq_id', ctype=db.types.int, notnull=True),
 		dict(cname='channel_id', ctype=db.types.int),
+		dict(cname='factory_version', ctype=db.types.int),
 		dict(cname='cfg_name', ctype=db.types.str),
 		dict(cname='cfg_info', ctype=db.types.text, default="{}"),
 		dict(cname='cfg_data', ctype=db.types.dict, default="{}")
@@ -38,19 +40,23 @@ db.ensure_table(dict(
 
 
 async def main():
+	config = None
 	qc_cfgs = await db.select(['*'], 'qc_configs')
 	for qc in qc_cfgs:
 		config = {name: val for name, val in qc.items() if name not in ['channel_id', 'cfg_name', 'cfg_info', 'cfg_data']}
 		await db.update('qc_configs', {'factory_version': 1, 'cfg_name': 'qc_config', 'cfg_data': json.dumps(config)})
+	if config:
 		for name in config.keys():
 			log.info(f'DROPPING COLUMN `{name}` in `qc_configs`...')
 			await db.execute(f'ALTER TABLE qc_configs DROP COLUMN `{name}`')
 			await db.execute(f'ALTER TABLE qc_configs CHANGE channel_id channel_id bigint(20) AUTO_INCREMENT')
 
+	config = None
 	pq_cfgs = await db.select(['*'], 'pq_configs')
 	for qc in pq_cfgs:
 		config = {name: val for name, val in qc.items() if name not in ['pq_id', 'channel_id', 'cfg_name', 'cfg_info', 'cfg_data']}
 		await db.update('pq_configs', {'factory_version': 1, 'cfg_name': 'pq_config', 'cfg_data': json.dumps(config)})
+	if config:
 		for name in config.keys():
 			log.info(f'DROPPING COLUMN `{name}` in `pq_configs`...')
 			await db.execute(f'ALTER TABLE pq_configs DROP COLUMN `{name}`')
