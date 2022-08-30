@@ -92,9 +92,9 @@ def parse_duration(string):
 		x = sum(x * int(t) for x, t in zip([3600, 60, 1], string.split(":")))
 		return timedelta(seconds=x)
 
-	elif re.match(r"^([\d\.]+\w *)+$", string):
+	elif re.match(r"^(\d+\w ?)+$", string):
 		duration = 0
-		for part in re.findall(r"[\d\.]+\w", string):
+		for part in re.findall(r"\d+\w", string):
 			val = float(part[:-1])
 			if part[-1] == 's':
 				duration += val

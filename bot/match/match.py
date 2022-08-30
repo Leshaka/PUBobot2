@@ -79,7 +79,11 @@ class Match:
 		match = cls(match_id, queue, qc, players, ratings, pick_teams="premade", **kwargs)
 		match.teams[0].set(winners)
 		match.teams[1].set(losers)
-		match.winner = None if draw else 0
+		if draw:
+			match.winner = None
+		else:
+			match.winner = 0
+			match.scores[match.winner] = 1
 		await bot.stats.register_match_ranked(ctx, match)
 
 	def serialize(self):
