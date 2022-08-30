@@ -178,6 +178,23 @@ async def disable_channel(
 			embed=error_embed('This channel is not enabled.'), ephemeral=True
 		)
 
+	bot.queue_channels.pop(qc.id)
+	await interaction.response.send_message(embed=ok_embed('The bot has been disabled.'))
+
+
+@groups.admin_channel.subcommand(name='delete', description='Delete stats/configs and disable the bot on this channel.')
+async def delete_channel(
+		interaction: Interaction
+):
+	if not interaction.user.guild_permissions.administrator:
+		return await interaction.response.send_message(
+			embed=error_embed('You must possess server administrator permissions.'), ephemeral=True
+		)
+	if (qc := bot.queue_channels.get(interaction.channel_id)) is None:
+		return await interaction.response.send_message(
+			embed=error_embed('This channel is not enabled.'), ephemeral=True
+		)
+
 	for queue in qc.queues:
 		await queue.cfg.delete()
 	await qc.cfg.delete()
@@ -228,7 +245,7 @@ async def _report_manual(
 		_winners = [await ctx.get_member(i) for i in _winners.split(" ")]
 		_losers = [await ctx.get_member(i) for i in _losers.split(" ")]
 		if None in _winners or None in _losers:
-			raise Exc.ValueError("Failed to parse teams arguments.")
+			raise bot.Exc.ValueError("Failed to parse teams arguments.")
 		await bot.commands.report_manual(ctx, *args, winners=_winners, losers=_losers, **kwargs)
 	await run_slash(_run, interaction=interaction, queue=queue, _winners=winners, _losers=losers, draw=draw)
 
