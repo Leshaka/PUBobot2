@@ -51,6 +51,9 @@ class Variable:
 		if obj is not None and not self.verify_f(obj):
 			raise(VerifyError(self.verify_message))
 
+	def jsonify(self, obj):
+		return obj
+
 
 class FactoryTable:
 	""" Database table representation that is passed to a CfgFactory object. """
@@ -191,14 +194,18 @@ class Config:
 				if vo.on_change:
 					on_change_triggers.add(vo.on_change)
 			await db.update(
-				self._factory.table.name, {'cfg_data': json.dumps(self.to_json())},
+				self._factory.table.name, {'cfg_data': json.dumps(self.jsonify())},
 				{self._factory.table.p_key: self.p_key}
 			)
 
 		for f in on_change_triggers:
 			f(self)
 
-	def to_json(self) -> dict:
+	def jsonify(self) -> dict:
+		data = {key: value.jsonify(getattr(self, key)) for key, value in self._factory.variables.items()}
+		return data
+
+	def readable(self) -> dict:
 		data = {key: value.readable(getattr(self, key)) for key, value in self._factory.variables.items()}
 		return data
 
@@ -361,6 +368,11 @@ class RoleVar(Variable):
 		else:
 			return None
 
+	def jsonify(self, obj):
+		if obj:
+			return obj.id
+		return None
+
 
 class MemberVar(Variable):
 
@@ -405,6 +417,11 @@ class MemberVar(Variable):
 		else:
 			return None
 
+	def jsonify(self, obj):
+		if obj:
+			return obj.id
+		return None
+
 
 class TextChanVar(Variable):
 	def __init__(self, name, **kwargs):
@@ -446,6 +463,11 @@ class TextChanVar(Variable):
 			return "#" + obj.name
 		else:
 			return None
+
+	def jsonify(self, obj):
+		if obj:
+			return obj.id
+		return None
 
 
 class DurationVar(Variable):
@@ -517,6 +539,9 @@ class VariableTable(Variable):
 				all((self.variables[key].verify(value) for key, value in d.items())) for d in l
 			))
 		)
+
+	def jsonify(self, l):
+		return [{var_name: self.variables[var_name].jsonify(value) for var_name, value in d.items()} for d in l]
 
 
 class Variables:

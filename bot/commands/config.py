@@ -72,14 +72,14 @@ async def set_queue(ctx, queue: str, variable: str, value: str):
 
 async def cfg_qc(ctx):
 	""" List QueueChannel configuration """
-	await ctx.reply_dm(f"```json\n{json.dumps(ctx.qc.cfg.to_json(), ensure_ascii=False, indent=2)}```")
+	await ctx.reply_dm(f"```json\n{json.dumps(ctx.qc.cfg.readable(), ensure_ascii=False, indent=2)}```")
 
 
 async def cfg_queue(ctx, queue: str):
 	""" List a queue configuration """
 	if (q := find(lambda i: i.name.lower() == queue.lower(), ctx.qc.queues)) is None:
 		raise bot.Exc.SyntaxError(f"Queue '{queue}' not found on the channel.")
-	await ctx.reply_dm(f"```json\n{json.dumps(q.cfg.to_json(), ensure_ascii=False, indent=2)}```")
+	await ctx.reply_dm(f"```json\n{json.dumps(q.cfg.readable(), ensure_ascii=False, indent=2)}```")
 
 
 async def set_qc_cfg(ctx, cfg):
