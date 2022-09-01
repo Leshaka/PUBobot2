@@ -40,7 +40,6 @@ class DiscordClient(nextcord.Client):
 	def __init__(self, *args, **kwargs):
 		super().__init__(*args, **kwargs)
 
-		self.was_ready = False
 		self.events = dict(on_init=[], on_think=[], on_exit=[])
 		self.commands = dict()
 

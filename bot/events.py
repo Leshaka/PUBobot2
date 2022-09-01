@@ -60,7 +60,7 @@ async def on_reaction_remove(reaction, user):  # FIXME: this event does not get 
 @dc.event
 async def on_ready():
 	await dc.change_presence(activity=Activity(type=ActivityType.watching, name=cfg.STATUS))
-	if not dc.was_ready:  # Connected for the first time, load everything
+	if not bot.bot_was_ready:  # Connected for the first time, load everything
 		log.info(f"Logged in discord as '{dc.user.name}#{dc.user.discriminator}'.")
 		log.info("Loading queue channels...")
 		for channel_id in await bot.QueueChannel.cfg_factory.p_keys():
@@ -73,11 +73,25 @@ async def on_ready():
 				log.info(f"\tCould not reach a text channel with id {channel_id}.")
 
 		await bot.load_state()
+		bot.bot_was_ready = True
 		bot.bot_ready = True
+		log.info("Done.")
 	else:  # Reconnected, fetch new channel objects
+		bot.bot_ready = True
 		log.info("Reconnected to discord.")
 
-	log.info("Done.")
+
+@dc.event
+async def on_disconnect():
+	log.info("Connection to discord is lost.")
+	bot.bot_ready = False
+
+
+@dc.event
+async def on_resumed():
+	log.info("Connection to discord is resumed.")
+	if bot.bot_was_ready:
+		bot.bot_ready = True
 
 
 @dc.event

@@ -18,6 +18,7 @@ from . import commands
 from . import events
 from . import utils
 
+bot_was_ready = False
 bot_ready = False
 queue_channels = dict()  # {channel.id: QueueChannel()}
 active_queues = []
