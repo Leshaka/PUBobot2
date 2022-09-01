@@ -43,7 +43,9 @@ async def main():
 	config = None
 	qc_cfgs = await db.select(['*'], 'qc_configs')
 	for qc in qc_cfgs:
-		config = {name: val for name, val in qc.items() if name not in ['channel_id', 'cfg_name', 'cfg_info', 'cfg_data']}
+		config = {name: val for name, val in qc.items() if name not in ['factory_version', 'channel_id', 'cfg_name', 'cfg_info', 'cfg_data']}
+		ranks = await db.select(['rank', 'rating', 'role'], 'qc_configs_ranks', where={'channel_id': qc['channel_id']})
+		config['ranks'] = ranks
 		await db.update(
 			'qc_configs', {'factory_version': 1, 'cfg_name': 'qc_config', 'cfg_data': json.dumps(config)},
 			{'channel_id': qc['channel_id']}
@@ -57,7 +59,11 @@ async def main():
 	config = None
 	pq_cfgs = await db.select(['*'], 'pq_configs')
 	for pq in pq_cfgs:
-		config = {name: val for name, val in pq.items() if name not in ['pq_id', 'channel_id', 'cfg_name', 'cfg_info', 'cfg_data']}
+		config = {name: val for name, val in pq.items() if name not in ['factory_version', 'pq_id', 'channel_id', 'cfg_name', 'cfg_info', 'cfg_data']}
+		aliases = await db.select(['alias'], 'pq_configs_aliases', where={'pq_id': pq['pq_id']})
+		maps = await db.select(['name'], 'pq_configs_maps', where={'pq_id': pq['pq_id']})
+		config['aliases'] = aliases
+		config['maps'] = maps
 		await db.update(
 			'pq_configs', {'factory_version': 1, 'cfg_name': 'pq_config', 'cfg_data': json.dumps(config)},
 			{'pq_id': pq['pq_id']}
