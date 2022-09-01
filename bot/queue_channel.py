@@ -313,7 +313,6 @@ class QueueChannel:
 		self.cfg = qc_cfg
 		self.id = text_channel.id
 		self.guild_id = text_channel.guild.id
-		self.channel = text_channel
 		self.gt = locales[self.cfg.lang]
 		self.rating = self.rating_names[self.cfg.rating_system](
 			channel_id=(self.cfg.rating_channel or text_channel).id,
@@ -364,14 +363,14 @@ class QueueChannel:
 		else:
 			return self.cfg.ranks
 
-	async def new_queue(self, name, size, kind):
+	async def new_queue(self, ctx, name, size, kind):
 		kind.validate_name(name)
 		if 1 > size > 100:
 			raise ValueError("Queue size must be between 2 and 100.")
 		if name.lower() in [i.name.lower() for i in self.queues]:
 			raise ValueError("Queue with this name already exists.")
 
-		q_obj = await kind.create(self, name, size)
+		q_obj = await kind.create(ctx, name, size)
 		self.queues.append(q_obj)
 		return q_obj
 
@@ -505,7 +504,7 @@ class QueueChannel:
 					pass
 				await asyncio.sleep(1)
 
-	async def check_allowed_to_add(self, member, queue=None):
+	async def check_allowed_to_add(self, ctx, member, queue=None):
 		""" raises exception if not allowed, returns phrase string or None if allowed """
 
 		if self.cfg.blacklist_role and self.cfg.blacklist_role in member.roles:
@@ -513,7 +512,7 @@ class QueueChannel:
 		if self.cfg.whitelist_role and self.cfg.whitelist_role not in member.roles:
 			raise bot.Exc.PermissionError(self.gt("You are not allowed to add to queues on this channel."))
 
-		ban_left, phrase = await bot.noadds.get_user(self, member)
+		ban_left, phrase = await bot.noadds.get_user(ctx, member)
 		if ban_left:
 			raise bot.Exc.PermissionError(self.gt("You have been banned, `{duration}` left.").format(
 				duration=seconds_to_str(ban_left)

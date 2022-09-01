@@ -80,22 +80,19 @@ async def load_state():
 	bot.allow_offline = list(data['allow_offline'])
 
 	for qd in data['queues']:
-		if qc := bot.queue_channels.get(qd['channel_id']):
-			if q := get(qc.queues, id=qd['queue_id']):
-				await q.from_json(qd)
-			else:
-				log.error(f"Queue with id {qd['queue_id']} not found.")
+		if qd.get('queue_type') in ['PickupQueue', None]:
+			try:
+				await bot.PickupQueue.from_json(qd)
+			except bot.Exc.ValueError as e:
+				log.error(f"Failed to load queue state ({qd.get('queue_id')}): {str(e)}")
 		else:
-			log.error(f"Queue channel with id {qd['channel_id']} not found.")
+			log.error(f"Got unknown queue type '{qd.get('queue_type')}'.")
 
 	for md in data['matches']:
-		if qc := bot.queue_channels.get(md['channel_id']):
-			if q := get(qc.queues, id=md['queue_id']):
-				await bot.Match.from_json(q, qc, md)
-			else:
-				log.error(f"Queue with id {md['queue_id']} not found.")
-		else:
-			log.error(f"Queue channel with id {md['channel_id']} not found.")
+		try:
+			await bot.Match.from_json(md)
+		except bot.Exc.ValueError as e:
+			log.error(f"Failed to load match {md['match_id']}: {str(e)}")
 
 	if 'expire' in data.keys():
 		await bot.expire.load_json(data['expire'])

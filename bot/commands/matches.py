@@ -45,7 +45,7 @@ async def sub_me(ctx, match: bot.Match):
 async def sub_for(ctx, player: Member):
 	if (match := find(lambda m: m.qc == ctx.qc and player in m.players, bot.active_matches)) is None:
 		raise bot.Exc.NotInMatchError(ctx.qc.gt("Specified user is not in a match."))
-	await ctx.qc.check_allowed_to_add(ctx.author, queue=match.queue)
+	await ctx.qc.check_allowed_to_add(ctx, ctx.author, queue=match.queue)
 	await match.draft.sub_for(ctx, player, ctx.author)
 
 

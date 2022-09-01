@@ -14,7 +14,7 @@ import bot
 
 
 async def noadds(ctx):
-	data = await bot.noadds.get_noadds(ctx.qc)
+	data = await bot.noadds.get_noadds(ctx)
 	now = int(time())
 	s = "```markdown\n"
 	s += ctx.qc.gt(" ID | Prisoner | Left | Reason")
@@ -36,7 +36,7 @@ async def noadd(ctx, player: Member, duration: timedelta, reason: str = None):
 	if duration > timedelta(days=365*100):
 		raise bot.Exc.ValueError(ctx.qc.gt("Specified duration time is too long."))
 	await bot.noadds.noadd(
-		qc=ctx.qc, member=player, duration=int(duration.total_seconds()), moderator=ctx.author, reason=reason
+		ctx=ctx, member=player, duration=int(duration.total_seconds()), moderator=ctx.author, reason=reason
 	)
 	await ctx.success(ctx.qc.gt("Banned **{member}** for `{duration}`.").format(
 		member=get_nick(player),
@@ -46,7 +46,7 @@ async def noadd(ctx, player: Member, duration: timedelta, reason: str = None):
 
 async def forgive(ctx, player: Member):
 	ctx.check_perms(ctx.Perms.MODERATOR)
-	if await bot.noadds.forgive(qc=ctx.qc, member=player, moderator=ctx.author):
+	if await bot.noadds.forgive(ctx=ctx, member=player, moderator=ctx.author):
 		await ctx.success(ctx.qc.gt("Done."))
 	else:
 		raise bot.Exc.NotFoundError(ctx.qc.gt("Specified member is not banned."))
@@ -111,20 +111,20 @@ async def stats_replace_player(ctx, player1: Member, player2: Member):
 
 async def phrases_add(ctx, player: Member, phrase: str):
 	ctx.check_perms(ctx.Perms.MODERATOR)
-	await bot.noadds.phrases_add(ctx.qc, player, phrase)
+	await bot.noadds.phrases_add(ctx, player, phrase)
 	await ctx.success(ctx.qc.gt("Done."))
 
 
 async def phrases_clear(ctx, player: Member):
 	ctx.check_perms(ctx.Perms.MODERATOR)
-	await bot.noadds.phrases_clear(ctx.qc, member=player)
+	await bot.noadds.phrases_clear(ctx, member=player)
 	await ctx.success(ctx.qc.gt("Done."))
 
 
 async def undo_match(ctx, match_id: int):
 	ctx.check_perms(ctx.Perms.MODERATOR)
 
-	result = await bot.stats.undo_match(match_id, ctx.qc)
+	result = await bot.stats.undo_match(ctx, match_id)
 	if result:
 		await ctx.success(ctx.qc.gt("Done."))
 	else:

@@ -37,37 +37,37 @@ class NoAdds:
 		self.next_tick = 0
 
 	@staticmethod
-	async def get_user(qc, member):
+	async def get_user(ctx, member):
 		""" returns [ban_left, phrase]"""
 
 		m_noadd = await db.select_one(
-			['duration', 'at'], 'noadds', where=dict(guild_id=qc.channel.guild.id, user_id=member.id, is_active=1)
+			['duration', 'at'], 'noadds', where=dict(guild_id=ctx.channel.guild.id, user_id=member.id, is_active=1)
 		)
 		ban_left = max(0, (m_noadd['duration']+m_noadd['at'])-int(time.time())) if m_noadd else 0
-		phrases = await db.select(['phrase'], 'qc_phrases', where=dict(channel_id=qc.channel.id, user_id=member.id))
+		phrases = await db.select(['phrase'], 'qc_phrases', where=dict(channel_id=ctx.channel.id, user_id=member.id))
 
 		return [ban_left, choice(phrases)['phrase'] if len(phrases) else None]
 
 	@staticmethod
-	async def phrases_add(qc, member, phrase):
-		await db.insert('qc_phrases', dict(channel_id=qc.channel.id, user_id=member.id, phrase=phrase))
+	async def phrases_add(ctx, member, phrase):
+		await db.insert('qc_phrases', dict(channel_id=ctx.channel.id, user_id=member.id, phrase=phrase))
 
 	@staticmethod
-	async def phrases_clear(qc, member=None):
+	async def phrases_clear(ctx, member=None):
 		if member:
-			await db.delete('qc_phrases', where=dict(channel_id=qc.channel.id, user_id=member.id))
+			await db.delete('qc_phrases', where=dict(channel_id=ctx.channel.id, user_id=member.id))
 		else:
-			await db.delete('qc_phrases', where=dict(channel_id=qc.channel.id))
+			await db.delete('qc_phrases', where=dict(channel_id=ctx.channel.id))
 
 	@staticmethod
-	async def noadd(qc, member, duration, moderator, reason=None):
+	async def noadd(ctx, member, duration, moderator, reason=None):
 		await db.update(
 			'noadds',
 			dict(is_active=0, released_by="another noadd"),
-			keys=dict(guild_id=qc.channel.guild.id, user_id=member.id, is_active=1)
+			keys=dict(guild_id=ctx.channel.guild.id, user_id=member.id, is_active=1)
 		)
 		await db.insert('noadds', dict(
-			guild_id=qc.channel.guild.id,
+			guild_id=ctx.channel.guild.id,
 			user_id=member.id,
 			name=get_nick(member),
 			at=int(time.time()),
@@ -77,9 +77,9 @@ class NoAdds:
 		))
 
 	@staticmethod
-	async def forgive(qc, member, moderator):
+	async def forgive(ctx, member, moderator):
 		noadd_id = await db.select_one(
-			['id'], 'noadds', where=dict(guild_id=qc.channel.guild.id, user_id=member.id, is_active=1)
+			['id'], 'noadds', where=dict(guild_id=ctx.channel.guild.id, user_id=member.id, is_active=1)
 		)
 		if not noadd_id:
 			return False
@@ -91,8 +91,8 @@ class NoAdds:
 		return True
 
 	@staticmethod
-	async def get_noadds(qc):
-		return await db.select(['*'], 'noadds', where=dict(guild_id=qc.channel.guild.id, is_active=1))
+	async def get_noadds(ctx):
+		return await db.select(['*'], 'noadds', where=dict(guild_id=ctx.channel.guild.id, is_active=1))
 
 	async def think(self, frame_time):
 		if frame_time > self.next_tick:

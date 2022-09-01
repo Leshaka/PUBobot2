@@ -12,7 +12,7 @@ import bot
 
 async def add(ctx, queues: str = None):
 	""" add author to channel queues """
-	phrase = await ctx.qc.check_allowed_to_add(ctx.author)
+	phrase = await ctx.qc.check_allowed_to_add(ctx, ctx.author)
 
 	targets = queues.lower().split(" ") if queues else []
 	# select the only one queue on the channel

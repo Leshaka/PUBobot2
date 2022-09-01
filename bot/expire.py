@@ -1,4 +1,7 @@
 import time
+
+from core.client import dc
+
 import bot
 
 from core.console import log
@@ -15,8 +18,11 @@ class ExpireTimer:
 
 	async def load_json(self, data):
 		for task_data in data:
-			if task := await self.ExpireTask.from_json(task_data):
+			try:
+				task = await self.ExpireTask.from_json(task_data)
 				self.tasks[task.hash] = task
+			except bot.Exc.ValueError as e:
+				log.error(f"Failed to load expire task '{data}': {str(e)}")
 		self._define_next()
 
 	class ExpireTask:
@@ -25,17 +31,20 @@ class ExpireTimer:
 			self.qc = qc
 			self.member = member
 			self.at = at
-			self.hash = str(self.qc.channel.id) + "_" + str(self.member.id)
+			self.hash = str(self.qc.id) + "_" + str(self.member.id)
 
 		def serialize(self):
-			return {'channel_id': self.qc.channel.id, 'member': self.member.id, 'at': self.at}
+			return {'channel_id': self.qc.id, 'member': self.member.id, 'at': self.at}
 
 		@classmethod
 		async def from_json(cls, data):
-			if qc := bot.queue_channels.get(data['channel_id']):
-				if member := qc.channel.guild.get_member(data['member']):
-					return cls(qc, member, data['at'])
-			return None
+			if (qc := bot.queue_channels.get(data['channel_id'])) is None:
+				raise bot.Exc.ValueError(f"QueueChannel is not found.")
+			if (guild := dc.get_guild(qc.guild_id)) is None:
+				raise bot.Exc.ValueError(f"Guild is not reachable.")
+			if (member := guild.get_member(data['member'])) is None:
+				raise bot.Exc.ValueError(f"Member is not found.")
+			return cls(qc, member, data['at'])
 
 	def set(self, qc, member, delay):
 		new_task = self.ExpireTask(qc, member, int(time.time()+delay))
@@ -44,7 +53,7 @@ class ExpireTimer:
 		self._define_next()
 
 	def get(self, qc, member):
-		return self.tasks.get(str(qc.channel.id) + "_" + str(member.id))
+		return self.tasks.get(str(qc.id) + "_" + str(member.id))
 
 	def _define_next(self):
 		if len(self.tasks):
@@ -54,7 +63,7 @@ class ExpireTimer:
 			self.next = None
 
 	def cancel(self, qc, member):
-		key = str(qc.channel.id) + "_" + str(member.id)
+		key = str(qc.id) + "_" + str(member.id)
 		if key in self.tasks.keys():
 			task = self.tasks.pop(key)
 			log.debug(f"EXPIRE TIMER CANCEL > {task.member.name} ({task.qc.id}/{task.member.id})")

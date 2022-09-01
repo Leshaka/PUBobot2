@@ -12,7 +12,7 @@ async def create_pickup(ctx, name: str, size: int = 8):
 	""" Create new PickupQueue """
 	ctx.check_perms(ctx.Perms.ADMIN)
 	try:
-		pq = await ctx.qc.new_queue(name, size, bot.PickupQueue)
+		pq = await ctx.qc.new_queue(ctx, name, size, bot.PickupQueue)
 	except ValueError as e:
 		raise bot.Exc.ValueError(str(e))
 	else:

@@ -101,12 +101,17 @@ class Match:
 		)
 
 	@classmethod
-	async def from_json(cls, queue, qc, data):
-		# Prepare discord objects
-		data['players'] = [qc.channel.guild.get_member(user_id) for user_id in data['players']]
+	async def from_json(cls, data):
+		if (qc := bot.queue_channels.get(data['channel_id'])) is None:
+			raise bot.Exc.ValueError('QueueChannel not found.')
+		if (queue := get(qc.queues, id=data['queue_id'])) is None:
+			raise bot.Exc.ValueError('Queue not found.')
+		if (guild := dc.get_guild(qc.guild_id)) is None:
+			raise bot.Exc.ValueError('Guild not found.')
+
+		data['players'] = [guild.get_member(user_id) for user_id in data['players']]
 		if None in data['players']:
-			log.error(f"Unable to load match {data['match_id']}, error fetching guild members.")
-			return
+			raise bot.Exc.ValueError(f"Error fetching guild members.")
 
 		# Fill data with discord objects
 		for i in range(len(data['teams'])):

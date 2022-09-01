@@ -2,7 +2,8 @@
 
 from core.console import log
 from core.cfg_factory import FactoryTable, CfgFactory, Variables, VariableTable
-from core.utils import get_nick
+from core.utils import get_nick, get
+from core.client import dc
 
 import bot
 
@@ -270,28 +271,35 @@ class PickupQueue:
 		return name
 
 	@classmethod
-	async def create(cls, qc, name, size=2):
-		cfg = await cls.cfg_factory.spawn(qc.channel.guild, f_key=qc.channel.id)
+	async def create(cls, ctx, name, size=2):
+		cfg = await cls.cfg_factory.spawn(ctx.channel.guild, f_key=ctx.channel.id)
 		await cfg.update({"name": name, "size": str(size)})
-		return cls(qc, cfg)
+		return cls(ctx.qc, cfg)
 
 	def serialize(self):
 		return dict(
+			queue_type=self.__class__.__name__,
 			queue_id=self.id,
 			channel_id=self.qc.id,
 			players=[i.id for i in self.queue if i]
 		)
 
-	async def from_json(self, data):
-		players = [self.qc.channel.guild.get_member(user_id) for user_id in data['players']]
+	@classmethod
+	async def from_json(cls, data):
+		if (qc := bot.queue_channels.get(data['channel_id'])) is None:
+			raise bot.Exc.ValueError("QueueChannel not found.")
+		if (q := get(qc.queues, id=data['queue_id'])) is None:
+			raise bot.Exc.ValueError("Queue not found.")
+		if (guild := dc.get_guild(qc.guild_id)) is None:
+			raise bot.Exc.ValueError("Guild not found.")
+
+		players = [guild.get_member(user_id) for user_id in data['players']]
 		if None in players:
-			log.error(f"Unable to load queue **{self.cfg.name}**, error fetching guild members.")
-			return
-		self.queue = players
-		if self.length:
-			if self in bot.active_queues:
-				bot.active_queues.remove(self)
-			bot.active_queues.append(self)
+			raise bot.Exc.ValueError(f"Error fetching guild members.")
+
+		q.queue = players
+		if q.length and q not in bot.active_queues:
+			bot.active_queues.append(q)
 
 	def __init__(self, qc, cfg):
 		self.qc = qc
@@ -404,7 +412,7 @@ class PickupQueue:
 			members=players,
 			message=dm_text.format(
 				queue=self.name,
-				channel=self.qc.channel.mention,
+				channel=ctx.channel.mention,
 				server=self.cfg.server
 			)
 		)
@@ -433,7 +441,7 @@ class PickupQueue:
 				members=group,
 				message=dm_text.format(
 					queue=self.name,
-					channel=self.qc.channel.mention,
+					channel=ctx.channel.mention,
 					server=self.cfg.server
 				)
 			)
