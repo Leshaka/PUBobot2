@@ -211,7 +211,7 @@ async def server(ctx, queue: str):
 		raise bot.Exc.NotFoundError(ctx.qc.gt("Server for **{queue}** is not set.").format(
 			queue=q.name
 		))
-	await ctx.success(ctx, q.cfg.server, title=ctx.qc.gt("Server for **{queue}**").format(
+	await ctx.success(q.cfg.server, title=ctx.qc.gt("Server for **{queue}**").format(
 		queue=q.name
 	))
 
