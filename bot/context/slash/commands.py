@@ -46,7 +46,7 @@ async def run_slash(coro: Callable, interaction: Interaction, **kwargs):
 			f"QC: {ctx.channel.guild.name}>#{ctx.channel.name} ({qc.id}).",
 			f"Member: {ctx.author} ({ctx.author.id}).",
 			f"Kwargs: {kwargs}.",
-			f"{str(e)}. Traceback:\n{traceback.format_exc()}=========="
+			f"Exception: {str(e)}. Traceback:\n{traceback.format_exc()}=========="
 		]))
 
 

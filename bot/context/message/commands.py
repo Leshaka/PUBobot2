@@ -68,6 +68,13 @@ async def on_message(message):
 			await ctx.error(str(e), title=e.__class__.__name__)
 		except Exception as e:
 			await ctx.error(str(e), title="RuntimeError")
+			log.error("\n".join([
+				f"Error processing a text message command.",
+				f"QC: {ctx.channel.guild.name}>#{ctx.channel.name} ({qc.id}).",
+				f"Member: {ctx.author} ({ctx.author.id}).",
+				f"Content: `{message.content}`.",
+				f"Exception: {str(e)}. Traceback:\n{traceback.format_exc()}=========="
+			]))
 
 
 @message_command('add', 'j')
