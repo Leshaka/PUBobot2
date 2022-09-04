@@ -4,7 +4,8 @@ __all__ = [
 ]
 
 import json
-from core.utils import find, get
+from core.utils import find, get, split_big_text
+from core.console import log
 import bot
 
 
@@ -72,14 +73,26 @@ async def set_queue(ctx, queue: str, variable: str, value: str):
 
 async def cfg_qc(ctx):
 	""" List QueueChannel configuration """
-	await ctx.reply_dm(f"```json\n{json.dumps(ctx.qc.cfg.readable(), ensure_ascii=False, indent=2)}```")
+	await ctx.ignore("Sent channel configuration in DM.")  # Have to reply to the slash command
+	gen = split_big_text(
+		json.dumps(ctx.qc.cfg.readable(), ensure_ascii=False, indent=2),
+		prefix="```json\n", suffix="\n```", limit=2000, delimiter=",\n"
+	)
+	for piece in gen:
+		await ctx.reply_dm(piece)
 
 
 async def cfg_queue(ctx, queue: str):
 	""" List a queue configuration """
 	if (q := find(lambda i: i.name.lower() == queue.lower(), ctx.qc.queues)) is None:
 		raise bot.Exc.SyntaxError(f"Queue '{queue}' not found on the channel.")
-	await ctx.reply_dm(f"```json\n{json.dumps(q.cfg.readable(), ensure_ascii=False, indent=2)}```")
+	await ctx.ignore(f"Sent **{queue}** configuration in DM.")  # Have to reply to the slash command
+	gen = split_big_text(
+		json.dumps(q.cfg.readable(), ensure_ascii=False, indent=2),
+		prefix="```json\n", suffix="\n```", limit=2000, delimiter=",\n"
+	)
+	for piece in gen:
+		await ctx.reply_dm(piece)
 
 
 async def set_qc_cfg(ctx, cfg):
