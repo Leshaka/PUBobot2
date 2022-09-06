@@ -1,6 +1,6 @@
 __all__ = [
 	'show_matches', 'show_teams', 'set_ready', 'sub_me', 'sub_for', 'put',
-	'sub_force', 'cap_for', 'pick', 'report_admin', 'report', 'report_manual'
+	'sub_force', 'cap_me', 'cap_for', 'pick', 'report_admin', 'report', 'report_manual'
 ]
 
 from nextcord import Member
@@ -57,6 +57,11 @@ async def sub_force(ctx, player1: Member, player2: Member):
 		raise bot.Exc.InMatchError(ctx.qc.gt("Specified user is in an active match."))
 
 	await match.draft.sub_for(ctx, player1, player2, force=True)
+
+
+@author_match
+async def cap_me(ctx, match: bot.Match):
+	await match.draft.cap_me(ctx, ctx.author)
 
 
 @author_match

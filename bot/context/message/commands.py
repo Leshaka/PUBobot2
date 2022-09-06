@@ -132,6 +132,11 @@ async def _sub_for(ctx: MessageContext, args: str = None):
 	await bot.commands.sub_for(ctx, player=player)
 
 
+@message_command('capme')
+async def _cap_me(ctx: MessageContext, args: str = None):
+	await bot.commands.cap_me(ctx)
+
+
 @message_command('capfor')
 async def _cap_for(ctx: MessageContext, args: str = None):
 	if not args:

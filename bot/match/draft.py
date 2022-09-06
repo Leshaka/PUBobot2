@@ -37,6 +37,20 @@ class Draft:
 		else:
 			await self.m.next_state(ctx)
 
+	async def cap_me(self, ctx, author):
+		if self.m.state != self.m.DRAFT:
+			raise bot.Exc.MatchStateError(self.m.gt("The match is not on the draft stage."))
+
+		team = find(lambda t: author in t, self.m.teams)
+		if team.idx == 2 or team.index(author) != 0:
+			raise bot.Exc.PermissionError(self.m.gt("You are not a captain."))
+		if len(team) > 1:
+			raise bot.Exc.PermissionError(self.m.gt("Can't to that after you've started picking."))
+
+		team.remove(author)
+		self.m.teams[2].add(author)
+		await self.print(ctx)
+
 	async def cap_for(self, ctx, author, team_name):
 		if self.m.state != self.m.DRAFT:
 			raise bot.Exc.MatchStateError(self.m.gt("The match is not on the draft stage."))
@@ -44,6 +58,10 @@ class Draft:
 			raise bot.Exc.PermissionError(self.m.gt("You must possess the captain's role."))
 		elif (team := find(lambda t: t.name.lower() == team_name.lower(), self.m.teams[:2])) is None:
 			raise bot.Exc.SyntaxError(self.m.gt("Specified team name not found."))
+		elif len(team) > 0:
+			raise bot.Exc.PermissionError(
+				self.m.gt(f"Team **{team.name}** already have a captain. The captain must type **/capme** first.")
+			)
 
 		if len(team):
 			# raise bot.Exc.PermissionError(self.m.gt("Team {name} already have a captain.".format(name=f"**{team.name}**")))
