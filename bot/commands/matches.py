@@ -5,6 +5,7 @@ __all__ = [
 
 from nextcord import Member
 from typing import List
+from functools import wraps
 
 from core.utils import get, find
 
@@ -12,6 +13,7 @@ import bot
 
 
 def author_match(coro):
+	@wraps(coro)
 	async def wrapper(ctx, *args, **kwargs):
 		if (match := find(lambda m: m.qc == ctx.qc and ctx.author in m.players, bot.active_matches)) is None:
 			raise bot.Exc.NotFoundError(ctx.qc.gt("You are not in an active match."))

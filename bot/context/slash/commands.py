@@ -3,7 +3,7 @@ from nextcord import Interaction, SlashOption, Member, TextChannel
 import traceback
 
 from core.client import dc
-from core.utils import error_embed, ok_embed, parse_duration
+from core.utils import error_embed, ok_embed, parse_duration, get_nick
 from core.console import log
 from core.config import cfg
 
@@ -35,6 +35,10 @@ async def run_slash(coro: Callable, interaction: Interaction, **kwargs):
 		return
 
 	ctx = SlashContext(qc, interaction)
+	log.command("{} | #{} | {}: /{} {}".format(
+		ctx.channel.guild.name, ctx.channel.name, get_nick(ctx.author), coro.__name__, kwargs
+	))
+
 	try:
 		await coro(ctx, **kwargs)
 	except bot.Exc.PubobotException as e:

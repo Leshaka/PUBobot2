@@ -45,7 +45,7 @@ class Draft:
 		if team.idx == 2 or team.index(author) != 0:
 			raise bot.Exc.PermissionError(self.m.gt("You are not a captain."))
 		if len(team) > 1:
-			raise bot.Exc.PermissionError(self.m.gt("Can't to that after you've started picking."))
+			raise bot.Exc.PermissionError(self.m.gt("Can't do that after you've started picking."))
 
 		team.remove(author)
 		self.m.teams[2].add(author)
@@ -58,14 +58,10 @@ class Draft:
 			raise bot.Exc.PermissionError(self.m.gt("You must possess the captain's role."))
 		elif (team := find(lambda t: t.name.lower() == team_name.lower(), self.m.teams[:2])) is None:
 			raise bot.Exc.SyntaxError(self.m.gt("Specified team name not found."))
-		elif len(team) > 0:
+		elif len(team):
 			raise bot.Exc.PermissionError(
 				self.m.gt(f"Team **{team.name}** already have a captain. The captain must type **/capme** first.")
 			)
-
-		if len(team):
-			# raise bot.Exc.PermissionError(self.m.gt("Team {name} already have a captain.".format(name=f"**{team.name}**")))
-			self.m.teams[2].append(team.pop(0))
 
 		find(lambda t: author in t, self.m.teams).remove(author)
 		team.insert(0, author)
