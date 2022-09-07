@@ -2,7 +2,7 @@
 
 from core.console import log
 from core.cfg_factory import FactoryTable, CfgFactory, Variables, VariableTable
-from core.utils import get_nick, get
+from core.utils import get_nick, get, SafeTemplateDict
 from core.client import dc
 
 import bot
@@ -340,11 +340,11 @@ class PickupQueue:
 	async def promote(self, ctx):
 		promotion_role = self.cfg.promotion_role or self.qc.cfg.promotion_role
 		promotion_msg = self.cfg.promotion_msg or self.qc.gt("{role} Please add to **{name}** pickup, `{left}` players left!")
-		promotion_msg = promotion_msg.format(
+		promotion_msg = promotion_msg.format_map(SafeTemplateDict(
 			role=promotion_role.mention if promotion_role else "",
 			name=self.name,
 			left=self.cfg.size-self.length
-		)
+		))
 
 		if (
 			promotion_role and not promotion_role.mentionable and
@@ -410,11 +410,11 @@ class PickupQueue:
 		await self.qc.queue_started(
 			ctx,
 			members=players,
-			message=dm_text.format(
+			message=dm_text.format_map(SafeTemplateDict(
 				queue=self.name,
 				channel=ctx.channel.mention,
 				server=self.cfg.server
-			)
+			))
 		)
 		if self.cfg.team_size:
 			team_size = min(int(self.cfg.size / 2), int(self.cfg.team_size))
@@ -439,11 +439,11 @@ class PickupQueue:
 			await self.qc.queue_started(
 				ctx,
 				members=group,
-				message=dm_text.format(
+				message=dm_text.format_map(SafeTemplateDict(
 					queue=self.name,
 					channel=ctx.channel.mention,
 					server=self.cfg.server
-				)
+				))
 			)
 
 			await bot.Match.new(ctx, self, group, team_size=group_size//2, **self._match_cfg())

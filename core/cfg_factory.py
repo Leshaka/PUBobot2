@@ -508,8 +508,10 @@ class VariableTable(Variable):
 		self.blank = blank if blank else {i: None for i in self.variables.keys()}
 
 	async def validate(self, data, guild):
-		if type(data) != list:
-			raise (ValueError('Value must be a list.'))
+		if type(data) == str:
+			data = json.loads(data)
+		elif type(data) != list:
+			raise (ValueError('Value must be a a json string or a list.'))
 
 		validated = []
 		for row in data:

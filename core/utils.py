@@ -164,3 +164,9 @@ def split_big_text(string: str, limit: int = 2000, delimiter: str = None, prefix
 			string = string[_limit:]
 	if len(string):
 		yield prefix + string + suffix
+
+
+class SafeTemplateDict(dict):
+	""" returns {key} for missing keys, useful for string.format_map() """
+	def __missing__(self, key):
+		return '{'+key+'}'
