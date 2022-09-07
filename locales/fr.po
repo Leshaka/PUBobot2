@@ -85,8 +85,8 @@ msgstr "Derniers changements:"
 msgid "No rating data found."
 msgstr "Aucune donnée d'évalutation n'a été trouvé."
 
-msgid "Could not find match with specified id. Check `{prefix}matches`."
-msgstr "Impossible de trouver un match lié à ce numéro. Cherchez le bon numéro avec la commande `{prefix}matches`."
+msgid "Could not find match with specified id. Check `/matches`."
+msgstr "Impossible de trouver un match lié à ce numéro. Cherchez le bon numéro avec la commande `/matches`."
 
 msgid "You have {duration} expire time left."
 msgstr "Il te reste {duration} avant de te faire retirer de la queue."
@@ -228,11 +228,11 @@ msgstr "Le match doit être à un stade d'attente de rapport de match."
 msgid "You must be a team captain to report a loss or draw."
 msgstr "Vous devez être le capitaine d'une équipe pour rapporter une défaite ou une égalité."
 
-msgid "{self} is calling a draw, waiting for {enemy} to type `{prefix}rd`."
-msgstr "{self} rapporte une égalité, en attente de {enemy} pour confirmer l'égalité avec la commande `{prefix}rd`."
+msgid "{self} is calling a draw, waiting for {enemy} to type `/report draw`."
+msgstr "{self} rapporte une égalité, en attente de {enemy} pour confirmer l'égalité avec la commande `/report draw`."
 
-msgid "{self} offers to cancel the match, waiting for {enemy} to type `{prefix}rc`."
-msgstr "{self} demande l’annulation du match, en attente de {enemy} pour confirmer avec la commande `{prefix}rc`."
+msgid "{self} offers to cancel the match, waiting for {enemy} to type `/report abort`."
+msgstr "{self} demande l’annulation du match, en attente de {enemy} pour confirmer avec la commande `/report abort`."
 
 msgid "Specified team name not found."
 msgstr "Le nom d'équipe que vous avez spécifié est introuvable."
@@ -281,8 +281,8 @@ msgstr "vide"
 msgid "Unpicked:"
 msgstr "Joueurs restants à choisir:"
 
-msgid "Pick players with `{prefix}pick @player` command."
-msgstr "Choisi ton joueur avec la commande `{prefix}pick @joueur`."
+msgid "Pick players with `/pick @player` command."
+msgstr "Choisi ton joueur avec la commande `/pick @joueur`."
 
 msgid "{member}'s turn to pick!"
 msgstr "C'est au tour de {member} de choisir son joueur!"

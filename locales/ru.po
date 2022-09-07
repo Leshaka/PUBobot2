@@ -85,8 +85,8 @@ msgstr "Последние изменения:"
 msgid "No rating data found."
 msgstr "Нет данных рейтинга."
 
-msgid "Could not find match with specified id. Check `{prefix}matches`."
-msgstr "Матч с указаным id не найден. Проверьте `{prefix}matches`."
+msgid "Could not find match with specified id. Check `/matches`."
+msgstr "Матч с указаным id не найден. Проверьте `/matches`."
 
 msgid "You have {duration} expire time left."
 msgstr "У вас осталось {duration} времени expire."
@@ -227,11 +227,11 @@ msgstr "Матч должен быть на стадии ожидания рез
 msgid "You must be a team captain to report a loss or draw."
 msgstr "Необходимо быть капитаном команды."
 
-msgid "{self} is calling a draw, waiting for {enemy} to type `{prefix}rd`."
-msgstr "{self} предлагает ничью, ожидаем `{prefix}rd` от {enemy}."
+msgid "{self} is calling a draw, waiting for {enemy} to type `/report draw`."
+msgstr "{self} предлагает ничью, ожидаем `/report draw` от {enemy}."
 
-msgid "{self} offers to cancel the match, waiting for {enemy} to type `{prefix}rc`."
-msgstr "{self} предлагает отмену матча, ожидаем `{prefix}rc` от {enemy}."
+msgid "{self} offers to cancel the match, waiting for {enemy} to type `/report abort`."
+msgstr "{self} предлагает отмену матча, ожидаем `/report abort` от {enemy}."
 
 msgid "Specified team name not found."
 msgstr "Указанная команда не найдена."
@@ -280,8 +280,8 @@ msgstr "пусто"
 msgid "Unpicked:"
 msgstr "Кандидаты:"
 
-msgid "Pick players with `{prefix}pick @player` command."
-msgstr "Выбирайте участников с помощью `{prefix}pick @player`."
+msgid "Pick players with `/pick @player` command."
+msgstr "Выбирайте участников с помощью `/pick @player`."
 
 msgid "{member}'s turn to pick!"
 msgstr "Черёд выбирать {member}!"

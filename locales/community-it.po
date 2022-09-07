@@ -85,8 +85,8 @@ msgstr "Ultime modifiche:"
 msgid "No rating data found."
 msgstr "Informazioni sul punteggio non trovate."
 
-msgid "Could not find match with specified id. Check `{prefix}matches`."
-msgstr "Nessuna partita trovata con l'ID specificato. Controlla `{prefix}matches`."
+msgid "Could not find match with specified id. Check `/matches`."
+msgstr "Nessuna partita trovata con l'ID specificato. Controlla `/matches`."
 
 msgid "You have {duration} expire time left."
 msgstr "Hai ancora {duration} prima di essere rimosso dalla coda."
@@ -228,11 +228,11 @@ msgstr "La partita deve essere in fase di attesa dei risultati."
 msgid "You must be a team captain to report a loss or draw."
 msgstr "Devi essere capitano della squadra per comunicare la sconfitta o il pareggio."
 
-msgid "{self} is calling a draw, waiting for {enemy} to type `{prefix}rd`."
-msgstr "{self} dichiara un pareggio, aspettando che {enemy} digiti `{prefix}rd`."
+msgid "{self} is calling a draw, waiting for {enemy} to type `/report draw`."
+msgstr "{self} dichiara un pareggio, aspettando che {enemy} digiti `/report draw`."
 
-msgid "{self} offers to cancel the match, waiting for {enemy} to type `{prefix}rc`."
-msgstr "{self} sta proponendo l'annullamento della partita, aspettando che {enemy} digiti `{prefix}rc`."
+msgid "{self} offers to cancel the match, waiting for {enemy} to type `/report abort`."
+msgstr "{self} sta proponendo l'annullamento della partita, aspettando che {enemy} digiti `/report abort`."
 
 msgid "Specified team name not found."
 msgstr "La quadra specificata non è stata trovata."
@@ -281,8 +281,8 @@ msgstr "vuoto"
 msgid "Unpicked:"
 msgstr "Non scelti:"
 
-msgid "Pick players with `{prefix}pick @player` command."
-msgstr "Scegli un giocatore con il comando `{prefix}pick @player`."
+msgid "Pick players with `/pick @player` command."
+msgstr "Scegli un giocatore con il comando `/pick @player`."
 
 msgid "{member}'s turn to pick!"
 msgstr "{member} sceglie per questo turno!"

@@ -294,12 +294,11 @@ class Match:
 			team.draw_flag = draw_flag
 			await ctx.notice(
 				self.gt(
-					"{self} is calling a draw, waiting for {enemy} to type `{prefix}rd`." if draw_flag == 1 else
-					"{self} offers to cancel the match, waiting for {enemy} to type `{prefix}rc`."
+					"{self} is calling a draw, waiting for {enemy} to type `/report draw`." if draw_flag == 1 else
+					"{self} offers to cancel the match, waiting for {enemy} to type `/report abort`."
 				).format(
 					self=member.mention,
 					enemy=enemy_team[0].mention,
-					prefix=self.queue.qc.cfg.prefix
 				)
 			)
 			return

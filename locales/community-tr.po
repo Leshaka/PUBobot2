@@ -86,8 +86,8 @@ msgstr "Son değişiklikler:"
 msgid "No rating data found."
 msgstr "Derece verisi bulunamadı."
 
-msgid "Could not find match with specified id. Check `{prefix}matches`."
-msgstr "Belirtilen numaraya ait bir maç bulunamadı. `{prefix}matches` yazarak kontrol edebilirsiniz."
+msgid "Could not find match with specified id. Check `/matches`."
+msgstr "Belirtilen numaraya ait bir maç bulunamadı. `/matches` yazarak kontrol edebilirsiniz."
 # Used "numara" = "number" instead of "ID", because "ID" doesn't translate well.
 
 msgid "You have {duration} expire time left."
@@ -235,11 +235,11 @@ msgstr "Maç rapor bekleme aşamasında olmalı."
 msgid "You must be a team captain to report a loss or draw."
 msgstr "Mağlubiyet veya berabere raporlamak için takım kaptanı olmanız gerekir."
 
-msgid "{self} is calling a draw, waiting for {enemy} to type `{prefix}rd`."
-msgstr "{self} berabere istiyor, {enemy}'nin `{prefix}rd` yazması bekleniyor."
+msgid "{self} is calling a draw, waiting for {enemy} to type `/report draw`."
+msgstr "{self} berabere istiyor, {enemy}'nin `/report draw` yazması bekleniyor."
 
-msgid "{self} offers to cancel the match, waiting for {enemy} to type `{prefix}rc`."
-msgstr "{self} maçı iptal etmek istiyor, {enemy}'nin `{prefix}rc` yazması bekleniyor."
+msgid "{self} offers to cancel the match, waiting for {enemy} to type `/report abort`."
+msgstr "{self} maçı iptal etmek istiyor, {enemy}'nin `/report abort` yazması bekleniyor."
 
 msgid "Specified team name not found."
 msgstr "Belirtilen takım ismi bulunamadı."
@@ -291,8 +291,8 @@ msgstr "boş"
 msgid "Unpicked:"
 msgstr "Seçilmeyenler:"
 
-msgid "Pick players with `{prefix}pick @player` command."
-msgstr "`{prefix}pick @player` komutuyla oyuncu seçin."
+msgid "Pick players with `/pick @player` command."
+msgstr "`/pick @player` komutuyla oyuncu seçin."
 
 msgid "{member}'s turn to pick!"
 msgstr "Seçme sırası {member}'da!"
