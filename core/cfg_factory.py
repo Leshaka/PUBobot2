@@ -73,8 +73,8 @@ class FactoryTable:
 				*keys,
 				dict(cname='factory_version', ctype=db.types.int),
 				dict(cname='cfg_name', ctype=db.types.str),
-				dict(cname='cfg_info', ctype=db.types.text, default="{}"),
-				dict(cname='cfg_data', ctype=db.types.dict, default="{}")
+				dict(cname='cfg_info', ctype=db.types.text),
+				dict(cname='cfg_data', ctype=db.types.dict)
 			],
 			primary_keys=[self.p_key]
 		))
