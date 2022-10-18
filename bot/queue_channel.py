@@ -391,7 +391,10 @@ class QueueChannel:
 
 		if len(affected):
 			if not ctx:
-				ctx = bot.SystemContext(self)
+				try:
+					ctx = bot.SystemContext(self)
+				except IndexError:
+					return
 
 			for m in affected:
 				bot.expire.cancel(self, m)
