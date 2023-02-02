@@ -318,10 +318,9 @@ class Match:
 		if self.state != self.WAITING_REPORT:
 			raise bot.Exc.MatchStateError(self.gt("The match must be on the waiting report stage."))
 
-		team_name = team_name.lower()
 		if draw:
 			self.winner = None
-		elif (team := find(lambda t: t.name.lower() == team_name, self.teams[:2])) is not None:
+		elif team_name and (team := find(lambda t: t.name.lower() == team_name.lower(), self.teams[:2])) is not None:
 			self.winner = team.idx
 			self.scores[self.winner] = 1
 		else:
