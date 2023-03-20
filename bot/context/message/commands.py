@@ -257,17 +257,13 @@ async def _set_queue_cfg(ctx: MessageContext, args: str = ""):
 async def _stats_reset_player(ctx: MessageContext, args: str = None):
 	if not args:
 		raise bot.Exc.SyntaxError(f"Usage: {ctx.qc.cfg.prefix}stats_reset_player __@player__")
-	if (member := await ctx.get_member(args)) is None:
-		raise bot.Exc.SyntaxError(f"Usage: {ctx.qc.cfg.prefix}stats_reset_player __@player__")
 
-	await bot.commands.stats_reset_player(ctx, player=member)
+	await bot.commands.stats_reset_player(ctx, player=args)
 
 
 @message_command('stats_replace_player')
 async def _stats_replace_player(ctx: MessageContext, args: str = ""):
 	if len(args := args.split(" ")) != 2:
-		raise bot.Exc.SyntaxError(f"Usage: {ctx.qc.cfg.prefix}stats_replace_player __@player1__ __@player2__")
-	if None in (args := [await ctx.get_member(i) for i in args]):
 		raise bot.Exc.SyntaxError(f"Usage: {ctx.qc.cfg.prefix}stats_replace_player __@player1__ __@player2__")
 
 	await bot.commands.stats_replace_player(ctx, player1=args[0], player2=args[1])
@@ -277,17 +273,13 @@ async def _stats_replace_player(ctx: MessageContext, args: str = ""):
 async def _rating_hide(ctx: MessageContext, args: str = None):
 	if not args:
 		raise bot.Exc.SyntaxError(f"Usage: {ctx.qc.cfg.prefix}rating_hide __@player__")
-	if (member := await ctx.get_member(args)) is None:
-		raise bot.Exc.SyntaxError(f"Usage: {ctx.qc.cfg.prefix}rating_hide __@player__")
 
-	await bot.commands.rating_hide(ctx, player=member)
+	await bot.commands.rating_hide(ctx, player=args)
 
 
 @message_command('rating_unhide_player')
 async def _rating_unhide(ctx: MessageContext, args: str = None):
 	if not args:
 		raise bot.Exc.SyntaxError(f"Usage: {ctx.qc.cfg.prefix}rating_unhide_player __@player__")
-	if (member := await ctx.get_member(args)) is None:
-		raise bot.Exc.SyntaxError(f"Usage: {ctx.qc.cfg.prefix}rating_unhide_player __@player__")
 
-	await bot.commands.rating_hide(ctx, player=member, hide=False)
+	await bot.commands.rating_hide(ctx, player=args, hide=False)

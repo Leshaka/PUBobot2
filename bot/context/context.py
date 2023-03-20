@@ -29,7 +29,7 @@ class Context:
 		self.channel = channel
 		self.author = author
 
-	async def get_member(self, mention):
+	async def get_member(self, mention) -> Member:
 		if type(mention) is Member:
 			return mention
 		elif highlight := re.match(r"<@!?(\d+)>", mention):

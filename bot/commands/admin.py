@@ -52,8 +52,10 @@ async def forgive(ctx, player: Member):
 		raise bot.Exc.NotFoundError(ctx.qc.gt("Specified member is not banned."))
 
 
-async def rating_seed(ctx, player: Member, rating: int, deviation: int = None):
+async def rating_seed(ctx, player: str, rating: int, deviation: int = None):
 	ctx.check_perms(ctx.Perms.MODERATOR)
+	if (player := await ctx.get_member(player)) is None:
+		raise bot.Exc.SyntaxError(f"Specified member not found on the server.")
 	if not 0 < rating < 10000 or not 0 < (deviation or 1) < 3000:
 		raise bot.Exc.ValueError("Bad rating or deviation value.")
 
@@ -62,8 +64,10 @@ async def rating_seed(ctx, player: Member, rating: int, deviation: int = None):
 	await ctx.success(ctx.qc.gt("Done."))
 
 
-async def rating_penality(ctx, player: Member, penality: int, reason: str = None):
+async def rating_penality(ctx, player: str, penality: int, reason: str = None):
 	ctx.check_perms(ctx.Perms.MODERATOR)
+	if (player := await ctx.get_member(player)) is None:
+		raise bot.Exc.SyntaxError(f"Specified member not found on the server.")
 	if abs(penality) > 10000:
 		raise ValueError("Bad penality value.")
 	reason = "penality: " + reason if reason else "penality by a moderator"
@@ -73,8 +77,10 @@ async def rating_penality(ctx, player: Member, penality: int, reason: str = None
 	await ctx.success(ctx.qc.gt("Done."))
 
 
-async def rating_hide(ctx, player: Member, hide: bool = True):
+async def rating_hide(ctx, player: str, hide: bool = True):
 	ctx.check_perms(ctx.Perms.MODERATOR)
+	if (player := await ctx.get_member(player)) is None:
+		raise bot.Exc.SyntaxError(f"Specified member not found on the server.")
 	await ctx.qc.rating.hide_player(player.id, hide=hide)
 	await ctx.success(ctx.qc.gt("Done."))
 
@@ -97,14 +103,22 @@ async def stats_reset(ctx):
 	await ctx.success(ctx.qc.gt("Done."))
 
 
-async def stats_reset_player(ctx, player: Member):
+async def stats_reset_player(ctx, player: str):
 	ctx.check_perms(ctx.Perms.MODERATOR)
+	if (player := await ctx.get_member(player)) is None:
+		raise bot.Exc.SyntaxError(f"Specified member not found on the server.")
+
 	await bot.stats.reset_player(ctx.qc.id, player.id)
 	await ctx.success(ctx.qc.gt("Done."))
 
 
-async def stats_replace_player(ctx, player1: Member, player2: Member):
+async def stats_replace_player(ctx, player1: str, player2: str):
 	ctx.check_perms(ctx.Perms.ADMIN)
+	if (player1 := await ctx.get_member(player1)) is None:
+		raise bot.Exc.SyntaxError(f"Specified member not found on the server.")
+	if (player2 := await ctx.get_member(player2)) is None:
+		raise bot.Exc.SyntaxError(f"Specified member not found on the server.")
+
 	await bot.stats.replace_player(ctx.qc.id, player1.id, player2.id, get_nick(player2))
 	await ctx.success(ctx.qc.gt("Done."))
 

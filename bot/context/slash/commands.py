@@ -325,7 +325,7 @@ async def _phrases_clear(
 @groups.admin_rating.subcommand(name='seed', description='Set player rating and deviation')
 async def _rating_seed(
 		interaction: Interaction,
-		player: Member = SlashOption(verify=False),
+		player: str = SlashOption(verify=False),
 		rating: int = SlashOption(),
 		deviation: int = SlashOption(required=False)
 ): await run_slash(bot.commands.rating_seed, interaction=interaction, player=player, rating=rating, deviation=deviation)
@@ -334,7 +334,7 @@ async def _rating_seed(
 @groups.admin_rating.subcommand(name='penality', description='Subtract points from player rating.')
 async def _rating_penality(
 		interaction: Interaction,
-		player: Member = SlashOption(verify=False),
+		player: str = SlashOption(verify=False),
 		points: int = SlashOption(),
 		reason: str = SlashOption(required=False)
 ): await run_slash(bot.commands.rating_penality, interaction=interaction, player=player, penality=points, reason=reason)
@@ -343,7 +343,7 @@ async def _rating_penality(
 @groups.admin_rating.subcommand(name='hide_player', description='Hide player from the leaderboard.')
 async def _rating_hide(
 		interaction: Interaction,
-		player: Member = SlashOption(verify=False)
+		player: str = SlashOption(),
 ): await run_slash(bot.commands.rating_hide, interaction=interaction, player=player, hide=True)
 
 
@@ -377,15 +377,15 @@ async def _stats_reset(
 @groups.admin_stats.subcommand(name='reset_player', description='Reset player stats.')
 async def _stats_reset_player(
 		interaction: Interaction,
-		player: Member = SlashOption(verify=False)
+		player: str = SlashOption(verify=False)
 ): await run_slash(bot.commands.stats_reset_player, interaction=interaction, player=player)
 
 
 @groups.admin_stats.subcommand(name='stats_replace_player', description='Replace player1 with player2.')
 async def _stats_replace_player(
 		interaction: Interaction,
-		player1: Member = SlashOption(verify=False),
-		player2: Member = SlashOption(verify=False)
+		player1: str = SlashOption(verify=False),
+		player2: str = SlashOption(verify=False)
 ): await run_slash(bot.commands.stats_replace_player, interaction=interaction, player1=player1, player2=player2)
 
 
@@ -579,7 +579,7 @@ async def _leaderboard(
 @groups.admin_rating.subcommand(name='unhide_player', description='Unhide player from the leaderboard.')
 async def _rating_unhide(
 		interaction: Interaction,
-		player: Member = SlashOption(verify=False)
+		player: str = SlashOption(verify=False)
 ): await run_slash(bot.commands.rating_hide, interaction=interaction, player=player, hide=False)
 
 
