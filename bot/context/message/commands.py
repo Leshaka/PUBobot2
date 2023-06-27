@@ -109,7 +109,7 @@ async def _teams(ctx: MessageContext, args: str = None):
 
 @message_command('ready', 'r')
 async def _ready(ctx: MessageContext, args: str = None):
-	await bot.commands.set_ready(ctx, is_ready=False)
+	await bot.commands.set_ready(ctx, is_ready=True)
 
 
 @message_command('notready', 'nr')
