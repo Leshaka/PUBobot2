@@ -16,7 +16,7 @@ Hosting the service for everyone is not free, not mentioning the actual time and
 ## Hosting the bot yourself
 
 ### Requirements
-* **Python 3.9** and modules from pip: discord.py, pymysql, aiomysql, emoji, glicko2, trueskill, prettytable.  
+* **Python 3.9+** 
 * **MySQL**.
 * **gettext** for multilanguage support.
 
@@ -27,13 +27,13 @@ Hosting the service for everyone is not free, not mentioning the actual time and
 * * `CREATE DATABASE pubodb CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;`
 * * `GRANT ALL PRIVILEGES ON pubodb.* TO 'pubobot'@'localhost';`
 * Install required modules and configure PUBobot2:
-* * `python3.9 -m pip install discord.py pymysql==0.9.3 aiomysql emoji glicko2 trueskill prettytable`
 * * `git clone https://github.com/Leshaka/PUBobot2`
 * * `cd PUBobot2`
+* * `pip3 install -r requirements.txt`
 * * `cp config.example.cfg config.cfg`
 * * `nano config.cfg` - Fill config file with your discord bot instance credentials and mysql settings and save.
 * * Optionally, if you want to use other languages, run script to compile translations: `./compile_locales.sh`.
-* * `python3.9 PUBobot2.py` - If everything is installed correctly the bot should launch without any errors and give you CLI.
+* * `python3 PUBobot2.py` - If everything is installed correctly the bot should launch without any errors and give you CLI.
 
 ## Credits
 Developer: **Leshaka**. Contact: leshkajm@ya.ru.  

@@ -1,0 +1,6 @@
+nextcord>=2.5
+aiomysql>=0.2
+glicko2>=2.0
+trueskill>=0.4.5
+emoji>=2.7
+prettytable>=3.8
