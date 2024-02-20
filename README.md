@@ -11,7 +11,7 @@ For the complete list of commands see [COMMANDS.md](https://github.com/Leshaka/P
 You can invite the bot to your discord server from the [web interface](https://pubobot.leshaka.xyz/) or use the direct [invite link](https://discord.com/oauth2/authorize?client_id=177021948935667713&scope=bot).
 
 ### Support
-Hosting the service for everyone is not free, not mentioning the actual time and effort to develop the project. If you enjoy the bot please subscribe on [Patreon](https://patreon.com/pubobot2) or donate any amount directly on [PayPal](https://paypal.me/leshkajm).
+Hosting the service for everyone is not free, not mentioning the actual time and effort to develop the project. If you enjoy the bot please subscribe on [Boosty](https://boosty.to/leshaka).
 
 ## Hosting the bot yourself
 
