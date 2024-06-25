@@ -338,13 +338,15 @@ async def top(channel_id, time_gap=None):
 async def last_games(channel_id):
 	#  get last played ranked match for all players
 	data = await db.fetchall(
-		"SELECT m.at, p.* FROM `qc_players` AS p " +
-		"JOIN qc_matches AS m ON m.match_id=("
-		"	SELECT match_id FROM qc_rating_history as h WHERE h.user_id=p.user_id ORDER BY match_id DESC LIMIT 1"
-		") " +
-		"WHERE p.channel_id=%s AND p.rating IS NOT NULL AND p.deviation IS NOT NULL "
-		"GROUP BY p.user_id",
-		(channel_id, )
+		"SELECT tmp.at, p.* " +
+		"FROM `qc_players` AS p " +
+		"LEFT JOIN (" +
+		"  SELECT MAX(h.at) AS at, h.user_id FROM `qc_rating_history` AS h" +
+		"    WHERE h.channel_id=%s AND h.match_id IS NOT NULL" +
+		"    GROUP BY h.user_id" +
+		") AS tmp ON p.user_id=tmp.user_id " +
+		"WHERE p.channel_id=%s",
+		(channel_id, channel_id)
 	)
 	return data
 

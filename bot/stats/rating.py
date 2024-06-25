@@ -153,6 +153,9 @@ class BaseRating:
 		history = []
 		to_update = []
 		for p in data:
+			if None in (p['rating'], p['deviation'], p['at']):
+				continue
+
 			new_deviation = min((self.init_deviation, p['deviation'] + deviation))
 
 			min_rating = max([i for i in ranks if i <= p['rating']]+[0])
