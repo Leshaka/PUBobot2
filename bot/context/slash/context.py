@@ -18,7 +18,7 @@ class SlashContext(Context):
 		if not self.interaction.response.is_done():
 			await self.interaction.response.send_message(*args, **kwargs)
 		else:
-			await self.interaction.message.reply(*args, **kwargs)
+			await self.interaction.followup.send(*args, **kwargs)
 
 	async def reply_dm(self, *args, **kwargs):
 		if not self.interaction.response.is_done():
@@ -40,7 +40,7 @@ class SlashContext(Context):
 		if not self.interaction.response.is_done():
 			await self.interaction.response.send_message(embed=error_embed(*args, **kwargs), ephemeral=True)
 		else:  # this probably should never happen
-			await self.interaction.message.reply(embed=error_embed(*args, **kwargs))
+			await self.interaction.followup.send(embed=error_embed(*args, **kwargs))
 
 	async def success(self, *args, **kwargs):
 		await self.reply(embed=ok_embed(*args, **kwargs))

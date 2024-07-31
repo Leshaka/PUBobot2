@@ -1,6 +1,8 @@
 from typing import Callable
+from asyncio import wait_for, shield
 from nextcord import Interaction, SlashOption, Member, TextChannel
 import traceback
+import time
 
 from core.client import dc
 from core.utils import error_embed, ok_embed, parse_duration, get_nick
@@ -24,6 +26,13 @@ def _parse_duration(ctx: SlashContext, s: str):
 
 
 async def run_slash(coro: Callable, interaction: Interaction, **kwargs):
+	# get passed time since interaction was created, convert snowflake into timestamp
+	passed_time = time.time() - (((int(interaction.id) >> 22) + 1420070400000) / 1000.0)
+
+	if passed_time >= 3.0:  # Interactions must be answered within 3 seconds or they time out
+		log.error('Skipping an outdated interaction.')
+		return
+
 	if not bot.bot_ready:
 		await interaction.response.send_message(
 			embed=error_embed("Bot is under connection, please try agian later...", title="Error")
@@ -35,6 +44,14 @@ async def run_slash(coro: Callable, interaction: Interaction, **kwargs):
 		return
 
 	ctx = SlashContext(qc, interaction)
+	try:
+		await wait_for(shield(run_slash_coro(ctx, coro, **kwargs)), timeout=max(2.5 - passed_time, 0))
+	except TimeoutError:
+		log.info('Deferring /slash command')
+		await interaction.response.defer()
+
+
+async def run_slash_coro(ctx: SlashContext, coro: Callable, **kwargs):
 	log.command("{} | #{} | {}: /{} {}".format(
 		ctx.channel.guild.name, ctx.channel.name, get_nick(ctx.author), coro.__name__, kwargs
 	))
