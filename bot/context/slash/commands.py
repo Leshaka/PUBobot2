@@ -1,5 +1,6 @@
 from typing import Callable
 from asyncio import wait_for, shield
+from asyncio.exceptions import TimeoutError as aTimeoutError
 from nextcord import Interaction, SlashOption, Member, TextChannel
 import traceback
 import time
@@ -46,7 +47,7 @@ async def run_slash(coro: Callable, interaction: Interaction, **kwargs):
 	ctx = SlashContext(qc, interaction)
 	try:
 		await wait_for(shield(run_slash_coro(ctx, coro, **kwargs)), timeout=max(2.5 - passed_time, 0))
-	except TimeoutError:
+	except (TimeoutError, aTimeoutError):
 		log.info('Deferring /slash command')
 		await interaction.response.defer()
 
