@@ -227,10 +227,10 @@ msgstr "경기가 보고 단계에 있어야 합니다."
 msgid "You must be a team captain to report a loss or draw."
 msgstr "패배나 무승부를 보고하려면 팀의 주장이어야 합니다."
 
-msgid "{self} is calling a draw, waiting for {enemy} to type /report draw."
+msgid "{self} is calling a draw, waiting for {enemy} to type `/report draw`."
 msgstr "{self}님이 무승부를 선언했습니다. {enemy}님이 `/report draw`를 입력하기를 기다립니다."
 
-msgid "{self} offers to cancel the match, waiting for {enemy} to type /report abort."
+msgid "{self} offers to cancel the match, waiting for {enemy} to type `/report abort`."
 msgstr "{self}님이 경기 취소를 요청했습니다. {enemy}님이 `/report abort`를 입력하기를 기다립니다."
 
 msgid "Specified team name not found."
