@@ -17,7 +17,7 @@ msgid "You must possess moderator permissions."
 msgstr "중재자 권한이 있어야 합니다."
 
 msgid "expire time ran off"
-msgstr "자동 퇴장 시간이 다 되었음"
+msgstr "자동 퇴장 시간이 됨"
 
 msgid "member offline"
 msgstr "멤버가 오프라인 상태임"
@@ -53,10 +53,10 @@ msgid "You are not allowed to add to {queues} queues."
 msgstr "{queues} 대기열에 입장할 권한이 없습니다."
 
 msgid "You are already in an active match."
-msgstr "이미 진행 중인 경기에 있습니다."
+msgstr "당신은 이미 진행 중인 경기에 있습니다."
 
 msgid "You are not in an active match."
-msgstr "진행 중인 경기에 없습니다."
+msgstr "당신은 진행 중인 경기에 없습니다."
 
 msgid "Specified user not found."
 msgstr "지정된 사용자를 찾을 수 없습니다."
@@ -71,7 +71,7 @@ msgid "Matches"
 msgstr "경기"
 
 msgid "Rank"
-msgstr "순위"
+msgstr "등급"
 
 msgid "Rating"
 msgstr "점수"
@@ -101,7 +101,7 @@ msgid "Expire time must be less than {time}."
 msgstr "자동 퇴장 시간은 {time} 보다 짧아야 합니다."
 
 msgid "Set your expire time to {duration}."
-msgstr "당신의 자동 퇴장 시간이 {duration} (으)로 설정되었습니다."
+msgstr "당신의 자동 퇴장 시간이 {duration}로 설정되었습니다."
 
 msgid "Invalid duration format. Syntax: 3h2m1s or 03:02:01 or AFK."
 msgstr "기간 형식이 잘못되었습니다. 구문: 3h2m1s 또는 03:02:01 또는 AFK."
@@ -173,7 +173,7 @@ msgid "Your automatic ready confirmation is now turned off."
 msgstr "당신의 자동 준비 완료 기능이 꺼졌습니다."
 
 msgid "During next {duration} your match participation will be confirmed automatically."
-msgstr "앞으로 {duration} 동안 당신의 경기 참가가 자동으로 준비 완료됩니다."
+msgstr "앞으로 {duration}동안 당신의 경기 참가가 자동으로 준비 완료됩니다."
 
 # bot/queues/pickup_queue.py
 
@@ -340,10 +340,10 @@ msgid "The match must be on the check-in, draft or waiting report stage."
 msgstr "경기가 준비 단계, 선택 단계, 혹은 보고 대기 단계에 있어야 합니다."
 
 msgid "You have stopped looking for a substitute."
-msgstr "더 이상 대체 인원을 찾지 않습니다."
+msgstr "더 이상 당신을 대체할 인원을 찾지 않습니다."
 
 msgid "You are now looking for a substitute."
-msgstr "지금부터 대체 인원을 찾습니다."
+msgstr "지금부터 당신을 대체할 인원을 찾습니다."
 
 msgid "Specified player is not looking for a substitute."
 msgstr "지정한 플레이어가 대체 인원을 찾는 중이 아닙니다."
