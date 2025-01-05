@@ -377,6 +377,9 @@ class PickupQueue:
 		):
 			return bot.Qr.NotAllowed
 
+		if len(self.queue) >= self.cfg.size:
+			return bot.Qr.QueueFull
+
 		if member not in self.queue:
 			self.queue.append(member)
 

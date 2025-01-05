@@ -1,4 +1,4 @@
-from nextcord import Embed, Colour, Streaming
+from nextcord import Embed, Colour, Streaming, Member
 from core.client import dc
 from core.utils import get_nick, join_and
 
@@ -14,6 +14,20 @@ class Embeds:
 			icon_url=dc.user.avatar.with_size(32)
 			# icon_url="https://cdn.discordapp.com/avatars/240843400457355264/a51a5bf3b34d94922fd60751ba1d60ab.png?size=64"
 		)
+
+	def _ranked_nick(self, p: Member):
+		if self.m.ranked:
+			if self.m.qc.cfg.emoji_ranks:
+				return f'{self.m.rank_str(p)}`{get_nick(p)}`'
+			return f'`{self.m.rank_str(p)}{get_nick(p)}`'
+		return f'`{get_nick(p)}`'
+
+	def _ranked_mention(self, p: Member):
+		if self.m.ranked:
+			if self.m.qc.cfg.emoji_ranks:
+				return f'{self.m.rank_str(p)}{p.mention}'
+			return f'`{self.m.rank_str(p)}`{p.mention}'
+		return p.mention
 
 	def check_in(self, not_ready):
 		embed = Embed(
@@ -72,8 +86,7 @@ class Embeds:
 		]
 		team_players = [
 			" \u200b ".join([
-				(f"`{self.m.rank_str(p)}" if self.m.ranked else "`") + f"{get_nick(p)}`"
-				for p in t
+				self._ranked_nick(p) for p in t
 			]) if len(t) else self.m.gt("empty")
 			for t in self.m.teams[:2]
 		]
@@ -84,10 +97,7 @@ class Embeds:
 			embed.add_field(
 				name=self.m.gt("Unpicked:"),
 				value="\n".join((
-					" \u200b `{rank}{name}`".format(
-						rank=self.m.rank_str(p) if self.m.ranked else "",
-						name=get_nick(p)
-					)
+					" \u200b " + self._ranked_nick(p)
 				) for p in self.m.teams[2]),
 				inline=False
 			)
@@ -136,8 +146,7 @@ class Embeds:
 			team_players = [
 				" \u200b " +
 				" \u200b ".join([
-					(f"`{self.m.rank_str(p)}`" if show_ranks else "") + f"<@{p.id}>"
-					for p in t
+					self._ranked_mention(p) for p in t
 				])
 				for t in self.m.teams[:2]
 			]

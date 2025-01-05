@@ -1,6 +1,7 @@
 __all__ = ['last_game', 'stats', 'top', 'rank', 'leaderboard']
 
 from time import time
+from math import ceil
 from nextcord import Member, Embed, Colour
 
 from core.utils import get, find, seconds_to_str, get_nick, discord_table
@@ -169,24 +170,57 @@ async def rank(ctx, player: Member = None):
 async def leaderboard(ctx, page: int = 1):
 	page = (page or 1) - 1
 
-	data = (await ctx.qc.get_lb())[page * 10:(page + 1) * 10]
-	if len(data):
-		await ctx.reply(
-			discord_table(
-				["№", "Rating〈Ξ〉", "Nickname", "Matches", "W/L/D"],
-				[[
-					(page * 10) + (n + 1),
-					str(data[n]['rating']) + ctx.qc.rating_rank(data[n]['rating'])['rank'],
-					data[n]['nick'].strip(),
-					int(data[n]['wins'] + data[n]['losses'] + data[n]['draws']),
-					"{0}/{1}/{2} ({3}%)".format(
-						data[n]['wins'],
-						data[n]['losses'],
-						data[n]['draws'],
-						int(data[n]['wins'] * 100 / ((data[n]['wins'] + data[n]['losses']) or 1))
-					)
-				] for n in range(len(data))]
-			)
-		)
-	else:
+	data = await ctx.qc.get_lb()
+	pages = ceil(len(await ctx.qc.get_lb())/10)
+	data = data[page * 10:(page + 1) * 10]
+	if not len(data):
 		raise bot.Exc.NotFoundError(ctx.qc.gt("Leaderboard is empty."))
+
+	if ctx.qc.cfg.emoji_ranks:  # display as embed message
+		embed = Embed(title=f"Leaderboard - page {page+1} of {pages}", colour=Colour(0x7289DA))
+		embed.add_field(
+			name="Nickname",
+			value="\n".join((
+				f'**{(page*10)+n+1}** ' + data[n]['nick'].strip()[:14]
+				for n in range(len(data))
+			)),
+			inline=True
+		)
+		embed.add_field(
+			name="W / L / D",
+			value="\n".join((
+				f"**{row['wins']}** / **{row['losses']}** / **{row['draws']}** (" +
+				str(int(row['wins'] * 100 / ((row['wins'] + row['losses']) or 1))) + "%)"
+				for row in data
+			)),
+			inline=True
+		)
+		embed.add_field(
+			name="Rating",
+			value="\n".join((
+				ctx.qc.rating_rank(row['rating'])['rank'] + f" **{row['rating']}**"
+				for row in data
+			)),
+			inline=True
+		)
+		await ctx.reply(embed=embed)
+		return
+
+	# display as md table
+	await ctx.reply(
+		discord_table(
+			["№", "Rating〈Ξ〉", "Nickname", "Matches", "W/L/D"],
+			[[
+				(page * 10) + (n + 1),
+				str(data[n]['rating']) + ctx.qc.rating_rank(data[n]['rating'])['rank'],
+				data[n]['nick'].strip(),
+				int(data[n]['wins'] + data[n]['losses'] + data[n]['draws']),
+				"{0}/{1}/{2} ({3}%)".format(
+					data[n]['wins'],
+					data[n]['losses'],
+					data[n]['draws'],
+					int(data[n]['wins'] * 100 / ((data[n]['wins'] + data[n]['losses']) or 1))
+				)
+			] for n in range(len(data))]
+		)
+	)

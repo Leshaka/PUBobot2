@@ -266,6 +266,12 @@ class QueueChannel:
 				description="Set a minimum amount of played matches required for a player to be shown in the !leaderboard."
 			),
 			Variables.BoolVar(
+				"emoji_ranks",
+				display="Ranks are emojis",
+				section="Leaderboard",
+				default=False
+			),
+			Variables.BoolVar(
 				"rating_nicks",
 				display="Set ratings to nicks",
 				section="Leaderboard",
