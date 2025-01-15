@@ -38,7 +38,7 @@ class Embeds:
 		)
 		embed.add_field(
 			name=self.m.gt("Waiting on:"),
-			value="\n".join((f" \u200b <@{p.id}>" for p in not_ready)),
+			value="\n".join((f" \u200b {'❌ ' if p in self.m.check_in.discarded_players else ''}<@{p.id}>" for p in not_ready)),
 			inline=False
 		)
 		if not len(self.m.check_in.maps):
