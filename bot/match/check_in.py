@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import mmap
 import random
 import bot
 from nextcord.errors import DiscordException
@@ -17,7 +18,9 @@ class CheckIn:
 		self.m = match
 		self.timeout = timeout
 		self.allow_discard = self.m.cfg['check_in_discard']
+		self.discard_immediately = self.m.cfg['check_in_discard_immediately']
 		self.ready_players = set()
+		self.discarded_players = set()
 		self.message = None
 
 		for p in (p for p in self.m.players if p.id in bot.auto_ready.keys()):
@@ -57,6 +60,24 @@ class CheckIn:
 
 	async def refresh(self, ctx):
 		not_ready = list(filter(lambda m: m not in self.ready_players, self.m.players))
+
+		if len(self.discarded_players) and len(self.discarded_players) == len(not_ready):
+			# all not ready players discarded check in
+			await ctx.notice('\n'.join((
+				self.m.gt("{member} has aborted the check-in.").format(
+					member=', '.join([m.mention for m in self.discarded_players])
+				),
+				self.m.gt("Reverting {queue} to the gathering stage...").format(queue=f"**{self.m.queue.name}**")
+			)))
+
+			bot.active_matches.remove(self.m)
+			await self.m.queue.revert(
+				ctx,
+				list(self.discarded_players),
+				[m for m in self.m.players if m not in self.discarded_players]
+			)
+			return
+
 		if len(not_ready):
 			try:
 				await self.message.edit(content=None, embed=self.m.embeds.check_in(not_ready))
@@ -92,6 +113,7 @@ class CheckIn:
 					self.ready_players.discard(user)
 				else:
 					self.map_votes[idx].add(user.id)
+					self.discarded_players.discard(user)
 					self.ready_players.add(user)
 				await self.refresh(bot.SystemContext(self.m.queue.qc))
 
@@ -99,22 +121,33 @@ class CheckIn:
 			if remove:
 				self.ready_players.discard(user)
 			else:
+				self.discarded_players.discard(user)
 				self.ready_players.add(user)
 			await self.refresh(bot.SystemContext(self.m.queue.qc))
 
 		elif str(reaction) == self.NOT_READY_EMOJI and self.allow_discard:
-			await self.abort_member(bot.SystemContext(self.m.queue.qc), user)
+			if self.discard_immediately:
+				return await self.abort_member(bot.SystemContext(self.m.queue.qc), user)
+			return await self.discard_member(bot.SystemContext(self.m.queue.qc), user)
 
 	async def set_ready(self, ctx, member, ready):
 		if self.m.state != self.m.CHECK_IN:
 			raise bot.Exc.MatchStateError(self.m.gt("The match is not on the check-in stage."))
 		if ready:
 			self.ready_players.add(member)
+			self.discarded_players.discard(member)
 			await self.refresh(ctx)
 		elif not ready:
 			if not self.allow_discard:
 				raise bot.Exc.PermissionError(self.m.gt("Discarding check-in is not allowed."))
-			await self.abort_member(ctx, member)
+			if self.discard_immediately:
+				return await self.abort_member(ctx, member)
+			return await self.discard_member(ctx, member)
+
+	async def discard_member(self, ctx, member):
+		self.ready_players.discard(member)
+		self.discarded_players.add(member)
+		await self.refresh(ctx)
 
 	async def abort_member(self, ctx, member):
 		bot.waiting_reactions.pop(self.message.id)

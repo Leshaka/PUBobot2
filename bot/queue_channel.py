@@ -273,6 +273,14 @@ class QueueChannel:
 				default=0,
 				notnull=True
 			),
+			Variables.BoolVar(
+				"emoji_ranks",
+				display="Ranks are emojis",
+				description="Display rank strings like emojis.",
+				section="Leaderboard",
+				notnull=True,
+				default=False
+			),
 			VariableTable(
 				'ranks', display="Rating ranks", section="Leaderboard",
 				variables=[
