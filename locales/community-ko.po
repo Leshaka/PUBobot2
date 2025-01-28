@@ -17,7 +17,7 @@ msgid "You must possess moderator permissions."
 msgstr "중재자 권한이 있어야 합니다."
 
 msgid "expire time ran off"
-msgstr "자동 퇴장 시간이 다 되었음"
+msgstr "자동 퇴장 시간이 됨"
 
 msgid "member offline"
 msgstr "멤버가 오프라인 상태임"
@@ -47,16 +47,16 @@ msgid "Error"
 msgstr "오류"
 
 msgid "You are not allowed to add to queues on this channel."
-msgstr "이 채널에서 대기열에 입장할 권한이 없습니다."
+msgstr "이 채널에서 대기열에 참가할 권한이 없습니다."
 
 msgid "You are not allowed to add to {queues} queues."
-msgstr "{queues} 대기열에 입장할 권한이 없습니다."
+msgstr "{queues} 대기열에 참가할 권한이 없습니다."
 
 msgid "You are already in an active match."
-msgstr "이미 진행 중인 경기에 있습니다."
+msgstr "당신은 이미 진행 중인 경기에 있습니다."
 
 msgid "You are not in an active match."
-msgstr "진행 중인 경기에 없습니다."
+msgstr "당신은 진행 중인 경기에 없습니다."
 
 msgid "Specified user not found."
 msgstr "지정된 사용자를 찾을 수 없습니다."
@@ -71,7 +71,7 @@ msgid "Matches"
 msgstr "경기"
 
 msgid "Rank"
-msgstr "순위"
+msgstr "등급"
 
 msgid "Rating"
 msgstr "점수"
@@ -101,7 +101,7 @@ msgid "Expire time must be less than {time}."
 msgstr "자동 퇴장 시간은 {time} 보다 짧아야 합니다."
 
 msgid "Set your expire time to {duration}."
-msgstr "당신의 자동 퇴장 시간이 {duration} (으)로 설정되었습니다."
+msgstr "당신의 자동 퇴장 시간이 {duration}로 설정되었습니다."
 
 msgid "Invalid duration format. Syntax: 3h2m1s or 03:02:01 or AFK."
 msgstr "기간 형식이 잘못되었습니다. 구문: 3h2m1s 또는 03:02:01 또는 AFK."
@@ -119,7 +119,7 @@ msgid "Your offline immunity is **off**."
 msgstr "당신의 오프라인 무시가 **꺼졌습니다**."
 
 msgid "Your offline immunity is **on** until the next match."
-msgstr "당신의 오프라인 무시가 다금 경기 전까지 **켜집니다**."
+msgstr "당신의 오프라인 무시가 다음 경기 전까지 **켜집니다**."
 
 msgid "> no active matches"
 msgstr "> 진행 중인 경기 없음"
@@ -137,10 +137,10 @@ msgid "Done."
 msgstr "완료."
 
 msgid "Your DM notifications is now turned off."
-msgstr "DM 알림이 꺼졌습니다."
+msgstr "당신의 DM 알림이 꺼졌습니다."
 
 msgid "Your DM notifications is now turned on."
-msgstr "DM 알림이 켜졌습니다."
+msgstr "당신의 DM 알림이 켜졌습니다."
 
 msgid "Leaderboard is empty."
 msgstr "순위표가 비어 있습니다"
@@ -149,19 +149,19 @@ msgid "Nothing found"
 msgstr "찾을 수 없음"
 
 msgid "Banned **{member}** for `{duration}`."
-msgstr "**{member}**님이 `{duration}`동안 입장 금지되었습니다."
+msgstr "**{member}**님이 `{duration}`동안 참가 금지되었습니다."
 
 msgid "Specified member is not banned."
-msgstr "지정된 멤버가 입장 금지되지 않았습니다."
+msgstr "지정된 멤버가 참가 금지되지 않았습니다."
 
 msgid " ID | Prisoner | Left | Reason"
-msgstr " ID | 입장 금지자 | 남은 시간 | 사유"
+msgstr " ID | 참가 금지자 | 남은 시간 | 사유"
 
 msgid "You have been banned, `{duration}` left."
-msgstr "입장 금지되었습니다. `{duration}` 남았습니다."
+msgstr "참가 금지되었습니다. `{duration}` 남았습니다."
 
 msgid "Noadds are empty."
-msgstr "입장 금지자가 없습니다."
+msgstr "참가 금지자가 없습니다."
 
 msgid "!auto_ready command is turned off on this channel."
 msgstr "이 채널에서는 !auto_ready 명령어가 꺼져 있습니다."
@@ -173,12 +173,12 @@ msgid "Your automatic ready confirmation is now turned off."
 msgstr "당신의 자동 준비 완료 기능이 꺼졌습니다."
 
 msgid "During next {duration} your match participation will be confirmed automatically."
-msgstr "앞으로 {duration} 동안 당신의 경기 참가가 자동으로 준비 완료됩니다."
+msgstr "앞으로 {duration}동안 당신의 경기 참가가 자동으로 준비 완료됩니다."
 
 # bot/queues/pickup_queue.py
 
 msgid "{role} Please add to **{name}** pickup, `{left}` players left!"
-msgstr "{role} **{name}** 픽업에 입장하세요. `{left}`명 남았습니다!"
+msgstr "{role} **{name}** 픽업에 참가하세요. `{left}`명 남았습니다!"
 
 msgid "Not enough players to start the queue."
 msgstr "대기열을 시작하기에 플레이어가 충분하지 않습니다."
@@ -263,7 +263,7 @@ msgid "Waiting on:"
 msgstr "기다리는 중"
 
 msgid "Please react with {ready_emoji} to **check-in** or {not_ready_emoji} to **abort**!"
-msgstr "{ready_emoji}를 반응하려 **준비 완료**하거나 {not_ready_emoji}를 반응하여 **준비 취소**를 하십시오!"
+msgstr "{ready_emoji}를 반응하여 **준비 완료**하거나 {not_ready_emoji}를 반응하여 **준비 취소**를 하십시오!"
 
 msgid "Please react with {ready_emoji} or vote for a map to **check-in**."
 msgstr "{ready_emoji}를 반응하거나 맵을 투표하여 **준비 완료**하십시오."
@@ -340,10 +340,10 @@ msgid "The match must be on the check-in, draft or waiting report stage."
 msgstr "경기가 준비 단계, 선택 단계, 혹은 보고 대기 단계에 있어야 합니다."
 
 msgid "You have stopped looking for a substitute."
-msgstr "더 이상 대체 인원을 찾지 않습니다."
+msgstr "더 이상 당신을 대체할 인원을 찾지 않습니다."
 
 msgid "You are now looking for a substitute."
-msgstr "지금부터 대체 인원을 찾습니다."
+msgstr "지금부터 당신을 대체할 인원을 찾습니다."
 
 msgid "Specified player is not looking for a substitute."
 msgstr "지정한 플레이어가 대체 인원을 찾는 중이 아닙니다."
