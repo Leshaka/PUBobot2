@@ -62,6 +62,13 @@ class CheckIn:
 		not_ready = list(filter(lambda m: m not in self.ready_players, self.m.players))
 
 		if len(self.discarded_players) and len(self.discarded_players) == len(not_ready):
+			if self.message:
+				bot.waiting_reactions.pop(self.message.id, None)
+				try:
+					await self.message.delete()
+				except DiscordException:
+					pass
+
 			# all not ready players discarded check in
 			await ctx.notice('\n'.join((
 				self.m.gt("{member} has aborted the check-in.").format(
