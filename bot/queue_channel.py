@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from time import time
 import re
 import asyncio
 from enum import Enum
@@ -265,6 +266,15 @@ class QueueChannel:
 				section="Leaderboard",
 				description="Set a minimum amount of played matches required for a player to be shown in the !leaderboard."
 			),
+			Variables.DurationVar(
+				"lb_last_match_limit",
+				display="Leaderboard last match limit",
+				section="Leaderboard",
+				description="Hide players from the leaderboard that hasn't played a single match for specified duration.",
+				default=None,
+				verify=lambda d: 0 < d <= 311040000,  # 10 years max
+				verify_message="Leaderboard last match limit must be less than 10 years."
+			),
 			Variables.BoolVar(
 				"rating_nicks",
 				display="Set ratings to nicks",
@@ -449,14 +459,17 @@ class QueueChannel:
 		return below[0]
 
 	async def get_lb(self):
+		now = int(time())
 		data = await db.select(
-			['user_id', 'nick', 'rating', 'deviation', 'wins', 'losses', 'draws', 'streak', 'is_hidden'], 'qc_players',
+			['user_id', 'nick', 'rating', 'deviation', 'wins', 'losses', 'draws', 'streak', 'is_hidden', 'last_ranked_match_at'],
+			'qc_players',
 			where={'channel_id': self.rating.channel_id}, order_by="rating"
 		)
 		return [
 			i for i in data
 			if i['rating'] is not None
 			and not i['is_hidden']
+			and (not self.cfg.lb_last_match_limit or (i['last_ranked_match_at'] is None or i['last_ranked_match_at'] + self.cfg.lb_last_match_limit > now))
 			and not (self.cfg.lb_min_matches and self.cfg.lb_min_matches > sum((i['wins'], i['losses'], i['draws'])))
 		]
 
