@@ -469,7 +469,7 @@ class QueueChannel:
 			i for i in data
 			if i['rating'] is not None
 			and not i['is_hidden']
-			and (not self.cfg.lb_last_match_limit or ((i['last_ranked_match_at'] or 0) + self.cfg.lb_last_match_limit > now))
+			and not (self.cfg.lb_last_match_limit and (i['last_ranked_match_at'] or 0) + self.cfg.lb_last_match_limit > now)
 			and not (self.cfg.lb_min_matches and self.cfg.lb_min_matches > sum((i['wins'], i['losses'], i['draws'])))
 		]
 
