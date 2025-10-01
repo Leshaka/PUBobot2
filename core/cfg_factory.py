@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
-import discord
 from typing import Optional, List
 import re
 import emoji
 import json
+from nextcord import Guild
 
 from core.database import db
 from core.client import dc
@@ -30,7 +30,7 @@ class Variable:
 		self.verify_message = verify_message
 		self.section = section
 
-	async def validate(self, string: str, guild: discord.Guild):
+	async def validate(self, string: str, guild: Guild):
 		""" Validate and return database-friendly object from received string """
 		if not string or string.lower() in ['none', 'null']:
 			if self.notnull:
@@ -38,7 +38,7 @@ class Variable:
 			return None
 		return string
 
-	async def wrap(self, value, guild: discord.Guild):
+	async def wrap(self, value, guild: Guild):
 		""" Return useful objects like role from role_id string etc """
 		return value
 
@@ -111,7 +111,7 @@ class CfgFactory:
 		self.variables = {v.name: v for v in variables}
 		self.blank = {v.name: v.default for v in self.variables.values()}
 
-	async def spawn(self, guild: discord.Guild, p_key: Optional[int] = None, f_key: Optional[int] = None):
+	async def spawn(self, guild: Guild, p_key: Optional[int] = None, f_key: Optional[int] = None):
 		""" Load existing Config from db by given p_key if exists or spawn a new one """
 
 		row = await db.select_one(['*'], self.table.name, {'cfg_name': self.name, self.table.p_key: p_key})
@@ -128,7 +128,7 @@ class CfgFactory:
 
 			return await Config.load(self, row, guild)
 
-	async def select(self, guild: discord.Guild, keys: List[dict]):
+	async def select(self, guild: Guild, keys: List[dict]):
 		""" Returns all Config objects from db by given keys """
 
 		rows = await db.select(['*'], self.table.name, keys)
@@ -146,7 +146,7 @@ class CfgFactory:
 class Config:
 
 	@classmethod
-	async def load(cls, cfg_factory: CfgFactory, row: dict, guild: discord.Guild):
+	async def load(cls, cfg_factory: CfgFactory, row: dict, guild: Guild):
 		self = Config(cfg_factory, row, guild)
 
 		# Wrap database data into useful objects and update self attributes
@@ -161,12 +161,12 @@ class Config:
 
 		return self
 
-	def _get_guild(self) -> discord.Guild:
+	def _get_guild(self) -> Guild:
 		if (guild := dc.get_guild(self._guild_id)) is None:
 			raise ValueError(f"Guild with id {self._guild_id} for config {self.cfg_info} is not found.")
 		return guild
 
-	def __init__(self, cfg_factory: CfgFactory, row: dict, guild: discord.Guild):
+	def __init__(self, cfg_factory: CfgFactory, row: dict, guild: Guild):
 		self._guild_id = guild.id
 		self._factory = cfg_factory
 		self.cfg_info = json.loads(row.pop("cfg_info"))

@@ -13,6 +13,9 @@ from asyncio import iscoroutine
 from core import config, console, database, locales, cfg_factory
 from core.client import dc
 
+loop = asyncio.get_event_loop()
+loop.run_until_complete(database.db.connect())
+
 # Load bot
 import bot
 

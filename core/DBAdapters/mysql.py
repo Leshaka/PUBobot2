@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import asyncio
 import aiomysql
 from pymysql import err as mysqlErr
 from .common import *
@@ -28,13 +29,14 @@ fkey_blank = dict(cname=None, refTable=None, refColumn=None, on_delete=None, on_
 
 
 class Adapter:
+	pool: aiomysql.Pool
+	loop: asyncio.AbstractEventLoop
 	types = Types
 	errors = Errors
 
-	def __init__(self, db_address, loop):
+	def __init__(self, db_address):
 		self.dbAddress = db_address
-		self.loop = loop
-		try: 
+		try:
 			self.dbUser, db_address = db_address.split(':', 1)
 			self.dbPassword, db_address = db_address.split('@', 1)
 			self.dbHost, self.dbName = db_address.split('/', 1)
@@ -45,15 +47,17 @@ class Adapter:
 		except Exception:
 			raise(ValueError('Bad database address string: ' + self.dbAddress))
 
+	async def connect(self):
+		self.loop = asyncio.get_running_loop()
 		try:
-			self.pool = self.loop.run_until_complete(aiomysql.create_pool(
+			self.pool = await aiomysql.create_pool(
 				host=self.dbHost,
 				user=self.dbUser,
 				password=self.dbPassword,
 				db=self.dbName,
 				charset='utf8mb4',
 				autocommit=True,
-				cursorclass=aiomysql.cursors.DictCursor))
+				cursorclass=aiomysql.cursors.DictCursor)
 
 		except mysqlErr.Error as e:
 			self.wrap_exc(e)
