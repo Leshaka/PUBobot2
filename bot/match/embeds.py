@@ -11,7 +11,7 @@ class Embeds:
 		# self.
 		self.footer = dict(
 			text=f"Match id: {self.m.id}",
-			icon_url=dc.user.avatar.with_size(32)
+			icon_url=dc.user.avatar.with_size(32).url if dc.user.avatar else None
 			# icon_url="https://cdn.discordapp.com/avatars/240843400457355264/a51a5bf3b34d94922fd60751ba1d60ab.png?size=64"
 		)
 
