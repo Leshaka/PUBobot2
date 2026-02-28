@@ -229,7 +229,7 @@ class PickupQueue:
 				display="Map count",
 				section="Maps",
 				default=1,
-				verify=lambda n: 0 <= n <= 5,
+				verify=lambda n: 0 <= n <= 15,
 				verify_message="Maps number must be between 0 and 5.",
 				description="Number of maps to show on match start."
 			),
